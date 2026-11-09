@@ -9,3 +9,4 @@ node_modules/
 **/slides/dist/
 .pnpm-store/
 coverage/
+**/demo/output/
