@@ -1,0 +1,6 @@
+packages:
+  - 'slide-deck'
+  - 'module-*/slides'
+
+shamefullyHoist: true
+strictPeerDependencies: false
