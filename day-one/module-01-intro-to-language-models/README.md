@@ -293,6 +293,14 @@ But it still does exactly what ours does: takes a context and produces a vector 
 | 4. Tokens | 4 tokens | Better trade-off, but still too many contexts to count |
 | 5. Neural model | 3 tokens | Learns a function, so it can predict for contexts it has never seen |
 
+## Playground
+
+[`playground/`](playground/) has seven small scripts to play with between exercises: temperature, backoff, scoring sentences, other books, tokenizer experiments and more. Each comes with ideas for taking it further.
+
+## Further reading and extensions
+
+The final exercise is in [`further-reading/`](further-reading/): research papers, from Shannon in 1948 to Chinchilla in 2022, with a note on what to look for in each and which demo it relates to, plus extension projects to take home.
+
 ## Slides
 
 ```bash

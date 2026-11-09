@@ -10,3 +10,4 @@ node_modules/
 .pnpm-store/
 coverage/
 **/demo/output/
+**/playground/*/output/

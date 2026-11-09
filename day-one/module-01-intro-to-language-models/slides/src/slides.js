@@ -484,4 +484,19 @@ score_grads[target] -= 1`,
       ],
     },
   },
+  {
+    type: 'standard',
+    content: {
+      title: 'Final exercise: further reading',
+      icon: 'book',
+      points: [
+        '**Shannon (1948)** — demos 1–3, done by hand',
+        '**Sennrich et al. (2016)** — byte-pair encoding comes to language',
+        '**Bengio et al. (2003)** — demo 5, at full size',
+        '**Vaswani et al. (2017)** — the transformer',
+        'Pick a paper, connect it to a demo, then start an extension',
+        'Everything is in `further-reading/`',
+      ],
+    },
+  },
 ];
