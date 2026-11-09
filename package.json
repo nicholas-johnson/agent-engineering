@@ -8,9 +8,10 @@
   "license": "UNLICENSED",
   "packageManager": "pnpm@12.15.0",
   "scripts": {
+    "slides:01": "pnpm --filter @agent-engineering/module-01-slides dev",
     "slides:pdf": "node scripts/export-slides-pdf.mjs",
     "lint:slides": "eslint slide-deck/",
-    "format:slides": "prettier --write slide-deck/ **/slides/src/**"
+    "format:slides": "prettier --write slide-deck/ \"day-*/module-*/slides/src/**\""
   },
   "engines": {
     "node": ">=22.22.0"

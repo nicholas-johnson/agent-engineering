@@ -52,12 +52,24 @@ Usage:
 `);
 }
 
+async function moduleDirs() {
+  const dirs = [];
+  for (const day of await readdir(root, { withFileTypes: true })) {
+    if (!day.isDirectory() || !day.name.startsWith('day-')) continue;
+    const dayDir = path.join(root, day.name);
+    for (const entry of await readdir(dayDir, { withFileTypes: true })) {
+      if (entry.isDirectory() && entry.name.startsWith('module-')) {
+        dirs.push({ name: entry.name, dir: path.join(dayDir, entry.name) });
+      }
+    }
+  }
+  return dirs;
+}
+
 async function listModules() {
-  const entries = await readdir(root, { withFileTypes: true });
   const modules = [];
-  for (const entry of entries) {
-    if (!entry.isDirectory() || !entry.name.startsWith('module-')) continue;
-    const slidesDir = path.join(root, entry.name, 'slides');
+  for (const entry of await moduleDirs()) {
+    const slidesDir = path.join(entry.dir, 'slides');
     try {
       await readFile(path.join(slidesDir, 'package.json'), 'utf8');
     } catch {
