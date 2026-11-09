@@ -64,6 +64,17 @@ Demos are teaching scripts, not reusable code. Keep them clean and simple.
 - Paths are relative to the script (`Path(__file__).parent`), so demos run from any folder.
 - Run with `uv run python demo/NN_name.py` from the module folder. The system `python3` is too old.
 
+### Demos that call an API
+
+Module 2 is the reference for these.
+
+- Use OpenAI's **Responses API** (`client.responses.create`, `output_text`, `input=` and `instructions=`). The older Chat Completions API is mentioned once, on one slide in Module 2, and nowhere else.
+- Call `load_dotenv()` at the top; the key lives in `.env` at the repo root. Never print or commit a key.
+- `MODEL = "gpt-6-luna"` as a constant, with `reasoning={"effort": "none"}` unless the demo is about reasoning. `temperature`, `top_p` and log probabilities only work when reasoning effort is `"none"`.
+- Interactive demos read from `input()` and stop on an empty line. Write the transcript to `demo/output/`.
+- Check a model or parameter against OpenAI's documentation, and with a real call, before relying on it. Model names and supported parameters change.
+- Test interactive scripts by piping input in: `printf 'Hello\n\n' | uv run python demo/02_chat_loop.py`.
+
 ## The module README
 
 Written for someone reading on their own after the session. In order:

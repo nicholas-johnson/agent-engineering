@@ -4,7 +4,8 @@ Course materials for _Agent Engineering_, a hands-on Python course on building A
 
 ## Repository
 
-- **Python**: managed with uv (`pyproject.toml`), standard library only so far. Run scripts with `uv run python ...`; the system `python3` is too old.
+- **Python**: managed with uv (`pyproject.toml`). Dependencies so far: `openai` and `python-dotenv` (from Module 2). Run scripts with `uv run python ...`; the system `python3` is too old.
+- **API key**: modules that call OpenAI read `OPENAI_API_KEY` from `.env` at the repo root (gitignored; copy `.env.example`).
 - **Slides**: a pnpm workspace. `slide-deck/` is the shared React slide components; each module's `slides/` is a Vite app that uses it.
 - **Commands**:
   - `pnpm slides:NN`: run module NN's slides
