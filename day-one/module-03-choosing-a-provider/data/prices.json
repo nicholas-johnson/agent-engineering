@@ -1,0 +1,489 @@
+{
+  "checked": "2026-11-10",
+  "source": "https://openrouter.ai/api/v1/models",
+  "models": [
+    {
+      "id": "openai/gpt-6-astra",
+      "name": "OpenAI: GPT-6 Astra",
+      "lab": "OpenAI",
+      "country": "USA",
+      "input_per_million": 10.0,
+      "output_per_million": 50.0,
+      "context_window": 1050000,
+      "open_weights": false,
+      "inputs": [
+        "file",
+        "image",
+        "text"
+      ]
+    },
+    {
+      "id": "openai/gpt-6.1-sol",
+      "name": "OpenAI: GPT-6.1 Sol",
+      "lab": "OpenAI",
+      "country": "USA",
+      "input_per_million": 2.0,
+      "output_per_million": 10.0,
+      "context_window": 1050000,
+      "open_weights": false,
+      "inputs": [
+        "file",
+        "image",
+        "text"
+      ]
+    },
+    {
+      "id": "openai/gpt-6.1-terra",
+      "name": "OpenAI: GPT-6.1 Terra",
+      "lab": "OpenAI",
+      "country": "USA",
+      "input_per_million": 1.0,
+      "output_per_million": 5.0,
+      "context_window": 1050000,
+      "open_weights": false,
+      "inputs": [
+        "file",
+        "image",
+        "text"
+      ]
+    },
+    {
+      "id": "openai/gpt-6-luna",
+      "name": "OpenAI: GPT-6 Luna",
+      "lab": "OpenAI",
+      "country": "USA",
+      "input_per_million": 0.1,
+      "output_per_million": 0.5,
+      "context_window": 1050000,
+      "open_weights": false,
+      "inputs": [
+        "file",
+        "image",
+        "text"
+      ]
+    },
+    {
+      "id": "anthropic/claude-fable-5.2",
+      "name": "Anthropic: Claude Fable 5.2",
+      "lab": "Anthropic",
+      "country": "USA",
+      "input_per_million": 8.0,
+      "output_per_million": 40.0,
+      "context_window": 1000000,
+      "open_weights": false,
+      "inputs": [
+        "text",
+        "image",
+        "file"
+      ]
+    },
+    {
+      "id": "anthropic/claude-opus-5.5",
+      "name": "Anthropic: Claude Opus 5.5",
+      "lab": "Anthropic",
+      "country": "USA",
+      "input_per_million": 4.0,
+      "output_per_million": 20.0,
+      "context_window": 1000000,
+      "open_weights": false,
+      "inputs": [
+        "text",
+        "image",
+        "file"
+      ]
+    },
+    {
+      "id": "anthropic/claude-sonnet-5.5",
+      "name": "Anthropic: Claude Sonnet 5.5",
+      "lab": "Anthropic",
+      "country": "USA",
+      "input_per_million": 2.0,
+      "output_per_million": 10.0,
+      "context_window": 1000000,
+      "open_weights": false,
+      "inputs": [
+        "text",
+        "image",
+        "file"
+      ]
+    },
+    {
+      "id": "anthropic/claude-haiku-5.5",
+      "name": "Anthropic: Claude Haiku 5.5",
+      "lab": "Anthropic",
+      "country": "USA",
+      "input_per_million": 0.1,
+      "output_per_million": 0.5,
+      "context_window": 1000000,
+      "open_weights": false,
+      "inputs": [
+        "text",
+        "image",
+        "file"
+      ]
+    },
+    {
+      "id": "google/gemini-4-carbon",
+      "name": "Google: Gemini 4 Carbon",
+      "lab": "Google",
+      "country": "USA",
+      "input_per_million": 2.0,
+      "output_per_million": 10.0,
+      "context_window": 1048576,
+      "open_weights": false,
+      "inputs": [
+        "audio",
+        "file",
+        "image",
+        "text",
+        "video"
+      ]
+    },
+    {
+      "id": "google/gemini-4-argon",
+      "name": "Google: Gemini 4 Argon",
+      "lab": "Google",
+      "country": "USA",
+      "input_per_million": 2.0,
+      "output_per_million": 10.0,
+      "context_window": 1048576,
+      "open_weights": false,
+      "inputs": [
+        "audio",
+        "file",
+        "image",
+        "text",
+        "video"
+      ]
+    },
+    {
+      "id": "google/gemini-3.8-flash",
+      "name": "Google: Gemini 3.8 Flash",
+      "lab": "Google",
+      "country": "USA",
+      "input_per_million": 0.825,
+      "output_per_million": 4.125,
+      "context_window": 1048576,
+      "open_weights": false,
+      "inputs": [
+        "text",
+        "image",
+        "video",
+        "file",
+        "audio"
+      ]
+    },
+    {
+      "id": "google/gemini-3.5-flash-lite",
+      "name": "Google: Gemini 3.5 Flash Lite",
+      "lab": "Google",
+      "country": "USA",
+      "input_per_million": 0.3,
+      "output_per_million": 2.5,
+      "context_window": 1048576,
+      "open_weights": false,
+      "inputs": [
+        "text",
+        "image",
+        "video",
+        "file",
+        "audio"
+      ]
+    },
+    {
+      "id": "x-ai/grok-4.7",
+      "name": "SpaceXAI: Grok 4.7",
+      "lab": "xAI",
+      "country": "USA",
+      "input_per_million": 2.0,
+      "output_per_million": 6.0,
+      "context_window": 500000,
+      "open_weights": false,
+      "inputs": [
+        "text",
+        "image",
+        "file"
+      ]
+    },
+    {
+      "id": "x-ai/grok-build-0.1",
+      "name": "SpaceXAI: Grok Build 0.1",
+      "lab": "xAI",
+      "country": "USA",
+      "input_per_million": 1.0,
+      "output_per_million": 2.0,
+      "context_window": 256000,
+      "open_weights": false,
+      "inputs": [
+        "text",
+        "image",
+        "file"
+      ]
+    },
+    {
+      "id": "meta/muse-wonder",
+      "name": "Meta: Muse Wonder",
+      "lab": "Meta",
+      "country": "USA",
+      "input_per_million": 4.0,
+      "output_per_million": 20.0,
+      "context_window": 1048576,
+      "open_weights": false,
+      "inputs": [
+        "text",
+        "image",
+        "video",
+        "file",
+        "audio"
+      ]
+    },
+    {
+      "id": "meta/muse-spark-open",
+      "name": "Meta: Muse Spark Open",
+      "lab": "Meta",
+      "country": "USA",
+      "input_per_million": 1.25,
+      "output_per_million": 4.25,
+      "context_window": 1048576,
+      "open_weights": true,
+      "inputs": [
+        "text",
+        "image",
+        "video",
+        "file",
+        "audio"
+      ]
+    },
+    {
+      "id": "amazon/nova-2-lite-v1",
+      "name": "Amazon: Nova 2 Lite",
+      "lab": "Amazon",
+      "country": "USA",
+      "input_per_million": 0.3,
+      "output_per_million": 2.5,
+      "context_window": 1000000,
+      "open_weights": false,
+      "inputs": [
+        "text",
+        "image",
+        "video",
+        "file"
+      ]
+    },
+    {
+      "id": "deepseek/deepseek-v4-pro-0813",
+      "name": "DeepSeek: DeepSeek V4 Pro 0813",
+      "lab": "DeepSeek",
+      "country": "China",
+      "input_per_million": 0.111,
+      "output_per_million": 4.44,
+      "context_window": 1048576,
+      "open_weights": true,
+      "inputs": [
+        "text"
+      ]
+    },
+    {
+      "id": "deepseek/deepseek-v4.1-flash",
+      "name": "DeepSeek: DeepSeek V4.1 Flash",
+      "lab": "DeepSeek",
+      "country": "China",
+      "input_per_million": 0.3,
+      "output_per_million": 1.2,
+      "context_window": 1048576,
+      "open_weights": true,
+      "inputs": [
+        "text",
+        "image"
+      ]
+    },
+    {
+      "id": "qwen/qwen3.8-max-0902",
+      "name": "Qwen: Qwen3.8 Max (0902)",
+      "lab": "Alibaba (Qwen)",
+      "country": "China",
+      "input_per_million": 2.0,
+      "output_per_million": 6.0,
+      "context_window": 1000000,
+      "open_weights": false,
+      "inputs": [
+        "text",
+        "image",
+        "video"
+      ]
+    },
+    {
+      "id": "qwen/qwen3.8-flash",
+      "name": "Qwen: Qwen3.8 Flash",
+      "lab": "Alibaba (Qwen)",
+      "country": "China",
+      "input_per_million": 0.15,
+      "output_per_million": 0.47,
+      "context_window": 1000000,
+      "open_weights": true,
+      "inputs": [
+        "text",
+        "image",
+        "video"
+      ]
+    },
+    {
+      "id": "moonshotai/kimi-k3.1-pro",
+      "name": "MoonshotAI: Kimi K3.1 Pro",
+      "lab": "Moonshot (Kimi)",
+      "country": "China",
+      "input_per_million": 2.0,
+      "output_per_million": 10.0,
+      "context_window": 1048576,
+      "open_weights": true,
+      "inputs": [
+        "text",
+        "image",
+        "video"
+      ]
+    },
+    {
+      "id": "z-ai/glm-5.3",
+      "name": "Z.ai: GLM 5.3",
+      "lab": "Zhipu (GLM)",
+      "country": "China",
+      "input_per_million": 0.0699,
+      "output_per_million": 1.4,
+      "context_window": 1048576,
+      "open_weights": true,
+      "inputs": [
+        "text"
+      ]
+    },
+    {
+      "id": "z-ai/glm-5.3-flash",
+      "name": "Z.ai: GLM 5.3 Flash",
+      "lab": "Zhipu (GLM)",
+      "country": "China",
+      "input_per_million": 0.0399,
+      "output_per_million": 0.0784,
+      "context_window": 1048576,
+      "open_weights": true,
+      "inputs": [
+        "text",
+        "image",
+        "video"
+      ]
+    },
+    {
+      "id": "minimax/minimax-m3",
+      "name": "MiniMax: MiniMax M3",
+      "lab": "MiniMax",
+      "country": "China",
+      "input_per_million": 0.3,
+      "output_per_million": 1.2,
+      "context_window": 1048576,
+      "open_weights": true,
+      "inputs": [
+        "text",
+        "image",
+        "video"
+      ]
+    },
+    {
+      "id": "bytedance-seed/seed-2-1-turbo",
+      "name": "ByteDance Seed: Seed 2.1 Turbo",
+      "lab": "ByteDance",
+      "country": "China",
+      "input_per_million": 0.5,
+      "output_per_million": 2.5,
+      "context_window": 262144,
+      "open_weights": false,
+      "inputs": [
+        "text",
+        "image",
+        "video"
+      ]
+    },
+    {
+      "id": "baidu/ernie-5.5-flash-preview",
+      "name": "Baidu: ERNIE-5.5-Flash-Preview",
+      "lab": "Baidu",
+      "country": "China",
+      "input_per_million": 0.28,
+      "output_per_million": 1.13,
+      "context_window": 1024000,
+      "open_weights": true,
+      "inputs": [
+        "text"
+      ]
+    },
+    {
+      "id": "tencent/hy4",
+      "name": "Tencent: Hy4",
+      "lab": "Tencent",
+      "country": "China",
+      "input_per_million": 0.417,
+      "output_per_million": 1.2505,
+      "context_window": 1048576,
+      "open_weights": true,
+      "inputs": [
+        "text",
+        "image"
+      ]
+    },
+    {
+      "id": "xiaomi/mimo-v2.6-pro",
+      "name": "Xiaomi: MiMo-V2.6-Pro",
+      "lab": "Xiaomi",
+      "country": "China",
+      "input_per_million": 0.435,
+      "output_per_million": 0.87,
+      "context_window": 1050000,
+      "open_weights": true,
+      "inputs": [
+        "text",
+        "image",
+        "video",
+        "audio"
+      ]
+    },
+    {
+      "id": "mistralai/mistral-large-4-0",
+      "name": "Mistral: Mistral Large 4",
+      "lab": "Mistral",
+      "country": "France",
+      "input_per_million": 0.7,
+      "output_per_million": 2.1,
+      "context_window": 1048576,
+      "open_weights": true,
+      "inputs": [
+        "text",
+        "image"
+      ]
+    },
+    {
+      "id": "mistralai/mistral-small-2603",
+      "name": "Mistral: Mistral Small 4",
+      "lab": "Mistral",
+      "country": "France",
+      "input_per_million": 0.15,
+      "output_per_million": 0.6,
+      "context_window": 262144,
+      "open_weights": true,
+      "inputs": [
+        "text",
+        "image"
+      ]
+    },
+    {
+      "id": "cohere/command-a-plus",
+      "name": "Cohere: Command A+",
+      "lab": "Cohere",
+      "country": "Canada",
+      "input_per_million": 0.3,
+      "output_per_million": 1.5,
+      "context_window": 192000,
+      "open_weights": false,
+      "inputs": [
+        "text",
+        "image"
+      ]
+    }
+  ]
+}

@@ -10,6 +10,7 @@
   "scripts": {
     "slides:01": "pnpm --filter @agent-engineering/module-01-slides dev",
     "slides:02": "pnpm --filter @agent-engineering/module-02-slides dev",
+    "slides:03": "pnpm --filter @agent-engineering/module-03-slides dev",
     "slides:pdf": "node scripts/export-slides-pdf.mjs",
     "lint:slides": "eslint slide-deck/",
     "format:slides": "prettier --write slide-deck/ \"day-*/module-*/slides/src/**\""

@@ -4,6 +4,14 @@ version = "1.0.0"
 description = "Agent Engineering: building AI agents from scratch in Python — course materials"
 requires-python = ">=3.12"
 dependencies = [
+    "anthropic>=2.8.0",
+    "google-genai>=3.1.0",
     "openai>=3.48.0",
     "python-dotenv>=1.2.4",
+]
+
+[project.optional-dependencies]
+local = [
+    "torch>=2.15.0",
+    "transformers>=5.22.2",
 ]
