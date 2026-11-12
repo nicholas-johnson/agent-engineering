@@ -1,0 +1,38 @@
+# Calculator
+
+The maths server from the demos had one tool. This one has six: add, subtract, multiply, divide, power and square root. Give the agent questions that need several of them, and watch it plan.
+
+```bash
+uv run python play.py
+```
+
+It needs `OPENAI_API_KEY`. `play.py` starts `server.py` itself. The three conversations, with every tool call, are written to `output/conversations.json`.
+
+```text
+You: A rectangle is 1,234.5 cm by 678.9 cm. How long is its diagonal?
+  [tool] power({"base":1234.5,"exponent":2}) -> 1523990.25
+  [tool] power({"base":678.9,"exponent":2}) -> 460905.20999999996
+  [tool] add({"a":1523990.25,"b":460905.21}) -> 1984895.46
+  [tool] square_root({"number":1984895.46}) -> 1408.863180014298
+Agent: The diagonal is approximately 1,408.86 cm.
+```
+
+Pythagoras, in four tool calls, and nobody told it the formula.
+
+## Things to notice
+
+```text
+You: What is 2 to the power of 100?
+  [tool] power({"base":2,"exponent":100}) -> 1.2676506002282294e+30
+Agent: 2 to the power of 100 is 1,267,650,600,228,229,401,496,703,205,376.
+```
+
+The tool returned a **floating-point** number, which keeps only about 17 significant digits. The agent's answer has 31. It is correct, but the last 14 digits did not come from the tool: the model knew them, because 2¹⁰⁰ is a famous number. With a less famous number it would have made them up. **Check where each digit in an answer came from.**
+
+## Try this
+
+1. **Your own questions.** Mortgage repayments, unit conversions, the area of a circle. Where does it chain tools well, and where does it do arithmetic in its head instead?
+2. **Exact integers.** Change `power` so that, when both numbers are whole, it returns an exact integer (Python's `int` has no size limit). Ask for 2¹⁰⁰ and 3¹⁰⁰ again.
+3. **Remove a tool.** Delete `square_root` from the server. How does the agent find a diagonal now? (Hint: `power` with an exponent of 0.5.)
+4. **Without the instruction.** Remove "Use the tools for every calculation" from `INSTRUCTIONS`. Which calculations does it now do in its head? Are they right?
+5. **One tool to rule them all.** Replace all six tools with one, `evaluate(expression: str)`, that works out an expression like `"1000 * 1.045 ** 17"`. Fewer calls? What could go wrong if you used Python's `eval` to do it?
