@@ -49,6 +49,15 @@ body {
     var(--bg);
 }
 
+/* The WebGL backdrop from backdrop.js, behind everything else */
+.backdrop {
+  position: absolute;
+  inset: 0;
+  width: 1080px;
+  height: 1920px;
+  display: block;
+}
+
 /* Your name and the course, at the top of every frame, over the camera too */
 .byline {
   position: absolute;

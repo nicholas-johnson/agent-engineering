@@ -57,7 +57,9 @@ The stage is 1080×1920:
 
 On a frame marked `data-camera="full"`, the camera fills the stage.
 
-`style.css` and `player.js` are shared by every clip, so a new clip needs only its own `index.html`. The top of `player.js` explains the markers that make things appear, change, type themselves out and become captions.
+Behind everything is a slow 3D backdrop drawn with WebGL ([`backdrop.js`](backdrop.js)): the glowing rim of a planet just above the camera box, a grid drifting across its surface, and faint stars. Its colours, the height of the horizon and the speeds are constants at the top of the shader. If WebGL isn't available, the stage falls back to a plain gradient.
+
+`style.css`, `player.js` and `backdrop.js` are shared by every clip, so a new clip needs only its own `index.html`. The top of `player.js` explains the markers that make things appear, change, type themselves out and become captions.
 
 ## Filming
 
