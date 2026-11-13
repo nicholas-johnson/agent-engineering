@@ -36,3 +36,11 @@ The same chatbot costs anything from $32 to $10,500 a month: a factor of more th
 4. **Add models.** Add more model IDs to `MODELS` in `data/build_prices.py`. The `model-catalogue` playground lists every ID.
 5. **Caching.** Many providers charge much less for input they've seen recently (prompt caching). OpenRouter's model list has an `input_cache_read` price. If 80% of each message's input were cached, how would the order change?
 6. **Is it worth it?** Pick three models from very different price points and run the same ten real questions through each. Is the expensive one 100 times better?
+
+## Questions
+
+For discussion. There are no right answers.
+
+- The cheapest model is more than 300 times cheaper than the most expensive. When is the expensive one worth it?
+- Prices keep falling. Should you design for today's prices, or for next year's?
+- Who in an organisation should decide which model to use: the engineers, finance, or legal?

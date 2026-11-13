@@ -47,3 +47,11 @@ Change one at a time, retrain, and compare the final loss and the completions. L
 4. **Is it memorising?** Train on every chapter except the last, then measure the loss on the last chapter, which the model has never seen. Compare it with the training loss. If the training loss keeps falling but the last-chapter loss doesn't, the model is memorising rather than learning.
 5. **Temperature.** Add a temperature to `complete.py` (see `../temperature`). Can you make the completions more readable?
 6. **Another layer.** Add a second hidden layer. You will need to extend `forward` and the backpropagation in `train`. This is the hardest one here, and the best way to really understand backpropagation.
+
+## Questions
+
+For discussion. There are no right answers.
+
+- The loss keeps going down. Is a lower loss always better? How would you know if the model was just memorising the book?
+- We trained for two minutes on a laptop. Frontier models train for months on thousands of GPUs. What changes, and what stays the same?
+- Which knob made the biggest difference, and why do you think that was?

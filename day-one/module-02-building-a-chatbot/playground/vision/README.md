@@ -28,3 +28,11 @@ Open `images/cat-fading.png`. It is the Cheshire Cat disappearing into the leave
 4. **Give it a hint.** Change `QUESTION` to tell it the pictures are from *Alice in Wonderland*. Does it get `cat-fading.png` right now?
 5. **Detail.** Each image part can take `"detail": "low"` or `"detail": "high"`. Try both on a picture with small text. How do the answers, and the input tokens, change?
 6. **Compare two pictures.** Send two images in the same message and ask what's different between them.
+
+## Questions
+
+For discussion. There are no right answers.
+
+- The model was completely confident, and completely wrong, about `cat-fading.png`. How would you design an app so that a confident wrong answer does less harm?
+- Should a vision model describe the people in a photo: their age, their mood, who they might be? Where are the lines?
+- Is a model's description of a picture easier or harder to check than its answer to a question? Why?

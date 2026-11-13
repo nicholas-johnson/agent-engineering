@@ -35,3 +35,11 @@ The last message asks the chatbot to remind Alice of everything that has happene
 3. **Summarise.** Every five turns, ask the model to summarise the conversation so far, and replace the old messages with that summary. How does the cost change? What gets lost?
 4. **Caching.** The CSV has a `cached_tokens` column. When the start of a request is the same as one sent recently, OpenAI can reuse its work and charge less. Make the instructions much longer (a page or two of text) and watch that column. When does caching start?
 5. **Let the API remember.** Use `previous_response_id` instead of sending `messages`. Does `input_tokens` go down? (Read the numbers carefully: you are still charged for the whole conversation.)
+
+## Questions
+
+For discussion. There are no right answers.
+
+- Long conversations get slow and expensive. Should a chatbot ever forget things on purpose? Who should decide what it forgets?
+- Summarising old messages loses detail. What kinds of detail would be dangerous to lose?
+- If the provider stores your conversation for you (`previous_response_id`), what does that mean for privacy?

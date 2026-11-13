@@ -45,3 +45,12 @@ Both answered the questions about the lock, the death penalty and the joke.
 3. **Ask in Chinese.** Translate the Tiananmen and Taiwan questions into Chinese. Do the answers change, for any model?
 4. **Same lab, different size.** With OpenRouter, compare `qwen3:1.7b` against `qwen/qwen3.8-flash`. Does the bigger Qwen model answer differently?
 5. **Instructions.** Add instructions telling each model to give a balanced, factual answer. Which models change their answers, and which don't?
+
+## Questions
+
+For discussion. There are no right answers.
+
+- Who should decide what a model will and won't say: the company that trains it, the government where it's made, or the person using it?
+- Is a model that refuses to answer better or worse than one that answers with a slant?
+- If you put a model inside your product, are its views now your views?
+- Is a completely neutral model possible? What would it even mean?

@@ -39,3 +39,11 @@ That's all MCP is: **JSON-RPC** messages (a request has a `method`, `params` and
 3. **Skip the handshake.** Send `tools/list` without `initialize` first. Does the server still answer?
 4. **Another server.** Point `SERVER` at `../../demo/04_cards_server.py` and call `find_card` by hand.
 5. **Ping.** Send `{"jsonrpc": "2.0", "id": 4, "method": "ping"}`. What comes back, and what might it be for?
+
+## Questions
+
+For discussion. There are no right answers.
+
+- MCP is just JSON messages over a pipe. Why does agreeing a standard matter more than any one tool?
+- What should a server be allowed to know about the client that connects to it, and what should the client know about the server?
+- MCP servers offer prompts and resources as well as tools. What might each be useful for?

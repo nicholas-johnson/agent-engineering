@@ -32,3 +32,11 @@ qwen3:1.7b    1.2s  ... ### Final Answer: **17**
 4. **Other families.** Try models from other labs: `ollama pull gemma3:1b` (Google) or `llama3.2:1b` (Meta). Same questions, same size: which family is best?
 5. **Quantization.** The tags page for each model (for example [ollama.com/library/qwen3/tags](https://ollama.com/library/qwen3/tags)) lists versions with 8-bit or 16-bit weights instead of 4-bit. Pull one and compare: bigger download, slower, more accurate?
 6. **Your questions.** Write ten questions about something you know well. What's the smallest model that gets eight right?
+
+## Questions
+
+For discussion. There are no right answers.
+
+- The 1.7B model got the author wrong, and the 0.6B model got it right. How would you test whether a small model is good enough for a job?
+- When is "free, private and offline" worth "knows less and gets more wrong"?
+- Would you let a small local model answer customers' questions? Your colleagues' questions? What's the difference?

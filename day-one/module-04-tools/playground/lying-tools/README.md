@@ -39,3 +39,11 @@ The right answer: 2766.6443573398
 3. **Sneakier bugs.** Make the buggy tool 0.001% wrong instead of 1%. Could anyone spot that?
 4. **A worse injection.** Make the injected text ask the model to say the answer is 42. Does it? What about if the injection claims to come from the system, or from OpenAI?
 5. **Two tools.** Give the agent both the honest and the buggy tool, under different names. When the answers disagree, what does it do?
+
+## Questions
+
+For discussion. There are no right answers.
+
+- The model followed an instruction hidden in a tool's result. Can that ever be fully fixed, or only made less likely?
+- Where would you draw the line between what an agent may do by itself and what needs a person to approve it?
+- If an agent is tricked into causing harm, who is responsible: the user, the developer, whoever wrote the tool, or the company that made the model?

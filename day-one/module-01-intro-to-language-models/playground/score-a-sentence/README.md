@@ -39,3 +39,11 @@ A word pair the model has never seen would get a probability of zero, and one ze
 3. **Spot the fake.** Take five real sentences from the book and five you wrote. Can the model tell them apart?
 4. **Who wrote it?** Train a second model on the other book in `../other-books/looking-glass.txt`. Score sentences from each book with both models. Does each model prefer its own book?
 5. **Chapter 1 only.** Count only `data/alice-chapter-1.txt`. Score a sentence from chapter 12. What happens to the perplexity, and why?
+
+## Questions
+
+For discussion. There are no right answers.
+
+- The made-up Carroll-style sentence scored almost as well as the real one. What does that say about tools that claim to detect AI-written text?
+- Low perplexity means unsurprising. Is good writing unsurprising?
+- Smoothing decides how much chance to give things never seen before. Where else do people have to make that decision?

@@ -31,3 +31,11 @@ Four tokens:   the queen said  [stuck]
 3. **Don't get stuck.** When the five-word model is stuck, fall back to the word-pair model instead of giving up. (The `backoff` playground does this properly.)
 4. **Add the neural model.** Train one with the `neural-knobs` playground, then load its `model.json` here and add a fifth line. Does it ever get stuck?
 5. **Use chapter 1.** Swap in the `alice-chapter-1` model files. How much more often does each model get stuck?
+
+## Questions
+
+For discussion. There are no right answers.
+
+- Which of the four models would you call the best? Best at what: sounding like English, saying something new, or never getting stuck?
+- The five-word model is fluent on anything from the book and stuck on almost everything else. Is a model that can only recite useful for anything?
+- Our models say `[stuck]` when they don't know. Real chatbots never do. Which would you rather have, and why?

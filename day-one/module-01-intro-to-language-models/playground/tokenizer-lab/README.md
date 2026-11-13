@@ -37,3 +37,11 @@ No demos need to be run first. It takes a few seconds, and writes each vocabular
 3. **Real BPE.** The splitter here takes the longest token that matches. Real BPE splits text into single characters and then replays the merges, in the order they were learned. Write that, and find a word where the two give different answers.
 4. **Numbers.** Add some digits to the training text. Does `1234` become one token, two, or four? Why might that make arithmetic hard for an LLM?
 5. **Bigger still.** Try 5,000 tokens. What kinds of tokens does it add at the end? Does anything get worse?
+
+## Questions
+
+For discussion. There are no right answers.
+
+- Text in languages the tokenizer wasn't trained on uses more tokens, so it costs more and fits less in the context window. Is that fair? Who pays?
+- Why might a bigger vocabulary not always be better?
+- The model never sees the letters inside "strawberry". What other tasks might be hard for the same reason?

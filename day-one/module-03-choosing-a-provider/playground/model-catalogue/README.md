@@ -34,3 +34,11 @@ $ 0.100 in  $ 0.300 out  1,310,720 tokens  meta-llama/llama-4-scout
 3. **Who has the most?** Count the models per lab (the part of the ID before the `/`). Which labs have the most models listed?
 4. **Newest first.** Each model has a `created` timestamp. List the ten newest. How many were released this month?
 5. **Speech and video.** Change the filter to models that take `audio` or `video` as input. Which labs offer them?
+
+## Questions
+
+For discussion. There are no right answers.
+
+- With hundreds of models to choose from, what would you filter on first, and why?
+- Why would a company give a model away for free?
+- Many of the cheapest models have open weights. Why might an open model be cheaper to use than a closed one?

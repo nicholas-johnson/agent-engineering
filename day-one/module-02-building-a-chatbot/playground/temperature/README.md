@@ -29,3 +29,11 @@ Asked for "one animal", the model is so sure about "Otter" that it takes tempera
 2. **Top-p.** The API also has `top_p`, which keeps only the most likely tokens that add up to that much probability (Module 1's top-p, built in). Try `temperature=2.0, top_p=1.0`, then `top_p=0.1`.
 3. **More tries.** Set `TRIES = 30` at temperature 2. What is the full list of animals it ever says? Why so few, out of all the animals there are?
 4. **Find a prompt temperature does affect.** What kind of question has many equally good answers? Try a few and see which one makes temperature matter most.
+
+## Questions
+
+For discussion. There are no right answers.
+
+- Training to be a helpful assistant has made the model very sure of itself: "Otter" almost every time. Is that a good thing?
+- Even temperature 0 doesn't give exactly the same answer every time. What does that mean for testing an application built on a model?
+- When would you want a chatbot to give the same answer every time, and when wouldn't you?

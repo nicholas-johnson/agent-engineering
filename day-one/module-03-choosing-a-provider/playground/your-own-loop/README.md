@@ -44,3 +44,11 @@ There are no chat instructions here, just raw text, so the model simply continue
 4. **A chat.** Build the prompt with `tokenizer.apply_chat_template` (as in demo 5) instead of raw text. Now it answers instead of continuing.
 5. **Stop at the end.** Stop the loop when the model picks its end-of-text token (`tokenizer.eos_token_id`), instead of after a fixed number of tokens.
 6. **Faster.** Each step runs the whole sequence through the model again. Look up "KV cache" in the `transformers` documentation and pass `past_key_values` between steps. How much faster is it?
+
+## Questions
+
+For discussion. There are no right answers.
+
+- `model.generate()` is essentially this loop. Does seeing the loop change how you think about what a chatbot is?
+- One unlikely token sent the whole sentence somewhere else. What does that say about how reliable generated text is?
+- You can see every probability here. Could you build something that warns users when a model is unsure? Would they want it?

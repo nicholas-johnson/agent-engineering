@@ -37,3 +37,11 @@ The March Hare says there's **no room** because the table is already full—then
 3. **A judge.** Ask `gpt-6-luna` to read both answers to each question and say which is better, and why. Does it agree with you?
 4. **Give it the book.** Put the tea-party chapter of *Alice* (from Module 1's `data/`) in the instructions and ask the March Hare question again. Does the small model get it right when it has the text?
 5. **Speed.** Time each answer. Which is faster: your laptop, or a data centre across the internet?
+
+## Questions
+
+For discussion. There are no right answers.
+
+- The small model invented a quotation and then explained the joke in it. Why is a confident invention worse than "I don't know"?
+- If open models catch up with closed ones, what's left for the closed providers to sell?
+- Would you rather depend on a company's API, or on a model you can download? What risks come with each?

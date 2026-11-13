@@ -41,3 +41,11 @@ she looked at the dragon  [stuck]
 3. **Unknown words.** When even one word fails, pick a common word like "the" or "and" instead of giving up. What happens after "the dragon"?
 4. **Add-one smoothing.** Pretend every word in the vocabulary followed every context once more than it did. Now no word ever has zero probability. What does that do to the completions?
 5. **Tokens.** Back off over token windows instead of word windows. Unknown words stop being a problem. Why?
+
+## Questions
+
+For discussion. There are no right answers.
+
+- Backoff guesses from less information when it doesn't know. When should a model admit it doesn't know instead of guessing?
+- Most of the surprising words came from the short windows. Is creativity just guessing with less to go on?
+- How is backoff like what you do when you half understand a sentence in a language you are learning?

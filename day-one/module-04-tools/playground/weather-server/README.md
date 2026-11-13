@@ -32,3 +32,11 @@ The model chained the tools: a name became coordinates, and the coordinates beca
 3. **Use it with the cards.** Connect this server and the cards server from demo 4 to the same agent, as `04_agent.py` does. Ask something that needs both.
 4. **A different API.** Pick another free API that needs no key, such as [Gutendex](https://gutendex.com) (Project Gutenberg's books) or [REST Countries](https://restcountries.com), and write a server for it by copying this one.
 5. **Use it from an app.** Many desktop AI apps, such as Claude Desktop, can run local MCP servers. Look up how to add one to an app you use, and give it this server. The app becomes the agent and does the tool loop for you.
+
+## Questions
+
+For discussion. There are no right answers.
+
+- The agent turned a page of numbers into advice: not ideal for a picnic. When should an agent give opinions, and when should it stick to the facts?
+- What public data would you most like an agent to have access to? What data should it never have?
+- If an API changes the shape of its data overnight, the agent may quietly start giving wrong answers. How would you notice?

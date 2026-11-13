@@ -35,3 +35,11 @@ Bot: A token is a piece of text—such as a word, part of a word, or punctuation
 3. **Pick up where you left off.** Save `messages` to a JSON file when you quit, and load it when you start, so the conversation carries on next time.
 4. **Think first.** Switch to `REASONING_EFFORT = "medium"` (and remove the temperature). Ask a tricky question. Is it slower? Better?
 5. **Let the API remember.** Instead of keeping `messages` yourself, pass `previous_response_id`. What do you still have to send, and what don't you?
+
+## Questions
+
+For discussion. There are no right answers.
+
+- Who should choose the settings: the developer who builds the chatbot, or the person using it?
+- If a reply is cut off by `MAX_OUTPUT_TOKENS` and the half-answer misleads someone, whose fault is it?
+- When is it worth paying more, and waiting longer, for a model that thinks before it answers?

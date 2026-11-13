@@ -36,3 +36,11 @@ The tool returned a **floating-point** number, which keeps only about 17 signifi
 3. **Remove a tool.** Delete `square_root` from the server. How does the agent find a diagonal now? (Hint: `power` with an exponent of 0.5.)
 4. **Without the instruction.** Remove "Use the tools for every calculation" from `INSTRUCTIONS`. Which calculations does it now do in its head? Are they right?
 5. **One tool to rule them all.** Replace all six tools with one, `evaluate(expression: str)`, that works out an expression like `"1000 * 1.045 ** 17"`. Fewer calls? What could go wrong if you used Python's `eval` to do it?
+
+## Questions
+
+For discussion. There are no right answers.
+
+- The agent filled in digits the tool never gave it. How would you make sure you know where every digit in an answer came from?
+- Should an agent ever do arithmetic in its head, or always use a tool?
+- Is one `evaluate(expression)` tool safer or riskier than six small tools? Why?

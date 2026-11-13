@@ -37,3 +37,11 @@ It has no idea what Python is. It has just counted which character comes after e
 3. **Window size.** Try `WINDOW = 4` and `WINDOW = 12` on the Python corpus. When does it stop looking like code? When does it start copying whole functions?
 4. **Another language.** Download a book in French or German from Project Gutenberg. Does the letter model care which language it is?
 5. **More code.** Use every `.py` file in the standard library folder instead of four. Does the code get more convincing? How long does it take, and how big does the model get?
+
+## Questions
+
+For discussion. There are no right answers.
+
+- The letter model wrote convincing-looking Python without knowing what Python is. How much of what looks like understanding in a big model could be the same trick?
+- If a model trained on your emails writes just like you, whose writing is it?
+- Where is the line between a model being influenced by a book and copying it?

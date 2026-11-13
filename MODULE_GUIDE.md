@@ -141,6 +141,7 @@ Things for delegates to play with between exercises. It should **build on what t
   - real example output
   - **Things to notice** (optional)
   - **Try this**: five or six numbered ideas for extending it, from easy to hard
+  - **Questions**, last: "For discussion. There are no right answers.", then three or four open questions as bullet points. They should start a conversation, not test knowledge: what the result means, when it matters, who decides, what could go wrong. Base them on what the script actually showed.
 - Same code style as demos. Where possible, load the files the demos wrote to `demo/output/` instead of rebuilding them.
 - Output goes in `output/` inside the folder (gitignored).
 - Good playgrounds turn a hidden setting into something you can change (temperature, window size, vocabulary size), run the model a different way (scoring instead of generating), or point it at different data.

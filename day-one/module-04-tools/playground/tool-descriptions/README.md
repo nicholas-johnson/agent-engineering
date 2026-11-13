@@ -41,3 +41,11 @@ So descriptions matter less than you might think when there's one obvious tool, 
 3. **Names matter too.** Rename the function from `calculate` to `square_root`, and keep the vague description. Does the name do the work the description wasn't doing?
 4. **Describe the arguments.** Add `"description": "The number to take the square root of"` to the `number` property. Does anything change?
 5. **Tell it when not to.** Write a description that says when *not* to use the tool, for example "Only for numbers over a million". Ask for the square root of 49.
+
+## Questions
+
+For discussion. There are no right answers.
+
+- The model trusted what the tool returned over what its description said. Is that a good habit or a bad one?
+- Who is a tool's description written for: the model, or the people who read the code? Can it be both?
+- If a tool's description is wrong and something goes badly, whose fault is it?

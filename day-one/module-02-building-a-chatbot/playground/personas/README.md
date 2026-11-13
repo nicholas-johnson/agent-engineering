@@ -40,3 +40,11 @@ It was told never to give the answer, and it gave the answer anyway, just phrase
 3. **Fix the tutor.** Rewrite `socratic-tutor.txt` so it really never gives the answer, even when you beg.
 4. **Two personas, one conversation.** Write a script where the `pirate` and the `cheshire-cat` talk to each other for ten turns. Each one's reply becomes the other's next message.
 5. **How short can it be?** What is the shortest set of instructions that still produces a convincing persona?
+
+## Questions
+
+For discussion. There are no right answers.
+
+- The tutor was told never to give the answer, and gave it anyway. Should a model follow instructions to the letter, or use its judgement? When would each be dangerous?
+- Is a persona a kind of lie? When is it fine for a chatbot to pretend to be someone, and when isn't it?
+- Many companies give their chatbots names and personalities. What should the people talking to them be told?

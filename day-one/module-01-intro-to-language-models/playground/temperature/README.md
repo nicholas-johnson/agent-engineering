@@ -37,3 +37,11 @@ At 0.1 the chance of "queen" after "the" goes from 4% to 56%. The model goes rou
 3. **Top-p.** Keep the most likely words until their probabilities add up to `p` (say 0.9), and throw away the rest. This is what most LLM APIs call `top_p`. Why might it be better than top-k?
 4. **A different model.** Load the letter model (`03_letters_alice.json`) instead. What does high temperature do to letters?
 5. **Find the sweet spot.** Which temperature gives the most Alice-like sentences? Is it always 1?
+
+## Questions
+
+For discussion. There are no right answers.
+
+- Always picking the most likely word makes the text go round in circles. Why isn't the most likely word the best word?
+- What temperature would you want for a legal contract? A poem? A chatbot answering customers' questions?
+- Temperature doesn't change the model at all, only how we pick from its probabilities. Is it part of the model, or part of how we use it?

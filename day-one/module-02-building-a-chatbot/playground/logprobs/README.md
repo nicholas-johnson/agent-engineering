@@ -41,3 +41,11 @@ The left column is the token the model chose, and the rest are its top choices a
 3. **Confidence colours.** Print the reply with each token coloured by how sure the model was: green above 90%, yellow above 50%, red below. (Search for "ANSI colour codes".)
 4. **Score a sentence.** Module 1's `score-a-sentence` playground worked out how likely a sentence was. Can you do the same with a real model? (Hint: give it the sentence and ask it to repeat it exactly.)
 5. **Where it went wrong.** Ask a question the model gets wrong. Is it unsure at the wrong token, or confidently wrong?
+
+## Questions
+
+For discussion. There are no right answers.
+
+- The model was 100% sure of every word of the book's opening line. Is being confident the same as being right?
+- If a chatbot showed you how sure it was of every word, would you trust it more or less?
+- The model can recite a famous book word for word. What does that mean for copyright?

@@ -43,3 +43,11 @@ Five lookups, one round trip to the model. A single response can contain several
 3. **Really parallel.** Use `asyncio.gather` to run all the calls in a round at the same time. How much faster is it? (Scryfall's half-second limit still applies per request.)
 4. **Count the cost.** Print `response.usage.input_tokens` for each round. How much does the second round cost compared with the first?
 5. **A long list.** Ask about twenty cards. Does it still do them all in one round?
+
+## Questions
+
+For discussion. There are no right answers.
+
+- The model mentioned, without being asked, that prices vary by printing and condition. Should agents always say how sure they are?
+- Five lookups at once is fine. What could go wrong with five calls at once to tools that change things, such as placing orders?
+- An agent that takes ten seconds to answer feels slow. How would you explain to a user what it's doing while they wait?

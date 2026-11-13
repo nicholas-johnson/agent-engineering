@@ -32,3 +32,11 @@ All four got the strawberry question right ("3 times"), even though, as the Modu
 3. **Harder questions.** Add a maths word problem, or a logic puzzle. Where do the small models start getting things wrong?
 4. **Think harder.** Run every model at `"low"` and then `"high"` reasoning effort. How much slower is it, how many more reasoning tokens does it use, and does the answer change?
 5. **Judge it.** Ask one model to read all four answers to each question and pick the best. Does it always pick itself?
+
+## Questions
+
+For discussion. There are no right answers.
+
+- Only the most expensive model knew the whole answer to the riddle. How would you decide which questions deserve the expensive model?
+- If a cheap model is wrong one time in twenty, is that acceptable? What does it depend on?
+- Should you trust a model to judge other models' answers? What could go wrong?
