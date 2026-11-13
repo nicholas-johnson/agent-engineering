@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <title>Clip 1 — The square root</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="../style.css" />
+    <script src="../player.js" defer></script>
+  </head>
+  <body data-clip="01-square-root">
+    <main class="stage">
+      <header class="byline">
+        <p class="name">Nicholas Johnson</p>
+        <p class="brand">Agent Engineering · Tools</p>
+      </header>
+
+      <!-- Beat 1: the promise, then the odd thing, full-face -->
+      <section class="frame" data-camera="full">
+        <p class="cue">I'm going to explain <em>MCP</em> to you in sixty seconds.</p>
+        <p class="cue">I asked an AI the same maths question three times.</p>
+      </section>
+
+      <!-- Beats 1 and 2: three answers, then where they drift (demo/01_maths.py) -->
+      <section class="frame">
+        <p class="cue">I got three different answers.</p>
+        <p class="cue">All completely confident.</p>
+        <p class="cue">All wrong.</p>
+        <p class="cue">They all start off right, then drift away.</p>
+        <p class="cue">It isn't calculating.</p>
+        <p class="cue">It's guessing what a square root <em>looks like</em>.</p>
+        <div class="swap">
+          <h1 data-out="3">Same question.<br />Three answers.</h1>
+          <h1 data-in="3">Right at first.<br />Then guessing.</h1>
+        </div>
+        <div class="bubble you">What is the square root of 7,654,321, to 10 decimal places?</div>
+        <div class="answers" data-at="3">
+          <div class="answer" data-in="0" style="--delay: 0.6s"><span>Try 1</span><span class="number type">2,766.6443672823</span></div>
+          <div class="answer" data-in="0" style="--delay: 1.4s"><span>Try 2</span><span class="number type">2,766.6443839608</span></div>
+          <div class="answer" data-in="0" style="--delay: 2.2s"><span>Try 3</span><span class="number type">2,766.6442826149</span></div>
+          <div class="answer right" data-in="2"><span>Right</span><span class="number type">2,766.6443573398</span></div>
+        </div>
+      </section>
+
+      <!-- Beat 3: Python gets it right (demo/02_function.py) -->
+      <section class="frame">
+        <p class="cue">Python gets it right in one line.</p>
+        <h1>Python gets it right.<br />Every time.</h1>
+        <pre class="code">
+def square_root(number: float) -> float:
+    """Return the square root of a number,
+    exactly, to full precision."""
+    return math.sqrt(number)
+</pre>
+        <p class="result" data-in="0" style="--delay: 1s"><span class="type">square_root(7654321) = <strong>2766.6443573398</strong></span></p>
+      </section>
+
+      <!-- Beat 3: two halves -->
+      <section class="frame">
+        <p class="cue">But Python can't read a question.</p>
+        <p class="cue">So we give this function to the AI as a <em>tool</em>.</p>
+        <h1>Two halves</h1>
+        <div class="compare">
+          <div class="card ai">
+            <h2>The AI</h2>
+            <ul>
+              <li class="yes">Reads any question</li>
+              <li class="no">Exact maths</li>
+            </ul>
+          </div>
+          <div class="card python">
+            <h2>Python</h2>
+            <ul>
+              <li class="no">Reads a question</li>
+              <li class="yes">Exact maths</li>
+            </ul>
+          </div>
+        </div>
+        <p class="note" data-in="1">So we give the function to the AI as a <strong>tool</strong>.</p>
+      </section>
+
+      <!-- Beat 3: the tool call (demo/03_agent.py's real transcript) -->
+      <section class="frame tight">
+        <p class="cue">Now when I ask, it doesn't guess.</p>
+        <p class="cue">It asks <em>me</em> to run square_root on 7,654,321.</p>
+        <p class="cue">My code runs it…</p>
+        <p class="cue">…and hands back the answer.</p>
+        <p class="cue">Right first time. Every time.</p>
+        <h1>It asks for help</h1>
+        <div class="bubble you">What is the square root of 7,654,321, to 10 decimal places?</div>
+        <div class="card ai" data-in="1">
+          <p class="who">The AI: please run</p>
+          <p class="says mono"><span class="type">square_root({"number":7654321})</span></p>
+        </div>
+        <div class="arrow" data-in="2">↓</div>
+        <div class="card python" data-in="2">
+          <p class="who">Your code runs it</p>
+          <p class="says mono"><span class="type">→ 2766.644357339772</span></p>
+        </div>
+        <div class="arrow" data-in="3">↓</div>
+        <div class="bubble ai" data-in="3">
+          <span class="stream">The square root of 7,654,321 to 10 decimal places is 2766.6443573398.</span>
+        </div>
+      </section>
+
+      <!-- Beat 4: the same function, plus four lines: an MCP server (demo/03_maths_server.py) -->
+      <section class="frame">
+        <p class="cue">And that tool? It's the same function…</p>
+        <p class="cue">…plus four lines.</p>
+        <p class="cue">That's an <em>MCP server</em>.</p>
+        <p class="cue">Write it once, and Claude, Cursor and VS&nbsp;Code can all use it.</p>
+        <div class="swap">
+          <h1 data-out="1">And the tool?<br />The same function…</h1>
+          <h1 data-in="1">…plus four lines.<br />An MCP server.</h1>
+        </div>
+        <pre class="code grow" data-at="1">
++ from mcp.server.mcpserver import MCPServer
++
++ server = MCPServer("maths")
++
++ @server.tool()
+def square_root(number: float) -> float:
+    """Return the square root of a number,
+    exactly, to full precision."""
+    return math.sqrt(number)
++
++ server.run()
+</pre>
+      </section>
+
+      <!-- Sign-off, full-face -->
+      <section class="frame" data-camera="full">
+        <p class="cue">I'm Nicholas Johnson. I'm a principal dev working with AI.</p>
+        <p class="cue">I'm doing a series on <em>AI fundamentals</em>.</p>
+        <p class="cue">Follow if you'd like to know more.</p>
+      </section>
+    </main>
+  </body>
+</html>
