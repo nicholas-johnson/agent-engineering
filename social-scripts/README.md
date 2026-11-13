@@ -1,6 +1,6 @@
 # Social scripts
 
-Scripts for short videos that promote the course. Each clip is a web page that puts you, an animation of the code and diagrams, and captions on one portrait stage, and records it straight from Chrome.
+Short vertical videos that promote the course. Each clip is a web page built with [clip-deck](../clip-deck/). It puts your camera, an animation of the code and diagrams, and captions on one portrait stage, and records it straight from Chrome.
 
 | Clip | Hook | Promotes |
 |------|------|----------|
@@ -13,18 +13,28 @@ Each clip has five beats:
 1. **The promise.** Say what they will learn and how fast: "I'm going to explain MCP to you in sixty seconds." It tells people why to keep watching. Make it a promise the clip can keep, in the time it says.
 2. **The odd thing.** Then, in the style of Hannah Fry, show something surprising that happened, not a topic. Stop and let it land.
 3. **The reveal.** Explain the mechanism in plain words. The technical term comes last.
-4. **The payoff.** Keep the promise in one line they could repeat to a friend.
+4. **The payoff.** Keep the promise in one line they could repeat to a friend. Real-world examples make it concrete.
 5. **The sign-off.** Full-face: "I'm Nicholas Johnson. I'm a principal dev working with AI. I'm doing a series on AI fundamentals. Follow if you'd like to know more." Then cut. The link to the course goes in the post text, not the video.
+
+## Making a clip
+
+Ask Claude Code for one. The [`social-clip` skill](../.claude/skills/social-clip/SKILL.md) walks it through the whole process. To do it by hand:
+
+1. **Start it:** `pnpm social:new 02-slug` copies the template into `02-slug/`.
+2. **Write `script.md` first,** and agree it before building anything.
+3. **Build the frames** in `index.html`. The [clip-deck README](../clip-deck/README.md) lists the markers, the components and the stage's limits.
+4. **Check it:** `pnpm social:check 02-slug` lists every caption, estimates the length, reports anything cut off, and saves a picture of every step to `output/02-slug/`.
+5. **Record it,** as below.
 
 ## Recording a clip
 
-Serve the pages from the repo root. The camera and recording only work from a served page, not one opened as a file:
+Serve the pages from the repo root:
 
 ```bash
 pnpm social
 ```
 
-Then open <http://127.0.0.1:8765/01-square-root/> in Chrome, allow the camera and microphone, and press F for full screen.
+Then open the clip, for example <http://127.0.0.1:8765/01-square-root/>, in Chrome. Allow the camera and microphone, and press F for full screen.
 
 1. Press **R**. Chrome asks what to share: choose **This tab**. A three-second countdown appears beside the stage.
 2. The page opens on you, full-screen, with the first caption. Say it.
@@ -33,37 +43,12 @@ Then open <http://127.0.0.1:8765/01-square-root/> in Chrome, allow the camera an
 
 Press R again for another take: it starts again from the top.
 
-| Key | Does |
-|-----|------|
-| Space, →, Page Down, Enter or a click | Next caption |
-| ←, Page Up or Backspace | Back one |
-| Home | Start again |
-| R | Start or stop recording |
-| C | Next camera, for example an iPhone through Continuity Camera |
-| F | Full screen |
-
-- **Only the stage is recorded.** The status beside it (recording time, camera and microphone, keys) is not.
-- **The size comes from your screen.** The recording is the stage at its size on screen. Full screen on a Retina Mac gives about 1100×1960.
 - **A presentation clicker works.** It sends Page Down, and it lets you keep your eyes on the camera.
-- **The address ends `#frame.step`,** so reloading keeps your place.
-
-## The stage
-
-The stage is 1080×1920:
-
-- **Your name and the course** sit at the top, between 136px and 240px, on every frame and over the camera too. Above them is left for the platform's own buttons.
-- **The animation** sits between 270px and 1150px.
-- **The camera box** is below the animation. The caption sits over the bottom of it.
-
-On a frame marked `data-camera="full"`, the camera fills the stage.
-
-Behind everything is a slow 3D backdrop drawn with WebGL ([`backdrop.js`](backdrop.js)): the glowing rim of a planet just above the camera box, a grid drifting across its surface, and faint stars. Its colours, the height of the horizon and the speeds are constants at the top of the shader. If WebGL isn't available, the stage falls back to a plain gradient.
-
-`style.css`, `player.js` and `backdrop.js` are shared by every clip, so a new clip needs only its own `index.html`. The top of `player.js` explains the markers that make things appear, change, type themselves out and become captions.
+- **C switches camera,** for example to an iPhone through Continuity Camera.
+- **Only the stage is recorded.** The status beside it is not.
 
 ## Filming
 
 - **The captions are the script,** so say the words as written. If a line doesn't sound like you, change it in `index.html`.
 - **Pause after the hook.** You can tighten a pause in CapCut, but you can't add one you didn't record.
-- **Big code:** code and terminal output on the stage need a very large font, 28pt or more.
 - **Real numbers only:** every number and every line of output on the stage must come from a real run. Each script says where its material comes from.

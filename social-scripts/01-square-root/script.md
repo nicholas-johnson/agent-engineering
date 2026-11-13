@@ -1,9 +1,9 @@
 # Clip 1 — The square root
 
-> A promise to explain MCP in sixty seconds. Then an AI gives three different, confident, wrong answers to the same maths question, a tool call fixes it, and four extra lines turn that tool into an MCP server that any MCP app can use. Then a sign-off.
+> A promise to explain MCP in sixty seconds. Then an AI gives three different, confident, wrong answers to the same maths question, a tool call fixes it, and four extra lines turn that tool into an MCP server that any MCP app can use, alongside Google's real ones for Gmail and Calendar. Then a sign-off.
 
 - **Promotes:** Module 4, Tools
-- **Length:** about 135 spoken words to explain MCP, then about 25 for the sign-off. The hook promises sixty seconds, so the explanation must be done by then.
+- **Length:** about 155 spoken words to explain MCP and show the real servers, then about 25 for the sign-off. The hook promises sixty seconds, so time your first take: see the notes if it runs over.
 - **Ending:** the sign-off, full-face: "Follow if you'd like to know more." Cut straight after it.
 - **Recording:** [`index.html`](index.html) in this folder. It puts you, the animation and the captions on one stage. Run `pnpm social`, open <http://127.0.0.1:8765/01-square-root/> in Chrome and press R. Each press of space brings up the next caption: say it, then press again.
 
@@ -83,7 +83,11 @@ server.run()                                  # +
 
 > "That's an MCP server. Write it once, and Claude, Cursor and VS Code can all use it."
 
-That last line keeps the promise: it says what MCP is for.
+That last line keeps the promise: it says what MCP is for. Then make it real:
+
+> "Google has one for Gmail: your AI can search your inbox and draft replies. And one for Calendar: it can find a free slot and book the meeting. And now there's yours."
+
+**Screen:** three cards, one per line: Gmail, Calendar, and your `maths` server.
 
 ### 5. Sign-off
 
@@ -119,9 +123,12 @@ The captions are the `<p class="cue">` lines in `index.html`. They are your auto
 | 17 | …plus four lines. | The four lines open up around the function, and the heading becomes "An MCP server." |
 | 18 | That's an *MCP server*. | — |
 | 19 | Write it once, and Claude, Cursor and VS Code can all use it. | — |
-| 20 | I'm Nicholas Johnson. I'm a principal dev working with AI. | You, full-screen again |
-| 21 | I'm doing a series on *AI fundamentals*. | — |
-| 22 | Follow if you'd like to know more. | — |
+| 20 | Google has one for Gmail: your AI can search your inbox and draft replies. | "Real MCP servers", with a Gmail card |
+| 21 | And one for Calendar: it can find a free slot and book the meeting. | A Calendar card |
+| 22 | And now there's yours. | Your `maths` server joins them |
+| 23 | I'm Nicholas Johnson. I'm a principal dev working with AI. | You, full-screen again |
+| 24 | I'm doing a series on *AI fundamentals*. | — |
+| 25 | Follow if you'd like to know more. | — |
 
 Then press R to stop.
 
@@ -137,11 +144,11 @@ Repeat the promise, then the course plug:
 
 - **The code on screen is squeezed to fit a phone.** The docstring is wrapped onto two lines, there is one blank line where the real files have two, and `import math` is left off. Otherwise it is the real code.
 - **Expect the comment "just use a reasoning model".** That's the follow-up clip. Module 4 found that with reasoning turned on, the model does get the right answer, but each answer took 9 to 57 seconds of thinking you pay for, against about a second for the tool. And nothing guarantees the reasoning model gets it right; the tool is right because it's arithmetic.
-- **If the explanation runs over sixty seconds** (everything before the sign-off), drop "All completely confident." and "It isn't calculating." here and in `index.html`. Don't split it into two parts: the hook promises the whole thing in one.
+- **If the explanation runs over sixty seconds** (everything before the sign-off), drop "All completely confident." and "It isn't calculating." here and in `index.html`. If it's still over, drop the Calendar line and keep Gmail. Don't split it into two parts: the hook promises the whole thing in one.
 
 ## Where the material comes from
 
-All from Module 4, `day-one/module-04-tools/`:
+From Module 4, `day-one/module-04-tools/`, except the two real servers:
 
 | On screen | Source |
 |-----------|--------|
@@ -150,5 +157,6 @@ All from Module 4, `day-one/module-04-tools/`:
 | The transcript with the tool call | README, section 3 (`demo/03_agent.py`) |
 | The MCP server | `demo/03_maths_server.py` |
 | Reasoning taking 9 to 57 seconds | README, section 1, "What about reasoning?" |
+| Google's Gmail and Calendar MCP servers | Google's [Workspace MCP server announcement](https://workspaceupdates.googleblog.com/2026/05/agent-tools-and-security-updates-for-workspace-developers.html), May 2026: Gmail can search and draft, Calendar can find free times and manage events. Public developer preview. Checked 13 November 2026 |
 
 The model's answers are random, so rerunning `demo/01_maths.py` gives different wrong answers. If you rerun it, update the numbers here.

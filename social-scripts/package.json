@@ -1,0 +1,15 @@
+{
+  "name": "@agent-engineering/social-scripts",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Short videos that promote the course, built with clip-deck",
+  "scripts": {
+    "dev": "clip-deck serve",
+    "new": "clip-deck new",
+    "check": "clip-deck check"
+  },
+  "dependencies": {
+    "clip-deck": "workspace:*"
+  }
+}

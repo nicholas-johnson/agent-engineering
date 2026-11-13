@@ -1,0 +1,13 @@
+{
+  "name": "clip-deck",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Short vertical videos you record in Chrome: your camera, an animation and captions on one 1080×1920 stage",
+  "bin": {
+    "clip-deck": "./cli.mjs"
+  },
+  "dependencies": {
+    "playwright-core": "^1.65.0"
+  }
+}

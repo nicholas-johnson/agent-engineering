@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <title>Clip {{number}} — Title</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/clip-deck/style.css" />
+    <script src="/clip-deck/backdrop.js" defer></script>
+    <script src="/clip-deck/player.js" defer></script>
+  </head>
+  <body data-clip="{{clip}}">
+    <main class="stage">
+      <header class="byline">
+        <p class="name">Nicholas Johnson</p>
+        <p class="brand">Agent Engineering · Module name</p>
+      </header>
+
+      <!-- 1. The promise, full-face -->
+      <section class="frame" data-camera="full">
+        <p class="cue">I'm going to explain <em>the idea</em> to you in sixty seconds.</p>
+      </section>
+
+      <!-- 2. The odd thing -->
+      <section class="frame">
+        <p class="cue">I asked an AI a simple question.</p>
+        <p class="cue">Look at what it said.</p>
+        <h1>A short heading</h1>
+        <div class="bubble you">The question, word for word</div>
+        <div class="bubble ai" data-in="1"><span class="stream">The real answer, streamed in word by word.</span></div>
+      </section>
+
+      <!-- 3. The reveal -->
+      <section class="frame">
+        <p class="cue">Here's what's really going on.</p>
+        <p class="cue">Add one thing, and it works.</p>
+        <div class="swap">
+          <h1 data-out="1">What's going on</h1>
+          <h1 data-in="1">The fix</h1>
+        </div>
+        <pre class="code grow" data-at="1">
+def answer(question: str) -> str:
+    return guess(question)
++
++ # Lines marked + open at the data-at step.
+</pre>
+      </section>
+
+      <!-- 4. The payoff -->
+      <section class="frame">
+        <p class="cue">One line they could repeat to a friend.</p>
+        <h1>The payoff</h1>
+        <div class="card python">
+          <p class="who">Remember</p>
+          <p class="says">The idea, in a sentence.</p>
+        </div>
+      </section>
+
+      <!-- 5. The sign-off, full-face -->
+      <section class="frame" data-camera="full">
+        <p class="cue">I'm Nicholas Johnson. I'm a principal dev working with AI.</p>
+        <p class="cue">I'm doing a series on <em>AI fundamentals</em>.</p>
+        <p class="cue">Follow if you'd like to know more.</p>
+      </section>
+    </main>
+  </body>
+</html>

@@ -188,6 +188,12 @@ importers:
         specifier: ^3.9.10
         version: 3.9.10
 
+  clip-deck:
+    dependencies:
+      playwright-core:
+        specifier: ^1.65.0
+        version: 1.65.0
+
   day-one/module-01-intro-to-language-models/slides:
     dependencies:
       react:
@@ -314,6 +320,12 @@ importers:
       react-router:
         specifier: ^8.5.0
         version: 8.5.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+
+  social-scripts:
+    dependencies:
+      clip-deck:
+        specifier: workspace:*
+        version: link:../clip-deck
 
 packages:
 

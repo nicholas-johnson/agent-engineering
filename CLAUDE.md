@@ -8,10 +8,13 @@ Course materials for _Agent Engineering_, a hands-on Python course on building A
 - **API keys**: read from `.env` at the repo root (gitignored; copy `.env.example`). `OPENAI_API_KEY` from Module 2; Module 3 also uses `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, `XAI_API_KEY` and `OPENROUTER_API_KEY` when present.
 - **Local models**: Module 3 uses Ollama with `qwen3:1.7b` (and `qwen3:0.6b` in a playground), and `Qwen/Qwen3-1.7B` from Hugging Face.
 - **Slides**: a pnpm workspace. `slide-deck/` is the shared React slide components; each module's `slides/` is a Vite app that uses it.
+- **Social clips**: short promo videos. `clip-deck/` is the engine (camera, captions, animation and recording in one page); `social-scripts/` holds the clips. To make one, use the `social-clip` skill.
 - **Commands**:
   - `pnpm slides:NN`: run module NN's slides
   - `pnpm slides:pdf`: export every deck to `pdf/`
   - `pnpm format:slides`: format the slides with Prettier
+  - `pnpm social`: serve the social clips at http://127.0.0.1:8765/
+  - `pnpm social:new NN-slug`, `pnpm social:check NN-slug`: start a clip from the template; step through one and report problems
 
 ## Building or changing a module
 

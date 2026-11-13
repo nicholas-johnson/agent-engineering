@@ -1,5 +1,7 @@
 packages:
   - 'slide-deck'
+  - 'clip-deck'
+  - 'social-scripts'
   - 'day-*/module-*/slides'
 
 shamefullyHoist: true

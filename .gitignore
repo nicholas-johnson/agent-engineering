@@ -11,3 +11,4 @@ node_modules/
 coverage/
 **/demo/output/
 **/playground/*/output/
+social-scripts/output/

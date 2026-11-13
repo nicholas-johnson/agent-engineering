@@ -361,6 +361,38 @@ h1 {
   margin: -14px 0;
 }
 
+/* A stack of named cards, such as MCP servers */
+
+.servers {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.servers h2 {
+  font-size: 46px;
+  margin-bottom: 8px;
+}
+
+.servers h2 span {
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.servers p {
+  font-size: 34px;
+  line-height: 1.3;
+  color: var(--muted);
+}
+
+.card.gmail {
+  border-top-color: var(--text);
+}
+
+.card.calendar {
+  border-top-color: var(--primary);
+}
+
 /* Side-by-side comparison */
 
 .compare {
