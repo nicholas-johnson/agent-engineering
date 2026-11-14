@@ -27,10 +27,11 @@ Read these first:
 2. **Find the real material.** Use output from a module's README, or run the demo. Never invent output or numbers. For any real-world claim (a product, a server, a feature), check a primary source and note it with the date.
 3. **Start the clip:** `pnpm social:new NN-slug`, numbered after the last clip in `social-scripts/`.
 4. **Write `script.md`:** the five beats, what's on screen, the captions table, the post text, notes, and a table saying where each piece of material came from.
-5. **Build `index.html`:** one `<section class="frame">` per screen. Write each spoken sentence as a `<p class="cue">`, which is both the autocue and the caption. Make things appear with `data-in`, and use the components in the clip-deck README. Set the byline's module name.
-6. **Check it:** `pnpm social:check NN-slug`. Fix every problem it reports, then look at `social-scripts/output/NN-slug/sheet.png`, which shows every step. Read the estimated length: if the part before the sign-off runs over the promise, cut lines.
-7. **Update `social-scripts/README.md`:** add the clip to the table.
-8. **Hand over:** tell Nicholas to run `pnpm social`, open the clip in Chrome and press R. Commit only when asked.
+5. **Build `index.html`:** one `<section class="frame">` per screen. Write each spoken sentence as a `<p class="cue">`, which is both the autocue and the caption. Make things appear with `data-in`, and use the components in the clip-deck README. Set the byline's module name. For a neural network diagram, use `network.js` with a `scene.js`, as in clip 2; don't hand-draw SVG.
+6. **Watch the motion.** The check's pictures show only where each step ends up. Open the clip in Chrome and step through it, to see that the animations read well.
+7. **Check it:** `pnpm social:check NN-slug`. Fix every problem it reports, then look at `social-scripts/output/NN-slug/sheet.png`, which shows every step. Read the estimated length: if the part before the sign-off runs over the promise, cut lines.
+8. **Update `social-scripts/README.md`:** add the clip to the table.
+9. **Hand over:** tell Nicholas to run `pnpm social`, open the clip in Chrome and press R. Commit only when asked.
 
 ## Rules
 

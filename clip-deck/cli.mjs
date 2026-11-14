@@ -177,7 +177,8 @@ async function check(only) {
   const app = server();
   const origin = await listen(app, 0);
   const browser = await launch(chromium);
-  const context = await browser.newContext({ viewport: { width: 540, height: 960 } });
+  // Reduced motion tells scripts such as network.js to jump straight to each step's final state.
+  const context = await browser.newContext({ viewport: { width: 540, height: 960 }, reducedMotion: 'reduce' });
   await context.grantPermissions(['camera', 'microphone'], { origin });
   // Skip the animations so every step can be read straight away.
   await context.addInitScript(() => {

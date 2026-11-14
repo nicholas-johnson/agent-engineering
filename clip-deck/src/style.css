@@ -115,6 +115,42 @@ body {
   gap: 20px;
 }
 
+/* Content at the top of the frame, leaving the space below for a graphic such as a network */
+.frame.top {
+  justify-content: flex-start;
+}
+
+/* A network diagram from network.js: it covers the stage, between the backdrop and the frames */
+.network {
+  position: absolute;
+  inset: 0;
+  width: 1080px;
+  height: 1920px;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.network text {
+  font-family: var(--sans);
+  font-size: 32px;
+  font-weight: 600;
+  paint-order: stroke;
+  stroke: rgba(2, 6, 23, 0.85);
+  stroke-width: 8px;
+  stroke-linejoin: round;
+}
+
+.network .mono {
+  font-family: var(--mono);
+  font-weight: 400;
+}
+
+.network .weight {
+  font-family: var(--mono);
+  font-size: 30px;
+  font-weight: 700;
+}
+
 .cue {
   display: none;
 }

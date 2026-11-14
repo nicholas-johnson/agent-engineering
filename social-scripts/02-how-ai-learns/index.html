@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <title>Clip 2 — How an AI learns</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/clip-deck/style.css" />
+    <script src="/clip-deck/backdrop.js" defer></script>
+    <script src="/clip-deck/network.js" defer></script>
+    <script src="scene.js" defer></script>
+    <script src="/clip-deck/player.js" defer></script>
+  </head>
+  <body data-clip="02-how-ai-learns">
+    <main class="stage">
+      <svg class="network" id="net"></svg>
+
+      <header class="byline">
+        <p class="name">Nicholas Johnson</p>
+        <p class="brand">Agent Engineering · Language models</p>
+      </header>
+
+      <!-- 1. The promise, full-face -->
+      <section class="frame" data-camera="full">
+        <p class="cue">I'm going to show you how an AI <em>learns</em>, in sixty seconds.</p>
+      </section>
+
+      <!-- 2. One neuron, wrong, nudged until it's right (neuron.py) -->
+      <section class="frame top">
+        <p class="cue">Every AI starts out knowing nothing.</p>
+        <p class="cue">Here's one neuron. Should I take an umbrella?</p>
+        <p class="cue">It says 0.26. The right answer is 1.</p>
+        <p class="cue">So we nudge each weight a little, towards the right answer.</p>
+        <p class="cue">Try again: 0.61.</p>
+        <p class="cue">Nudge, and try again: 0.77.</p>
+        <p class="cue">And again: 0.84. That's <em>learning</em>.</p>
+        <div class="swap">
+          <h1 data-out="6">One neuron</h1>
+          <h1 data-in="6">Wrong. Nudge. Repeat.</h1>
+        </div>
+        <p class="note" data-in="2">The right answer: <strong>1</strong>, take an umbrella</p>
+      </section>
+
+      <!-- 3. Layers, and backpropagation -->
+      <section class="frame top">
+        <p class="cue">Real networks have layers of these.</p>
+        <p class="cue">Data flows forwards, and the answer's wrong.</p>
+        <p class="cue">The error flows backwards, and every weight gets a nudge.</p>
+        <p class="cue">That's <em>backpropagation</em>. Then do it again. And again.</p>
+        <div class="swap">
+          <h1 data-out="3">Layers of neurons</h1>
+          <h1 data-in="3">Backpropagation</h1>
+        </div>
+      </section>
+
+      <!-- 4. Module 1's model predicting the next token (Module 1 README, section 5) -->
+      <section class="frame top">
+        <p class="cue">Train one on a book, and it learns to predict the next word…</p>
+        <p class="cue">…or the next part of a word, which we call a <em>token</em>.</p>
+        <p class="cue">It gives every possible next word a chance.</p>
+        <div class="swap">
+          <h1 data-out="1">The next word</h1>
+          <h1 data-in="1">The next token</h1>
+        </div>
+        <p class="note">After <span class="mono">“the queen said to”</span></p>
+      </section>
+
+      <!-- 5. Zoom right out -->
+      <section class="frame top">
+        <p class="cue">This little one has 48 weights to nudge.</p>
+        <p class="cue">The big ones have <em>billions</em>.</p>
+        <p class="cue">Same trick: be wrong, nudge, repeat.</p>
+        <div class="swap">
+          <h1 data-out="1">48 weights</h1>
+          <h1 data-in="1">Billions</h1>
+        </div>
+      </section>
+
+      <!-- 6. The sign-off, full-face -->
+      <section class="frame" data-camera="full">
+        <p class="cue">I'm Nicholas Johnson. I'm a principal dev working with AI.</p>
+        <p class="cue">I'm doing a series on <em>AI fundamentals</em>.</p>
+        <p class="cue">Follow if you'd like to know more.</p>
+      </section>
+    </main>
+  </body>
+</html>

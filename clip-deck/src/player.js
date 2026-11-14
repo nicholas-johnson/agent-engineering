@@ -13,6 +13,9 @@
 //   data-at="n"         gets the class "reached" at step n (for effects such as the red digits)
 //   class="type"        types itself out, one character at a time (monospace text only)
 //   class="stream"      appears word by word, like a streamed reply
+//
+// Scripts can follow along: window.clip.steps lists every step's key ("frame.step"), and a
+// "clip:step" event fires on document with { key, index, forward } whenever the step changes.
 
 const KEYWORDS = new Set([
   "and", "as", "async", "await", "class", "def", "elif", "else", "for", "from",
@@ -143,6 +146,10 @@ const lastStep = frames.map((frame, f) =>
   ),
 );
 
+// Every step's key ("frame.step", as in the address bar), in order, for scripts such as network.js.
+window.clip = { steps: lastStep.flatMap((last, f) => Array.from({ length: last + 1 }, (_, s) => `${f + 1}.${s}`)) };
+let shownIndex = null;
+
 const caption = document.createElement("p");
 caption.className = "caption";
 stage.append(caption);
@@ -178,7 +185,16 @@ function show() {
     );
   }
   caption.hidden = !words;
-  history.replaceState(null, "", `#${current + 1}.${step}`);
+
+  // Tell scripts on the page. "forward" is true only for a single step on, the time to play effects.
+  const key = `${current + 1}.${step}`;
+  const index = window.clip.steps.indexOf(key);
+  if (index !== shownIndex) {
+    const forward = shownIndex !== null && index === shownIndex + 1;
+    shownIndex = index;
+    document.dispatchEvent(new CustomEvent("clip:step", { detail: { key, index, forward } }));
+  }
+  history.replaceState(null, "", `#${key}`);
 }
 
 function next() {
