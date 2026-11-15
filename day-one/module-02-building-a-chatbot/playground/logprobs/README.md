@@ -70,5 +70,5 @@ For discussion. There are no right answers.
 
 Optional. These leave the script.
 
-1. **Semantic entropy.** **Farquhar, S., Kossen, J., Kuhn, L. & Gal, Y. (2024). "Detecting hallucinations in large language models using semantic entropy." *Nature* 630:625–630.** [PMC11186750](https://pmc.ncbi.nlm.nih.gov/articles/PMC11186750/). A token at 40% can be the same answer as the token at 60%. Sample several replies, group them by what they mean, and measure the uncertainty of the groups. The percentages in this playground are not that number.
+1. **Semantic entropy.** **Farquhar, S., Kossen, J., Kuhn, L. & Gal, Y. (2024). "Detecting hallucinations in large language models using semantic entropy." *Nature* 630:625–630.** [PMC11186750](https://pmc.ncbi.nlm.nih.gov/articles/PMC11186750/). A token at 40% can be the same answer as the token at 60%. Sample several replies, group them by what they mean, and measure the uncertainty of the groups. The percentages in this playground are per token. Semantic entropy is per meaning.
 2. **A wrong answer it is sure of.** Ask something the model usually misses, several times. If every sample says the same wrong thing, both kinds of uncertainty are low: it is sure, and wrong. The paper is about the other case, where the words change and the meaning changes with them.

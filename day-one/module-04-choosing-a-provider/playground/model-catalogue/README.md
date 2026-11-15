@@ -57,3 +57,10 @@ For discussion. There are no right answers.
 
 - **Liesenfeld, A. & Dingemanse, M. (2024). "Rethinking open source generative AI: open washing and the EU AI Act." *FAccT 2024*, 1774–1787.** [doi:10.1145/3630106.3659005](https://doi.org/10.1145/3630106.3659005). They score "open" models on what is actually shared: weights, data, code, documentation, licence. Read it before trusting an openness filter.
 - **Solaiman, I. (2023). "The Gradient of Generative AI Release: Methods and Considerations." *FAccT 2023*.** [arXiv:2302.04844](https://arxiv.org/abs/2302.04844). Figure 1. Release runs from fully closed, to an API, to downloadable weights, to fully open. The catalogue's openness column is one point on that line.
+
+## Rabbit holes
+
+Optional. These leave the script.
+
+1. **One whole record.** Open `catalogue.json` and pick a single model. Explain every key: `architecture` (what it can read and write), `pricing` (more than the two prices the script prints), `supported_parameters`, `hugging_face_id`.
+2. **Suffixes that are not in the file.** OpenRouter's [model variants](https://openrouter.ai/docs/guides/routing/model-variants/overview). `:free` and `:batch` are separate catalogue entries. `:floor` and `:exacto` only change which provider serves the request, so they never appear in `catalogue.json`.

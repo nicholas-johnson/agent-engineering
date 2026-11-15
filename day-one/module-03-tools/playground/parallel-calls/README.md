@@ -67,3 +67,10 @@ For discussion. There are no right answers.
 
 - **OpenAI, [Function calling](https://developers.openai.com/api/docs/guides/function-calling).** The section on parallel function calling. One response can hold several calls, and `parallel_tool_calls` can turn that off. That switch is the first exercise.
 - **Yao, S. et al. (2023). "ReAct: Synergizing Reasoning and Acting in Language Models." *ICLR 2023*.** [arXiv:2210.03629](https://arxiv.org/abs/2210.03629). The earlier pattern: one action, then one observation, in a loop. Figure 1. A parallel call is several actions before the next observation.
+
+## Rabbit holes
+
+Optional. These leave the script.
+
+1. **Draw the graph.** Which of the five lookups need another call's result, and which can share a round? Then ask the question from the second exercise, about the most expensive rabbit and what the next one does, and mark the calls that had to wait.
+2. **How a real SDK runs the batch.** The [OpenAI Agents SDK](https://openai.github.io/openai-agents-python/running_agents/) starts every call from one response together. Dependencies are left to the model: a call that needs another call's result has to wait for the next turn. A failed call becomes an error message, and the run continues. Read `max_function_tool_concurrency` there, and `failure_error_function` in the [tools guide](https://openai.github.io/openai-agents-python/tools/).
