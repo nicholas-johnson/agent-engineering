@@ -282,24 +282,30 @@ That's 73 tokens. The empty `<think></think>` is how "thinking off" works: the t
 
 Send one question to every option you can reach, print the reply, and measure what matters: how long until the first word, how long in total, how many tokens, and what 1,000 such chats would cost at the prices in `data/prices.json`.
 
-The question is a short logic puzzle, so a stronger model and a weaker one can come apart without a long answer. Three tins are labelled marmalade, treacle, and marmalade and treacle, and every label is wrong. The tin labelled marmalade and treacle contains only marmalade, so the tin labelled treacle is the mixture and the tin labelled marmalade is treacle. Replies are capped at 250 tokens, and reasoning is turned off, so the text you see is the answer rather than a hidden chain of thought.
+The question is a short logic puzzle, so a stronger model and a weaker one can come apart without a long answer. Three tins are labelled marmalade, treacle, and marmalade and treacle, and every label is wrong. The tin labelled marmalade and treacle contains only marmalade, so the tin labelled treacle is the mixture and the tin labelled marmalade is treacle. Replies are capped at 500 tokens. Reasoning is turned off where the model allows it, so the text you see is the answer. Opus, Gemini and Grok refuse that and think anyway.
 
-Every option uses the same streaming code. OpenAI and Ollama speak the Responses API, and OpenRouter does too. Each model runs with its own default settings.
+Every option uses the same streaming code. OpenAI, OpenRouter and Ollama speak the Responses API. Reasoning is set to `"none"` where the model allows it.
 
 ```text
 Model                            First word   Total Tokens out  Per 1,000 chats
-gpt-6-luna                             9.6s   10.7s         80          $0.0465
-anthropic/claude-haiku-5.5                                  skipped: no API key
-anthropic/claude-opus-5.5                                   skipped: no API key
-google/gemini-3.8-flash                                     skipped: no API key
-x-ai/grok-4.7                                               skipped: no API key
-deepseek/deepseek-v4.1-flash                                skipped: no API key
-qwen/qwen3.8-flash                                          skipped: no API key
-mistralai/mistral-small-2603                                skipped: no API key
-qwen3:1.7b                             1.6s    2.8s        170             free
+gpt-6-luna                             0.9s    2.1s         83          $0.0493
+anthropic/claude-haiku-5.5             0.6s    1.2s        165          $0.0932
+anthropic/claude-opus-5.5              2.7s    3.0s        265          $5.7320
+google/gemini-3.8-flash                5.5s    5.7s        496          $2.1029
+x-ai/grok-4.7                         10.8s   11.5s        874          $7.8760
+deepseek/deepseek-v4.1-flash           0.4s    0.6s         46          $0.0786
+qwen/qwen3.8-flash                     0.6s    1.6s        124          $0.0719
+mistralai/mistral-small-2603           0.5s    1.1s        146          $0.1011
+qwen3:1.7b                             0.3s    1.0s         48             free
 ```
 
-*Full scorecard to come.* Even this much has a lesson in it: `gpt-6-luna`'s default reasoning effort is `"medium"`, so it thought for nine seconds before writing a word. In Module 2 we set it to `"none"`. **Defaults differ, and they matter.**
+Haiku gets the tins the wrong way round. The laptop model does not:
+
+> **claude-haiku-5.5:** "marmalade and treacle" tin: treacle. "marmalade" tin: the mixture. "treacle" tin: marmalade.
+>
+> **qwen3:1.7b:** The tin labelled 'marmalade and treacle' contains marmalade. The tin labelled 'marmalade' contains treacle. The tin labelled 'treacle' contains marmalade and treacle.
+
+Gemini spends the whole cap and stops mid-word. Grok, Opus and Gemini cannot turn reasoning off: Grok thought for 11 seconds and used 874 tokens to reach a right answer. **Defaults differ, and they matter.**
 
 The scorecard is a starting point, not an answer. Add the questions from the start of this module, and the answer to "which provider?" is the Cat's: it depends a good deal on where you want to get to.
 

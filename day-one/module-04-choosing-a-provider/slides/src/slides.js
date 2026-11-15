@@ -530,14 +530,19 @@ anywhere, you must first find the cake.`,
   {
     type: 'code',
     content: {
-      title: 'Defaults differ',
-      code: `Model          First word   Total  Tokens out  Per 1,000 chats
-gpt-6-luna           9.6s   10.7s          80          $0.0465
-qwen3:1.7b           1.6s    2.8s         170             free`,
+      title: 'Not the same answer',
+      code: `claude-haiku-5.5
+  mixed tin: treacle. marmalade tin: the mixture.
+
+qwen3:1.7b
+  mixed tin: marmalade. marmalade tin: treacle.
+
+gemini-3.8-flash
+  "…the tin labelled 'tre"`,
       highlights: [
-        '`gpt-6-luna` defaults to reasoning effort `"medium"`: it thought first',
-        'In Module 2 we set it to `"none"`',
-        'Check the settings before you compare',
+        'Haiku swaps the tins. The small local model does not',
+        'Gemini spends the 500 token cap and never finishes',
+        'Grok cannot turn reasoning off: 11s and 874 tokens',
       ],
     },
   },

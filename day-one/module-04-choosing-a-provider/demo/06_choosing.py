@@ -21,9 +21,8 @@ QUESTION = (
     "Every label is wrong. You open the tin labelled 'marmalade and treacle' and find only marmalade. "
     "What is in each tin?"
 )
-# A cap keeps a reasoning model from writing an essay, and stops OpenRouter reserving
-# tens of thousands of tokens against a small credit limit.
-MAX_OUTPUT_TOKENS = 250
+# A cap keeps a reply short, and stops OpenRouter reserving tens of thousands of tokens.
+MAX_OUTPUT_TOKENS = 500
 
 # (where it runs, model name there, model id in prices.json)
 OPTIONS = [
@@ -49,18 +48,20 @@ if "OPENROUTER_API_KEY" in os.environ:
     )
 
 
-def measure(client, model):
+def measure(client, model, reasoning_off):
     start = time.perf_counter()
     first_word = None
     parts = []
-    stream = client.responses.create(
+    kwargs = dict(
         model=model,
         instructions=INSTRUCTIONS,
         input=QUESTION,
-        reasoning={"effort": "none"},
         max_output_tokens=MAX_OUTPUT_TOKENS,
         stream=True,
     )
+    if reasoning_off:
+        kwargs["reasoning"] = {"effort": "none"}
+    stream = client.responses.create(**kwargs)
     usage = None
     for event in stream:
         if event.type == "response.output_text.delta":
@@ -86,7 +87,12 @@ for where, model, price_id in OPTIONS:
         continue
 
     try:
-        first_word, total, usage, reply = measure(clients[where], model)
+        try:
+            first_word, total, usage, reply = measure(clients[where], model, True)
+        except openai.APIStatusError as error:
+            if "cannot be disabled" not in str(error):
+                raise
+            first_word, total, usage, reply = measure(clients[where], model, False)
     except Exception as error:
         message = str(error).split(" To increase")[0]
         scorecard.append({"model": model, "where": where, "skipped": message})
