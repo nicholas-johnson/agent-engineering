@@ -1,3 +1,5 @@
+# Run from the module folder: uv run python demo/03_chinese_labs.py
+
 import json
 import os
 from pathlib import Path

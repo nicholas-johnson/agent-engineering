@@ -1,3 +1,5 @@
+# Run from the module folder: uv run python demo/03_maths_server.py
+
 import math
 
 from mcp.server.mcpserver import MCPServer

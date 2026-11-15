@@ -1,3 +1,5 @@
+# Run from the module folder: uv run python demo/05_neural_model.py
+
 import json
 import math
 import random

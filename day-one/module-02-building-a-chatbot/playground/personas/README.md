@@ -1,5 +1,7 @@
 # Personas
 
+The same model and the same question, with only the instructions changed. You'll pick a persona, chat with it, and see how it answers.
+
 From the module folder (`day-one/module-02-building-a-chatbot`):
 
 ```bash
@@ -16,8 +18,6 @@ python playground/personas/play.py
 Needs `OPENAI_API_KEY` in `.env`. Pick a persona from the list, then chat (press Enter on an empty line to stop). Each persona is a short text file in `playground/personas/instructions/`. The conversation is saved to `playground/personas/output/<persona>.txt`.
 
 ---
-
-The same model, the same question, completely different answers. The only thing that changes is the **instructions**.
 
 | Persona | Instructions, in short |
 |---------|------------------------|
@@ -59,3 +59,8 @@ For discussion. There are no right answers.
 - The tutor was told never to give the answer, and gave it anyway. Should a model follow instructions to the letter, or use its judgement? When would each be dangerous?
 - Is a persona a kind of lie? When is it fine for a chatbot to pretend to be someone, and when isn't it?
 - Many companies give their chatbots names and personalities. What should the people talking to them be told?
+
+## Further reading
+
+- **Bai, Y. et al. (2022). "Constitutional AI: Harmlessness from AI Feedback."** [arXiv:2212.08073](https://arxiv.org/abs/2212.08073). A short list of principles, which the model uses to critique its own answers. A persona is a list of principles too.
+- **Perez, F. & Ribeiro, I. (2022). "Ignore Previous Prompt: Attack Techniques For Language Models." *NeurIPS ML Safety Workshop*.** [arXiv:2211.09527](https://arxiv.org/abs/2211.09527). Getting a model to drop its instructions by what you type. Read it after trying to break the haiku poet and the pirate.

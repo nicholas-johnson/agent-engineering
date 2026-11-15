@@ -1,5 +1,7 @@
 # Finish my sentence
 
+Type the start of a sentence and watch all four counting models finish it, side by side. When a model reaches a context it has never seen, it gives up and prints `[stuck]`.
+
 From the module folder (`day-one/module-01-intro-to-language-models`):
 
 ```bash
@@ -15,8 +17,6 @@ python3 playground/finish-my-sentence/play.py
 Builds all four counting models directly from `data/alice.txt`. Press Enter on an empty line to stop.
 
 ---
-
-Type the start of a sentence and watch all four counting models finish it, side by side. When a model reaches a context it has never seen, it gives up and prints `[stuck]`.
 
 ```text
 Start a sentence (Enter to stop): the queen said
@@ -47,3 +47,8 @@ For discussion. There are no right answers.
 - Which of the four models would you call the best? Best at what: sounding like English, saying something new, or never getting stuck?
 - The five-word model is fluent on anything from the book and stuck on almost everything else. Is a model that can only recite useful for anything?
 - Our models say `[stuck]` when they don't know. Real chatbots never do. Which would you rather have, and why?
+
+## Further reading
+
+- **Shannon, C. E. (1948). "A Mathematical Theory of Communication." *Bell System Technical Journal* 27(3):379–423.** Look for *"The series of approximations to English"*. He generates text from letter counts, then from word counts, and it gets closer to English each time. This playground is that experiment.
+- **Jurafsky, D. & Martin, J. H. *Speech and Language Processing* (3rd edition draft).** The chapter on n-gram language models, free at [web.stanford.edu/~jurafsky/slp3](https://web.stanford.edu/~jurafsky/slp3/). The four counting models, with the maths written out.

@@ -1,5 +1,7 @@
 # Other books
 
+The letter model only knows the text it counted. You'll run it on *Through the Looking-Glass* and on Python code, and watch it write like whichever one it read.
+
 From the module folder (`day-one/module-01-intro-to-language-models`):
 
 ```bash
@@ -15,8 +17,6 @@ python3 playground/other-books/play.py
 Each corpus gets three samples of 400 characters, written to `playground/other-books/output/<corpus>.txt`.
 
 ---
-
-The model doesn't know anything about *Alice*. It only knows the text it counted. Give it different text and it writes like that instead.
 
 This runs the eight-letter model from demo 3 on three corpora:
 
@@ -57,3 +57,7 @@ For discussion. There are no right answers.
 - The letter model wrote convincing-looking Python without knowing what Python is. How much of what looks like understanding in a big model could be the same trick?
 - If a model trained on your emails writes just like you, whose writing is it?
 - Where is the line between a model being influenced by a book and copying it?
+
+## Further reading
+
+- **Karpathy, A. (2015). "The Unreasonable Effectiveness of Recurrent Neural Networks."** [karpathy.github.io/2015/05/21/rnn-effectiveness](https://karpathy.github.io/2015/05/21/rnn-effectiveness/). A letter model trained on Shakespeare, Wikipedia, LaTeX and the Linux source, writing in the style of each. The same experiment as this playground, with a neural net in place of the counts.

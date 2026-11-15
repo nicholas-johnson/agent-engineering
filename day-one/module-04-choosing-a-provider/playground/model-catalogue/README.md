@@ -1,5 +1,7 @@
 # Model catalogue
 
+OpenRouter's full list of models. You'll filter it by price, context length, inputs and whether the weights are open.
+
 From the module folder (`day-one/module-03-choosing-a-provider`):
 
 ```bash
@@ -16,9 +18,7 @@ No API key needed (requires an internet connection). The full list, with every d
 
 ---
 
-There are far more models than the 32 in `data/prices.json`. This downloads OpenRouter's public list of every model it offers, and filters it by what you need. The filters are at the top of `play.py`.
-
-The starting filters ask for an open-weight model that reads images, has a context window of at least a million tokens, and costs at most $0.50 per million input tokens:
+The filters are at the top of `play.py`. The starting filters ask for an open-weight model that reads images, has a context window of at least a million tokens, and costs at most $0.50 per million input tokens:
 
 ```text
 OpenRouter lists 469 models today
@@ -52,3 +52,8 @@ For discussion. There are no right answers.
 - With hundreds of models to choose from, what would you filter on first, and why?
 - Why would a company give a model away for free?
 - Many of the cheapest models have open weights. Why might an open model be cheaper to use than a closed one?
+
+## Further reading
+
+- **Liesenfeld, A. & Dingemanse, M. (2024). "Rethinking open source generative AI: open washing and the EU AI Act." *FAccT 2024*, 1774–1787.** [doi:10.1145/3630106.3659005](https://doi.org/10.1145/3630106.3659005). They score "open" models on what is actually shared: weights, data, code, documentation, licence. Read it before trusting an openness filter.
+- **Solaiman, I. (2023). "The Gradient of Generative AI Release: Methods and Considerations." *FAccT 2023*.** [arXiv:2302.04844](https://arxiv.org/abs/2302.04844). Figure 1. Release runs from fully closed, to an API, to downloadable weights, to fully open. The catalogue's openness column is one point on that line.

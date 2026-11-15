@@ -1,5 +1,7 @@
 # Chatbot
 
+A complete streaming chatbot, with every setting at the top of the file. You'll chat with it, change a setting, and see what that does to the replies.
+
 From the module folder (`day-one/module-02-building-a-chatbot`):
 
 ```bash
@@ -17,7 +19,7 @@ Needs `OPENAI_API_KEY` in `.env`. Press Enter on an empty line to stop. The conv
 
 ---
 
-A complete streaming chatbot with memory, with every setting at the top of the file. It's the chatbot from the demos, ready to take apart.
+It's the chatbot from the demos, ready to take apart.
 
 ```text
 You: What is a token, in one sentence?
@@ -54,3 +56,8 @@ For discussion. There are no right answers.
 - Who should choose the settings: the developer who builds the chatbot, or the person using it?
 - If a reply is cut off by `MAX_OUTPUT_TOKENS` and the half-answer misleads someone, whose fault is it?
 - When is it worth paying more, and waiting longer, for a model that thinks before it answers?
+
+## Further reading
+
+- **Ouyang, L. et al. (2022). "Training language models to follow instructions with human feedback." *NeurIPS 2022*.** [arXiv:2203.02155](https://arxiv.org/abs/2203.02155). InstructGPT, the ancestor of this chatbot. Figure 2 is how a next-token predictor was trained to answer a question rather than continue it.
+- **OpenAI, [Text generation](https://developers.openai.com/api/docs/guides/text).** The settings at the top of `play.py` — model, instructions, temperature, length — as the API documents them.

@@ -1,3 +1,5 @@
+# Run from the module folder: uv run python demo/05_images.py
+
 import base64
 from pathlib import Path
 

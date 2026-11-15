@@ -1,3 +1,5 @@
+# Run from the module folder: uv run python demo/02_context_window.py
+
 import json
 import random
 import re

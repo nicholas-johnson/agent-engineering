@@ -1,3 +1,5 @@
+# Run from the module folder: uv run python demo/01_maths.py
+
 import json
 import math
 from pathlib import Path

@@ -1,5 +1,7 @@
 # Model shootout
 
+The same questions, sent to four different OpenAI models. You'll compare how long each takes, how many tokens it uses, and what it answers.
+
 From the module folder (`day-one/module-02-building-a-chatbot`):
 
 ```bash
@@ -16,8 +18,6 @@ python playground/model-shootout/play.py
 Needs `OPENAI_API_KEY` in `.env`. Everything, including each model's full answer, is written to `playground/model-shootout/output/shootout.json`.
 
 ---
-
-The same questions, sent to four different OpenAI models. How long does each take, how many tokens does it use, and is it any better?
 
 ```text
 === Why is a raven like a writing-desk? ===
@@ -51,3 +51,8 @@ For discussion. There are no right answers.
 - Only the most expensive model knew the whole answer to the riddle. How would you decide which questions deserve the expensive model?
 - If a cheap model is wrong one time in twenty, is that acceptable? What does it depend on?
 - Should you trust a model to judge other models' answers? What could go wrong?
+
+## Further reading
+
+- **Wei, J. et al. (2022). "Chain-of-Thought Prompting Elicits Reasoning in Large Language Models." *NeurIPS 2022*.** [arXiv:2201.11903](https://arxiv.org/abs/2201.11903). Asking a model to work step by step before it answers. The reasoning tokens in `shootout.json` are that step, built into the model.
+- **OpenAI, [Reasoning](https://developers.openai.com/api/docs/guides/reasoning).** What the effort levels change, and which parameters stop working once reasoning is on.

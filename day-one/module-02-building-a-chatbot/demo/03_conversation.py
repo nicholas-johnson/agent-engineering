@@ -1,3 +1,5 @@
+# Run from the module folder: uv run python demo/03_conversation.py
+
 from pathlib import Path
 
 from dotenv import load_dotenv

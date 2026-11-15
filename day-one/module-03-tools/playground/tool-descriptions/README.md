@@ -1,5 +1,7 @@
 # Tool descriptions
 
+A tool's description is all the model knows about it. You'll give the model the same square root function three times, each time with a different description.
+
 From the module folder (`day-one/module-04-tools`):
 
 ```bash
@@ -17,15 +19,13 @@ Needs `OPENAI_API_KEY` in `.env`. The results are written to `playground/tool-de
 
 ---
 
-A tool's description is all the model knows about it. So how much does the description matter? This gives the model the same square root function three times, each with a different description:
+There's no MCP server here: tools are defined straight in the Responses API, which is all MCP was doing for us. The same function is offered three times:
 
 | Label | Description |
 |-------|-------------|
 | `clear` | "Return the square root of a number, exactly, to full precision." |
 | `vague` | "Does a calculation." |
 | `wrong` | "Returns the cube root of a number." |
-
-There's no MCP server here: tools are defined straight in the Responses API, which is all MCP was doing for us.
 
 ```text
 === clear: "Return the square root of a number, exactly, to full precision." ===
@@ -62,3 +62,8 @@ For discussion. There are no right answers.
 - The model trusted what the tool returned over what its description said. Is that a good habit or a bad one?
 - Who is a tool's description written for: the model, or the people who read the code? Can it be both?
 - If a tool's description is wrong and something goes badly, whose fault is it?
+
+## Further reading
+
+- **Patil, S. G., Zhang, T., Wang, X. & Gonzalez, J. E. (2023). "Gorilla: Large Language Model Connected with Massive APIs."** [arXiv:2305.15334](https://arxiv.org/abs/2305.15334). Asked to call real APIs, models often name ones that were never published. Gorilla trains a model on the documentation. Look for how much a written description does once the model has to choose.
+- **OpenAI, [Function calling](https://developers.openai.com/api/docs/guides/function-calling).** The `description` on a tool and on its arguments. That text is all the model is shown.

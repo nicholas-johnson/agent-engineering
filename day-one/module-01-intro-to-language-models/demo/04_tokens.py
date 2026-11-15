@@ -1,3 +1,5 @@
+# Run from the module folder: uv run python demo/04_tokens.py
+
 import json
 import random
 from collections import Counter, defaultdict

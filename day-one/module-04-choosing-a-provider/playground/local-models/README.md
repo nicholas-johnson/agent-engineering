@@ -1,5 +1,7 @@
 # Local models
 
+How small can a model be and still be useful? You'll ask the same three questions of two Qwen models running on your laptop.
+
 From the module folder (`day-one/module-03-choosing-a-provider`):
 
 ```bash
@@ -21,7 +23,7 @@ Needs Ollama running (`qwen3:0.6b` is 523 MB; `qwen3:1.7b` is 1.4 GB). The answe
 
 ---
 
-How small can a model be and still be useful? This asks the same three questions to two sizes of Qwen3 running in Ollama: 0.6 billion and 1.7 billion parameters.
+One model has 0.6 billion parameters, the other 1.7 billion. Both run in Ollama.
 
 ```text
 === Who wrote Alice's Adventures in Wonderland, and in what year was it published? ===
@@ -54,3 +56,8 @@ For discussion. There are no right answers.
 - The 1.7B model got the author wrong, and the 0.6B model got it right. How would you test whether a small model is good enough for a job?
 - When is "free, private and offline" worth "knows less and gets more wrong"?
 - Would you let a small local model answer customers' questions? Your colleagues' questions? What's the difference?
+
+## Further reading
+
+- **Qwen Team (2025). "Qwen3 Technical Report."** [arXiv:2505.09388](https://arxiv.org/abs/2505.09388). The family in this playground. Look for how one family covers sizes from 0.6 billion parameters up, and how the small models learn from the big ones.
+- **Frantar, E., Ashkboos, S., Hoefler, T. & Alistarh, D. (2023). "GPTQ: Accurate Post-Training Quantization for Generative Pre-trained Transformers." *ICLR 2023*.** [arXiv:2210.17323](https://arxiv.org/abs/2210.17323). How a trained model's weights are squeezed into a few bits. This is why `qwen3:1.7b` is a 1.4 GB download rather than 3.4 GB.

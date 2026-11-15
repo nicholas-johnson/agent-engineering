@@ -1,5 +1,7 @@
 # Log probabilities
 
+A real model's next-token probabilities, the same kind of vector the models in Module 1 produced. For each token it writes, you'll see the ones it nearly wrote instead.
+
 From the module folder (`day-one/module-02-building-a-chatbot`):
 
 ```bash
@@ -16,8 +18,6 @@ python playground/logprobs/play.py
 Needs `OPENAI_API_KEY` in `.env`. The full results are written to `playground/logprobs/output/logprobs.json`.
 
 ---
-
-Module 1 was all about vectors of next-token probabilities. A real model produces exactly the same thing, and the API will show you part of it: for each token it wrote, the five most likely tokens it could have written instead.
 
 ```text
 === Alice was beginning to get ===
@@ -60,3 +60,15 @@ For discussion. There are no right answers.
 - The model was 100% sure of every word of the book's opening line. Is being confident the same as being right?
 - If a chatbot showed you how sure it was of every word, would you trust it more or less?
 - The model can recite a famous book word for word. What does that mean for copyright?
+
+## Further reading
+
+- **Kadavath, S. et al. (2022). "Language Models (Mostly) Know What They Know."** [arXiv:2207.05221](https://arxiv.org/abs/2207.05221). When a model gives an answer a 70% probability, is it right about 70% of the time? Mostly, before it is trained to be an assistant.
+- **OpenAI (2023). "GPT-4 Technical Report."** [arXiv:2303.08774](https://arxiv.org/abs/2303.08774). Figure 8. After that training, the probabilities sit too close to 100%. That is the wall of certainty in the output above.
+
+## Rabbit holes
+
+Optional. These leave the script.
+
+1. **Semantic entropy.** **Farquhar, S., Kossen, J., Kuhn, L. & Gal, Y. (2024). "Detecting hallucinations in large language models using semantic entropy." *Nature* 630:625–630.** [PMC11186750](https://pmc.ncbi.nlm.nih.gov/articles/PMC11186750/). A token at 40% can be the same answer as the token at 60%. Sample several replies, group them by what they mean, and measure the uncertainty of the groups. The percentages in this playground are not that number.
+2. **A wrong answer it is sure of.** Ask something the model usually misses, several times. If every sample says the same wrong thing, both kinds of uncertainty are low: it is sure, and wrong. The paper is about the other case, where the words change and the meaning changes with them.

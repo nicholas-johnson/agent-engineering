@@ -1,5 +1,7 @@
 # Tokenizer lab
 
+How big should a token vocabulary be, and what happens to text the tokenizer wasn't trained on? You'll build vocabularies of 100, 500 and 2,000 tokens from *Alice*, then split some sample text with each one.
+
 From the module folder (`day-one/module-01-intro-to-language-models`):
 
 ```bash
@@ -15,8 +17,6 @@ python3 playground/tokenizer-lab/play.py
 Takes a few seconds, and writes each vocabulary to `playground/tokenizer-lab/output/tokens_<size>.json`.
 
 ---
-
-How big should a token vocabulary be, and what happens to text the tokenizer wasn't trained on?
 
 This builds a byte-pair encoding vocabulary from *Alice*, the same way as `data/build_tokens.py`, but carries on to 2,000 tokens. Because each merge is added to the end of the list, the first 100 tokens are a 100-token vocabulary, the first 500 are a 500-token vocabulary, and so on. It then splits some sample text with each one.
 
@@ -55,3 +55,15 @@ For discussion. There are no right answers.
 - Text in languages the tokenizer wasn't trained on uses more tokens, so it costs more and fits less in the context window. Is that fair? Who pays?
 - Why might a bigger vocabulary not always be better?
 - The model never sees the letters inside "strawberry". What other tasks might be hard for the same reason?
+
+## Further reading
+
+- **Sennrich, R., Haddow, B. & Birch, A. (2016). "Neural Machine Translation of Rare Words with Subword Units." *ACL 2016*.** [arXiv:1508.07909](https://arxiv.org/abs/1508.07909). The paper that used byte-pair encoding for language. The algorithm is a short Python listing. Compare it with the vocabulary this playground builds.
+- **Radford, A., Wu, J., Child, R., Luan, D., Amodei, D. & Sutskever, I. (2019). "Language Models are Unsupervised Multitask Learners." OpenAI.** [PDF](https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf). Section 2.2, byte-level BPE: start from all 256 bytes, so a character this vocabulary has never seen, such as a digit, is never unknown.
+
+## Rabbit holes
+
+Optional. These leave the script.
+
+1. **tiktoken.** Split the same samples with the encoding it uses for current OpenAI models (`o200k_base`): "strawberry", a line of Python, and a line of Chinese. Where does it agree with the 2,000-token vocabulary from *Alice*, and where does it spend more tokens?
+2. **The pre-tokenizer.** In tiktoken's source, find the regular expression that runs before any merge. The merges are the easy part. The expression is why code, contractions and spaces split the way they do.

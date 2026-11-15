@@ -1,3 +1,5 @@
+# Run from the module folder: uv run python demo/03_letters.py
+
 import json
 import random
 from collections import Counter, defaultdict

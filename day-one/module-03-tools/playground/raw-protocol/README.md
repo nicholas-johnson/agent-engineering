@@ -1,5 +1,7 @@
 # The protocol by hand
 
+MCP as plain JSON, one message per line. You'll start the maths server and talk to it yourself.
+
 From the module folder (`day-one/module-04-tools`):
 
 ```bash
@@ -17,7 +19,7 @@ No API key needed. Every message, sent and received, is written to `playground/r
 
 ---
 
-The `mcp` package hides the protocol. This takes it away: it starts the maths server from demo 3 and talks to it by writing JSON to its standard input and reading JSON back from its standard output, one line per message. No API key, no model, no `mcp` client.
+It starts the maths server from demo 3 and writes JSON to its standard input, one line per message.
 
 ```text
 >> {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {"protocolVersion": "2025-11-25", ...}}
@@ -58,3 +60,15 @@ For discussion. There are no right answers.
 - MCP is just JSON messages over a pipe. Why does agreeing a standard matter more than any one tool?
 - What should a server be allowed to know about the client that connects to it, and what should the client know about the server?
 - MCP servers offer prompts and resources as well as tools. What might each be useful for?
+
+## Further reading
+
+- **[JSON-RPC 2.0 specification](https://www.jsonrpc.org/specification).** The message shape this playground speaks. A request has a `method`, `params` and an `id`. A notification has no `id`. The reply carries the same `id`.
+- **[Model Context Protocol](https://modelcontextprotocol.io).** The methods on top of that shape: `initialize`, `tools/list`, `tools/call`, plus the prompts and resources the server advertised.
+
+## Rabbit holes
+
+Optional. These leave the script.
+
+1. **The inspector.** From the module folder: `npx @modelcontextprotocol/inspector uv run python demo/03_maths_server.py`. Open the Protocol tab and diff its transcript with `playground/raw-protocol/output/messages.json`. The interesting lines are the fields this script never sends. The [inspector guide](https://modelcontextprotocol.io/docs/2025-11-25/tools/inspector) explains the tabs.
+2. **Prompts and resources.** The server advertises both, and this script ignores them. In the inspector they are tabs you can click. Call one, and compare the JSON with a `tools/call`.

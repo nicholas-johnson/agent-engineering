@@ -1,3 +1,5 @@
+# Run from the module folder: uv run python demo/04_agent.py
+
 import asyncio
 import json
 import sys

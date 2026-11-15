@@ -1,5 +1,7 @@
 # Calculator
 
+An agent with six maths tools: add, subtract, multiply, divide, power and square root. You'll ask questions that need several of them, and watch it plan the calculation.
+
 From the module folder (`day-one/module-04-tools`):
 
 ```bash
@@ -16,8 +18,6 @@ python playground/calculator/play.py
 Needs `OPENAI_API_KEY` in `.env`. `play.py` starts `server.py` itself. The three conversations, with every tool call, are written to `playground/calculator/output/conversations.json`.
 
 ---
-
-The maths server from the demos had one tool. This one has six: add, subtract, multiply, divide, power and square root. Give the agent questions that need several of them, and watch it plan.
 
 ```text
 You: A rectangle is 1,234.5 cm by 678.9 cm. How long is its diagonal?
@@ -55,3 +55,8 @@ For discussion. There are no right answers.
 - The agent filled in digits the tool never gave it. How would you make sure you know where every digit in an answer came from?
 - Should an agent ever do arithmetic in its head, or always use a tool?
 - Is one `evaluate(expression)` tool safer or riskier than six small tools? Why?
+
+## Further reading
+
+- **Singh, A. K. & Strouse, D. J. (2024). "Tokenization counts: the impact of tokenization on arithmetic in frontier LLMs."** [arXiv:2402.14903](https://arxiv.org/abs/2402.14903). A number is split into tokens like any other text, and where the split falls changes the arithmetic. Read it next to the digits the tool never returned.
+- **Gao, L. et al. (2023). "PAL: Program-aided Language Models." *ICML 2023*.** [arXiv:2211.10435](https://arxiv.org/abs/2211.10435). Have the model write one short program for the whole problem, and run it. Compare it with the `evaluate(expression)` exercise.

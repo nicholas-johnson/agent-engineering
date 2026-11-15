@@ -1,6 +1,6 @@
 # Playground
 
-Things to play with between exercises. Each folder has a short script to run and a list of ideas to take it further. None of them are required, and there are no right answers.
+Things to play with between exercises: a real chatbot, and the settings that change how it answers. Each folder has a short script to run and a list of ideas to take it further. None of them are required, and there are no right answers.
 
 They all need your OpenAI API key in `.env` (see the module README). Each run costs a fraction of a cent.
 

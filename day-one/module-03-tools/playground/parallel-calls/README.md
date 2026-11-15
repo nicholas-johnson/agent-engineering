@@ -1,5 +1,7 @@
 # Parallel calls
 
+Five card lookups in one question. You'll see whether the model asks for them one at a time or all in a single round.
+
 From the module folder (`day-one/module-04-tools`):
 
 ```bash
@@ -16,8 +18,6 @@ python playground/parallel-calls/play.py
 Needs `OPENAI_API_KEY` in `.env` and an internet connection, and uses the cards server from demo 4 (`play.py` starts it automatically). The whole conversation is written to `playground/parallel-calls/output/conversation.json`.
 
 ---
-
-Ask about five cards at once. Does the model look them up one at a time, or all together?
 
 ```text
 You: What are these Magic: The Gathering cards worth right now: Sol Ring, Lightning Bolt, Counterspell, Llanowar Elves and Dark Ritual? Which is the most expensive?
@@ -62,3 +62,8 @@ For discussion. There are no right answers.
 - The model mentioned, without being asked, that prices vary by printing and condition. Should agents always say how sure they are?
 - Five lookups at once is fine. What could go wrong with five calls at once to tools that change things, such as placing orders?
 - An agent that takes ten seconds to answer feels slow. How would you explain to a user what it's doing while they wait?
+
+## Further reading
+
+- **OpenAI, [Function calling](https://developers.openai.com/api/docs/guides/function-calling).** The section on parallel function calling. One response can hold several calls, and `parallel_tool_calls` can turn that off. That switch is the first exercise.
+- **Yao, S. et al. (2023). "ReAct: Synergizing Reasoning and Acting in Language Models." *ICLR 2023*.** [arXiv:2210.03629](https://arxiv.org/abs/2210.03629). The earlier pattern: one action, then one observation, in a loop. Figure 1. A parallel call is several actions before the next observation.

@@ -1,3 +1,5 @@
+# Run from the module folder: uv run python demo/02_function.py
+
 import math
 from pathlib import Path
 

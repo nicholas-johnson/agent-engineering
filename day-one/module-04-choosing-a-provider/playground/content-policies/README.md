@@ -1,5 +1,7 @@
 # Content policies
 
+Every model reflects the rules and values of the people who trained it. You'll send the same five questions to every model you can reach, and compare what each one says, refuses, or sidesteps.
+
 From the module folder (`day-one/module-03-choosing-a-provider`):
 
 ```bash
@@ -16,8 +18,6 @@ python playground/content-policies/play.py
 Always uses `qwen3:1.7b` in Ollama (`ollama pull qwen3:1.7b`). Adds `gpt-6-luna` if you have `OPENAI_API_KEY`, and six models from American and Chinese labs if you have `OPENROUTER_API_KEY`. The full answers are written to `playground/content-policies/output/answers.json`: read them, not just the first line.
 
 ---
-
-Every model reflects the rules and values of the company, and the country, that trained it. This sends the same five questions to every model you can reach, and records what each one says, refuses, or sidesteps.
 
 The questions cover Chinese politics, American politics, a "how does it work" question that sounds dodgy, and a contested moral question.
 
@@ -65,3 +65,8 @@ For discussion. There are no right answers.
 - Is a model that refuses to answer better or worse than one that answers with a slant?
 - If you put a model inside your product, are its views now your views?
 - Is a completely neutral model possible? What would it even mean?
+
+## Further reading
+
+- **Noels, S. et al. (2025). "What Large Language Models Do Not Talk About: An Empirical Study of Moderation and Censorship Practices." *ECML PKDD 2025*, 265–281.** [arXiv:2504.03803](https://arxiv.org/abs/2504.03803). The same kind of comparison, on 14 models. They separate a refusal from an answer that quietly leaves something out. Reread `answers.json` with that distinction in mind.
+- **Bai, Y. et al. (2022). "Constitutional AI: Harmlessness from AI Feedback."** [arXiv:2212.08073](https://arxiv.org/abs/2212.08073). One way a lab writes down what its model should refuse: a short list of principles. Useful beside the question of who decides.

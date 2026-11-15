@@ -1,3 +1,5 @@
+# Run from the module folder: uv run python demo/01_word_pairs.py
+
 import json
 import random
 import re

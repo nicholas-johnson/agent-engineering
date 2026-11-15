@@ -1,3 +1,5 @@
+# Run from the module folder: uv run python demo/04_cards_server.py
+
 import json
 import time
 import urllib.error

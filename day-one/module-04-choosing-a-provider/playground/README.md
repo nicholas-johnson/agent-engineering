@@ -1,6 +1,6 @@
 # Playground
 
-Things to play with between exercises. Each folder has a short script to run and a list of ideas to take it further. None of them are required, and there are no right answers.
+Things to play with between exercises: models, prices and providers, side by side. Each folder has a short script to run and a list of ideas to take it further. None of them are required, and there are no right answers.
 
 From the module folder (`day-one/module-03-choosing-a-provider`):
 

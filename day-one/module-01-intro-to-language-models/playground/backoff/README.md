@@ -1,5 +1,7 @@
 # Backoff
 
+When a long context has never been seen, **backoff** tries a shorter one: five words, then four, then three, then two, then one. You'll complete a sentence and see which window each word came from.
+
 From the module folder (`day-one/module-01-intro-to-language-models`):
 
 ```bash
@@ -16,7 +18,7 @@ Builds word models for windows 1 to 5 from `data/alice.txt`, and writes all five
 
 ---
 
-The five-word model from demo 2 has nothing to say about contexts it has never seen. **Backoff** is the classic fix, from before neural networks: if the last five words are unknown, try the last four. If those are unknown, try three, then two, then one.
+If the last five words are unknown, try the last four, and keep stepping down:
 
 ```python
 for window in range(5, 0, -1):
@@ -59,3 +61,8 @@ For discussion. There are no right answers.
 - Backoff guesses from less information when it doesn't know. When should a model admit it doesn't know instead of guessing?
 - Most of the surprising words came from the short windows. Is creativity just guessing with less to go on?
 - How is backoff like what you do when you half understand a sentence in a language you are learning?
+
+## Further reading
+
+- **Katz, S. M. (1987). "Estimation of probabilities from sparse data for the language model component of a speech recognizer." *IEEE Transactions on Acoustics, Speech, and Signal Processing* 35(3):400–401.** Two pages that introduced backoff, and kept the probabilities adding up to 1. This playground is that idea.
+- **Brants, T., Popat, A. C., Xu, P., Och, F. J. & Dean, J. (2007). "Large Language Models in Machine Translation." *EMNLP-CoNLL 2007*.** Counting models trained on up to two trillion words. At that scale a version they called "stupid backoff" worked as well as the careful one.

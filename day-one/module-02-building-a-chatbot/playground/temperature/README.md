@@ -1,5 +1,7 @@
 # Temperature
 
+The `temperature` setting from Module 1, now on a real model. You'll ask the same question eight times at each temperature from 0 to 2.
+
 From the module folder (`day-one/module-02-building-a-chatbot`):
 
 ```bash
@@ -17,9 +19,7 @@ Needs `OPENAI_API_KEY` in `.env`.
 
 ---
 
-In Module 1's temperature playground, temperature 5 turned our word-pair model into chaos. What does it do to a real model?
-
-This asks `gpt-6-luna` the same question eight times at each temperature from 0 to 2 (the API's maximum), and writes the answers to `playground/temperature/output/temperatures.txt`.
+This asks `gpt-6-luna`. Temperature 2 is as high as the API allows. The answers go to `playground/temperature/output/temperatures.txt`.
 
 ```text
 0.0  Otter, Otter, Otter, Otter, Otter, Otter, Otter, Otter
@@ -50,3 +50,8 @@ For discussion. There are no right answers.
 - Training to be a helpful assistant has made the model very sure of itself: "Otter" almost every time. Is that a good thing?
 - Even temperature 0 doesn't give exactly the same answer every time. What does that mean for testing an application built on a model?
 - When would you want a chatbot to give the same answer every time, and when wouldn't you?
+
+## Further reading
+
+- **Holtzman, A., Buys, J., Du, L., Forbes, M. & Choi, Y. (2020). "The Curious Case of Neural Text Degeneration." *ICLR 2020*.** [arXiv:1904.09751](https://arxiv.org/abs/1904.09751). How temperature and top-p reshape the probabilities. The top-p exercise is this paper's sampling method, on a real model.
+- **OpenAI (2023). "GPT-4 Technical Report."** [arXiv:2303.08774](https://arxiv.org/abs/2303.08774). Figure 8. After training to be an assistant, the model is much more sure of itself than its hit rate justifies. That is why "Otter" survives until the temperature is high.

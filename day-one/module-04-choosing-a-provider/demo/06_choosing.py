@@ -1,3 +1,5 @@
+# Run from the module folder: uv run python demo/06_choosing.py
+
 import json
 import os
 import time

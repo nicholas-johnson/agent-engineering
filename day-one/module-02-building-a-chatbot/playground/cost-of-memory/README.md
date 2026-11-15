@@ -1,5 +1,7 @@
 # The cost of memory
 
+A chatbot with memory sends the whole conversation again on every turn. You'll play out ten turns of Alice telling a chatbot about her day, and watch what each turn costs.
+
 From the module folder (`day-one/module-02-building-a-chatbot`):
 
 ```bash
@@ -16,8 +18,6 @@ python playground/cost-of-memory/play.py
 Needs `OPENAI_API_KEY` in `.env`. It needs no typing: the ten messages are in the script. The numbers are written to `playground/cost-of-memory/output/tokens_per_turn.csv`, which opens in any spreadsheet.
 
 ---
-
-Demo 3 gave the chatbot memory by sending the whole conversation every turn. This plays out a ten-turn conversation, Alice telling a chatbot about her day, and records how many tokens each turn costs.
 
 ```text
 Turn  Input tokens  Output tokens
@@ -54,3 +54,15 @@ For discussion. There are no right answers.
 - Long conversations get slow and expensive. Should a chatbot ever forget things on purpose? Who should decide what it forgets?
 - Summarising old messages loses detail. What kinds of detail would be dangerous to lose?
 - If the provider stores your conversation for you (`previous_response_id`), what does that mean for privacy?
+
+## Further reading
+
+- **Liu, N. F. et al. (2024). "Lost in the Middle: How Language Models Use Long Contexts." *Transactions of the ACL* 12:157–173.** [arXiv:2307.03172](https://arxiv.org/abs/2307.03172). Hide a fact in a long context and models find it at the start or the end, and often miss it in the middle. Figure 1 is the U-shape. Worth knowing once a conversation is long enough to be expensive.
+- **Packer, C. et al. (2023). "MemGPT: Towards LLMs as Operating Systems."** [arXiv:2310.08560](https://arxiv.org/abs/2310.08560). When the conversation will not fit, keep the recent part and let the model fetch the rest. A larger version of the summarising exercise.
+
+## Rabbit holes
+
+Optional. These leave the script.
+
+1. **The cache, in bytes.** A KV cache is about `2 × layers × kv_heads × head_dim × tokens × 2`, the last 2 being bytes in a 16-bit cache. Work it out for this ten-turn chat, then for 100,000 tokens. The `cached_tokens` column is how much of that a provider managed to reuse.
+2. **Prompt caching.** OpenAI's [prompt caching guide](https://developers.openai.com/api/docs/guides/prompt-caching). The hosted version of the same sum: what has to stay identical at the start of the request, and when the discount starts.

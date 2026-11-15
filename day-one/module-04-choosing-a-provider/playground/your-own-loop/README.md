@@ -1,5 +1,7 @@
 # Your own generation loop
 
+Module 1's generation loop, written by hand, running on a real open model. You'll watch it pick the next token from a vector of probabilities, one step at a time.
+
 From the module folder (`day-one/module-03-choosing-a-provider`):
 
 ```bash
@@ -17,7 +19,7 @@ The first run downloads `Qwen/Qwen3-1.7B` from Hugging Face (about 4 GB) if it i
 
 ---
 
-In Module 1 we wrote a loop that completed *"alice was beginning to get"* one word at a time, by picking from a vector of probabilities. This is the same loop, written by hand, running on a real open model: Qwen3 1.7B, loaded with `transformers`.
+Qwen3 1.7B, loaded with `transformers`:
 
 ```python
 for _ in range(NEW_TOKENS):
@@ -63,3 +65,15 @@ For discussion. There are no right answers.
 - `model.generate()` is essentially this loop. Does seeing the loop change how you think about what a chatbot is?
 - One unlikely token sent the whole sentence somewhere else. What does that say about how reliable generated text is?
 - You can see every probability here. Could you build something that warns users when a model is unsure? Would they want it?
+
+## Further reading
+
+- **Holtzman, A., Buys, J., Du, L., Forbes, M. & Choi, Y. (2020). "The Curious Case of Neural Text Degeneration." *ICLR 2020*.** [arXiv:1904.09751](https://arxiv.org/abs/1904.09751). The line that picks the next token. Temperature, and why always taking the top token starts to repeat. The first two exercises are this paper.
+- **Pope, R. et al. (2023). "Efficiently Scaling Transformer Inference." *MLSys 2023*.** [arXiv:2211.05102](https://arxiv.org/abs/2211.05102). Why each step runs the whole sequence through the model again, and the cache that avoids it. That is the last exercise.
+
+## Rabbit holes
+
+Optional. These leave the script.
+
+1. **`GenerationMixin._sample`.** In the `transformers` source, `src/transformers/generation/utils.py`. Find the loop. The lines that take the last logits, turn them into probabilities, sample, and append are this playground.
+2. **The cache beside it.** `past_key_values` is updated on each pass through that loop, which is why the library doesn't run the whole sequence again. That is the last exercise, with the real names on it.

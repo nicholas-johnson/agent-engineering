@@ -1,5 +1,7 @@
 # Vision
 
+Point a model at a folder of pictures and ask it about each one. You'll read the descriptions, then add pictures of your own.
+
 From the module folder (`day-one/module-02-building-a-chatbot`):
 
 ```bash
@@ -16,8 +18,6 @@ python playground/vision/play.py
 Needs `OPENAI_API_KEY` in `.env`.
 
 ---
-
-Point the model at a folder of pictures and ask it about each one.
 
 It describes every image in `playground/vision/images/` (PNG, JPEG, WebP or GIF) and writes the descriptions to `playground/vision/output/descriptions.txt`. The folder starts with four of John Tenniel's illustrations from *Alice* ([Project Gutenberg #114](https://www.gutenberg.org/ebooks/114), public domain). Add your own.
 
@@ -49,3 +49,8 @@ For discussion. There are no right answers.
 - The model was completely confident, and completely wrong, about `cat-fading.png`. How would you design an app so that a confident wrong answer does less harm?
 - Should a vision model describe the people in a photo: their age, their mood, who they might be? Where are the lines?
 - Is a model's description of a picture easier or harder to check than its answer to a question? Why?
+
+## Further reading
+
+- **Dosovitskiy, A. et al. (2021). "An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale." *ICLR 2021*.** [arXiv:2010.11929](https://arxiv.org/abs/2010.11929). Figure 1. Cut a picture into small patches, turn each patch into a vector, and feed them in as if they were words. That is how a model sees `caterpillar.png`.
+- **Alayrac, J.-B. et al. (2022). "Flamingo: a Visual Language Model for Few-Shot Learning." *NeurIPS 2022*.** [arXiv:2204.14198](https://arxiv.org/abs/2204.14198). How an image model is plugged into a language model, so a picture and a question can go in the same message.

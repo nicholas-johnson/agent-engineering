@@ -1,6 +1,6 @@
 # Playground
 
-Things to play with between exercises. Each folder has a short script to run and a list of ideas to take it further. None of them are required, and there are no right answers.
+Things to play with between exercises: the models from this module, with the settings and the data left for you to change. Each folder has a short script to run and a list of ideas to take it further. None of them are required, and there are no right answers.
 
 From the module folder (`day-one/module-01-intro-to-language-models`):
 

@@ -1,5 +1,7 @@
 # Open versus closed
 
+A small open model on your laptop, next to a hosted frontier model. You'll read both answers to the same four questions.
+
 From the module folder (`day-one/module-03-choosing-a-provider`):
 
 ```bash
@@ -17,7 +19,7 @@ Needs `OPENAI_API_KEY` in `.env`, and Ollama running with `qwen3:1.7b` (`ollama 
 
 ---
 
-A small open model on your laptop against a hosted frontier model, on the same four questions: a fact from *Alice*, a classic trick question, a translation and some code.
+The four questions are a fact from *Alice*, a classic trick question, a translation and some code.
 
 ```text
 === What is the March Hare's excuse for there being no room at the tea table? ===
@@ -56,3 +58,8 @@ For discussion. There are no right answers.
 - The small model invented a quotation and then explained the joke in it. Why is a confident invention worse than "I don't know"?
 - If open models catch up with closed ones, what's left for the closed providers to sell?
 - Would you rather depend on a company's API, or on a model you can download? What risks come with each?
+
+## Further reading
+
+- **Solaiman, I. (2023). "The Gradient of Generative AI Release: Methods and Considerations." *FAccT 2023*.** [arXiv:2302.04844](https://arxiv.org/abs/2302.04844). Figure 1. The two models here sit at different points on it: one you call, one you download.
+- **Qwen Team (2025). "Qwen3 Technical Report."** [arXiv:2505.09388](https://arxiv.org/abs/2505.09388). The laptop model. Look for the small sizes, and how they are trained from the larger ones.

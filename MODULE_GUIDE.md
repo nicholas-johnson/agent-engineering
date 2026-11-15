@@ -62,7 +62,7 @@ Demos are teaching scripts, not reusable code. Keep them clean and simple.
 - **End with the thing the module is about**, visibly working: in Module 1, completing a sentence.
 - If a demo takes more than a few seconds, show a single progress line that updates in place (`print(..., end="\r")`) so it doesn't look frozen.
 - Paths are relative to the script (`Path(__file__).parent`), so demos run from any folder.
-- Run with `uv run python demo/NN_name.py` from the module folder. The system `python3` is too old.
+- Run with `uv run python demo/NN_name.py` from the module folder, and put that command in a comment on the first line (`# Run from the module folder: uv run python demo/NN_name.py`). The system `python3` is too old. A demo that needs the `local` extra says `uv run --extra local` in that comment.
 
 ### Demos that call an API
 
@@ -133,15 +133,18 @@ Setting up a new deck:
 
 Things for delegates to play with between exercises. It should **build on what the module covered without repeating it**.
 
-- `playground/README.md`: how to run the scripts (with `uv` and without), and a table of the folders and what each is about (plus a `Needs` column if any require API keys, local models or optional packages).
+- `playground/README.md`: a short intro about what the playground is and what the reader will be doing, then how to run the scripts (with `uv` and without), and a table of the folders and what each is about (plus a `Needs` column if any require API keys, local models or optional packages).
 - One folder per idea, short and descriptive (`temperature`, `tokenizer-lab`). Usually six or seven.
 - Each folder has `play.py` (or two scripts where that's clearer, like `train.py` and `complete.py`) and a `README.md` containing:
-  - how to run it from the module folder (both `uv run` and non-`uv`), right at the top
+  - a short intro, first: what it is, and what the reader will be doing
+  - how to run it from the module folder (both `uv run` and non-`uv`)
   - what it shows and why it's interesting, in a paragraph
   - real example output
   - **Things to notice** (optional)
   - **Try this**: five or six numbered ideas for extending it, from easy to hard
-  - **Questions**, last: "For discussion. There are no right answers.", then three or four open questions as bullet points. They should start a conversation, not test knowledge: what the result means, when it matters, who decides, what could go wrong. Base them on what the script actually showed.
+  - **Questions**: "For discussion. There are no right answers.", then three or four open questions as bullet points. They should start a conversation, not test knowledge: what the result means, when it matters, who decides, what could go wrong. Base them on what the script actually showed.
+  - **Further reading**, when a paper, specification or guide really sits behind what the script showed: one or two items. Reuse the module further reading's citation and link where it has them, and add one sentence on which part to read. Leave the section out when nothing specific applies.
+  - **Rabbit holes**, last, when the script is a small version of a real tool, library or specification: two items that leave the script. Optional, and longer than **Try this**. Leave the section out when **Try this** already goes there.
 - Same code style as demos, plus a short `#` header at the top of each `.py` file (what it does, how to run it with and without `uv`, and a two-line "To play:" note) and brief one-line signposts on the main steps and settings. **Every playground must stand alone**: never require the demos to have been run first, and never load files from `demo/output/`. Build whatever is needed from `data/` instead.
 - Output goes in `output/` inside the folder (gitignored).
 - Good playgrounds turn a hidden setting into something you can change (temperature, window size, vocabulary size), run the model a different way (scoring instead of generating), or point it at different data.

@@ -1,5 +1,7 @@
 # Temperature
 
+Every LLM API has a `temperature` setting. You'll complete the same sentence at five temperatures and see what that does to the probabilities.
+
 From the module folder (`day-one/module-01-intro-to-language-models`):
 
 ```bash
@@ -15,8 +17,6 @@ python3 playground/temperature/play.py
 Builds a word-pair model from `data/alice.txt`, completes the same sentence at five temperatures, and writes `playground/temperature/output/after_the.json`.
 
 ---
-
-Every LLM API has a `temperature` setting. This is what it does.
 
 Before picking the next word, raise every probability to the power `1 / temperature`, then rescale so they add up to 1 again:
 
@@ -55,3 +55,14 @@ For discussion. There are no right answers.
 - Always picking the most likely word makes the text go round in circles. Why isn't the most likely word the best word?
 - What temperature would you want for a legal contract? A poem? A chatbot answering customers' questions?
 - Temperature doesn't change the model at all, only how we pick from its probabilities. Is it part of the model, or part of how we use it?
+
+## Further reading
+
+- **Holtzman, A., Buys, J., Du, L., Forbes, M. & Choi, Y. (2020). "The Curious Case of Neural Text Degeneration." *ICLR 2020*.** [arXiv:1904.09751](https://arxiv.org/abs/1904.09751). Why always picking the most likely word goes round in circles, on large neural models as well as this one. **Top-p** sampling, in the exercises, comes from this paper.
+
+## Rabbit holes
+
+Optional. These leave the script.
+
+1. **llama.cpp's sampler.** Temperature, top-k, top-p and min-p are separate steps in a chain. Read `llama_sampler` in [llama.cpp](https://github.com/ggml-org/llama.cpp) and match each step to the formula above.
+2. **Min-p.** **Nguyen, M. N. et al. (2025). "Turning Up the Heat: Min-p Sampling for Creative and Coherent LLM Outputs." *ICLR 2025*.** [arXiv:2407.01082](https://arxiv.org/abs/2407.01082). Drop every token whose probability is below a fraction of the top token's. Implement it beside top-p, and see which one still makes sense at a high temperature.

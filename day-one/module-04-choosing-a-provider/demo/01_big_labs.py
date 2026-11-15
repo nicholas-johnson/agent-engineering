@@ -1,3 +1,5 @@
+# Run from the module folder: uv run python demo/01_big_labs.py
+
 import json
 import os
 import warnings

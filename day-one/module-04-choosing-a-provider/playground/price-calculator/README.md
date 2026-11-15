@@ -1,5 +1,7 @@
 # Price calculator
 
+Token prices, turned into a monthly bill. You'll cost out one company chatbot on every model in `data/prices.json`.
+
 From the module folder (`day-one/module-03-choosing-a-provider`):
 
 ```bash
@@ -15,8 +17,6 @@ python3 playground/price-calculator/play.py
 No API keys needed. The results are written to `playground/price-calculator/output/monthly_costs.csv`.
 
 ---
-
-Prices per million tokens are hard to picture. What would a real chatbot cost each month, on every model in `data/prices.json`?
 
 The scenario is at the top of `play.py`: a company chatbot for 1,000 people, 20 messages each a working day, 1,500 tokens in and 200 out per message.
 
@@ -56,3 +56,8 @@ For discussion. There are no right answers.
 - The cheapest model is more than 300 times cheaper than the most expensive. When is the expensive one worth it?
 - Prices keep falling. Should you design for today's prices, or for next year's?
 - Who in an organisation should decide which model to use: the engineers, finance, or legal?
+
+## Further reading
+
+- **DeepSeek-AI (2024). "DeepSeek-V3 Technical Report."** [arXiv:2412.19437](https://arxiv.org/abs/2412.19437). The cost table near the start: what the training run cost, and why a model can be cheap to run. Read it next to a monthly bill where the models are hundreds of times apart.
+- **[Artificial Analysis](https://artificialanalysis.ai).** Independent measurements of quality, speed and price, for when the numbers in `data/prices.json` have gone stale.

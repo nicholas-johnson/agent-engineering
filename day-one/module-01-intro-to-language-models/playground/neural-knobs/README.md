@@ -1,5 +1,7 @@
 # Neural knobs
 
+The neural model from the module, with its settings out where you can change them. You'll train it, watch the loss fall, then complete sentences with the model you saved.
+
 From the module folder (`day-one/module-01-intro-to-language-models`):
 
 ```bash
@@ -18,7 +20,7 @@ Training takes a minute or two with the default settings and saves `playground/n
 
 ---
 
-The neural model from demo 5, with two changes:
+Two things are different from demo 5:
 
 - **It saves what it learned.** `train.py` trains the model and writes it to `playground/neural-knobs/output/model.json`. `complete.py` loads that file, so you can train once and complete as many sentences as you like.
 - **It shows the loss as it trains**, so you can see what each setting does.
@@ -66,3 +68,15 @@ For discussion. There are no right answers.
 - The loss keeps going down. Is a lower loss always better? How would you know if the model was just memorising the book?
 - We trained for two minutes on a laptop. Frontier models train for months on thousands of GPUs. What changes, and what stays the same?
 - Which knob made the biggest difference, and why do you think that was?
+
+## Further reading
+
+- **Bengio, Y., Ducharme, R., Vincent, P. & Jauvin, C. (2003). "A Neural Probabilistic Language Model." *Journal of Machine Learning Research* 3:1137–1155.** [PDF](https://www.jmlr.org/papers/volume3/bengio03a/bengio03a.pdf). The model you are training. The introduction is the problem the knobs are for: too many contexts to count, so learn a vector for each word.
+- **Kaplan, J., McCandlish, S., Henighan, T., Brown, T. B., Chess, B., Child, R., Gray, S., Radford, A., Wu, J. & Amodei, D. (2020). "Scaling Laws for Neural Language Models."** [arXiv:2001.08361](https://arxiv.org/abs/2001.08361). What happens to the loss as the model gets bigger and the training gets longer. It falls smoothly, as a power law.
+
+## Rabbit holes
+
+Optional. These leave the script.
+
+1. **makemore, part 2.** Andrej Karpathy's second makemore lecture, on [karpathy.ai/zero-to-hero](https://karpathy.ai/zero-to-hero.html), builds this model line by line: a vector per word, one hidden layer, a loss, a backward pass.
+2. **Check the gradients.** Rebuild `forward` in PyTorch and compare its gradients with the ones `train.py` works out by hand. Where they disagree, the hand-written backward pass is wrong.

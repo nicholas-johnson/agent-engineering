@@ -1,3 +1,5 @@
+# Run from the module folder: uv run --extra local python demo/05_python.py
+
 import json
 from pathlib import Path
 

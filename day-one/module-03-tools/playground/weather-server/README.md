@@ -1,5 +1,7 @@
 # Your own server: the weather
 
+A second MCP server, for the weather, to copy when you write your own. You'll ask a question in plain English and watch the agent chain its tools to answer.
+
 From the module folder (`day-one/module-04-tools`):
 
 ```bash
@@ -17,7 +19,7 @@ Needs `OPENAI_API_KEY` in `.env` and an internet connection. `play.py` starts `s
 
 ---
 
-A second MCP server for a different free API, to copy when you write your own. It uses [Open-Meteo](https://open-meteo.com), which needs no key, and offers two tools:
+It uses [Open-Meteo](https://open-meteo.com), which needs no key, and offers two tools:
 
 - `find_place(name)`: a town's latitude and longitude
 - `get_weather(latitude, longitude)`: the weather now, and a three-day forecast
@@ -51,3 +53,8 @@ For discussion. There are no right answers.
 - The agent turned a page of numbers into advice: not ideal for a picnic. When should an agent give opinions, and when should it stick to the facts?
 - What public data would you most like an agent to have access to? What data should it never have?
 - If an API changes the shape of its data overnight, the agent may quietly start giving wrong answers. How would you notice?
+
+## Further reading
+
+- **[Model Context Protocol](https://modelcontextprotocol.io).** The guides to writing a server. Copy this playground first, then use the spec when the next server needs something it does not have.
+- **[Open-Meteo](https://open-meteo.com).** The weather API behind the two tools, including the air-quality API in the exercises. No key.

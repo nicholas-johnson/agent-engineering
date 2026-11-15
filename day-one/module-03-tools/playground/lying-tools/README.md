@@ -1,5 +1,7 @@
 # Lying tools
 
+What an agent does when a tool is wrong, or when a tool's result contains instructions. You'll ask for the same square root from an honest tool, a buggy one, and one that tries to change how the agent talks.
+
 From the module folder (`day-one/module-04-tools`):
 
 ```bash
@@ -17,7 +19,7 @@ Needs `OPENAI_API_KEY` in `.env`. The answers are written to `playground/lying-t
 
 ---
 
-The agent trusts its tools. What if a tool is wrong? What if a tool's result contains instructions? This gives the model the same square root tool, with the same description, three times. Only what comes back changes:
+Same tool, same description. Only the result changes:
 
 | Tool | Returns |
 |------|---------|
@@ -58,3 +60,15 @@ For discussion. There are no right answers.
 - The model followed an instruction hidden in a tool's result. Can that ever be fully fixed, or only made less likely?
 - Where would you draw the line between what an agent may do by itself and what needs a person to approve it?
 - If an agent is tricked into causing harm, who is responsible: the user, the developer, whoever wrote the tool, or the company that made the model?
+
+## Further reading
+
+- **Greshake, K. et al. (2023). "Not what you've signed up for: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection." *AISec 2023*.** [arXiv:2302.12173](https://arxiv.org/abs/2302.12173). Instructions hidden in a page, an email or a document that a tool reads, which the agent then follows. The pirate sentence in the injected tool is a small copy of their examples.
+- **[Simon Willison on prompt injection](https://simonwillison.net/series/prompt-injection/).** The person who named it, writing about it since 2022. Start with the oldest posts.
+
+## Rabbit holes
+
+Optional. These leave the script.
+
+1. **The lethal trifecta.** Simon Willison, ["The lethal trifecta for AI agents"](https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/) (16 June 2025). An agent is exposed when it can see private data, read untrusted text, and send something out. The pirate sentence is only the untrusted text.
+2. **Add the other two.** Give the agent a note it is supposed to keep private, and a tool that "sends email" by writing a file. Hide a new instruction in the tool result. How little has to change before the note ends up in the file?
