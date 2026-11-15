@@ -1,12 +1,23 @@
 # Content policies
 
-Every model reflects the rules and values of the company, and the country, that trained it. This sends the same five questions to every model you can reach, and records what each one says, refuses, or sidesteps.
+From the module folder (`day-one/module-03-choosing-a-provider`):
 
 ```bash
-uv run python play.py
+uv run python playground/content-policies/play.py
 ```
 
-It always uses `qwen3:1.7b` in Ollama. It adds `gpt-6-luna` if you have `OPENAI_API_KEY`, and six models from American and Chinese labs if you have `OPENROUTER_API_KEY`. The full answers are written to `output/answers.json`: read them, not just the first line.
+Or without `uv` (set up `.venv` once at the repo root with `python3 -m venv .venv && .venv/bin/pip install -e .`):
+
+```bash
+source ../../.venv/bin/activate
+python playground/content-policies/play.py
+```
+
+Always uses `qwen3:1.7b` in Ollama (`ollama pull qwen3:1.7b`). Adds `gpt-6-luna` if you have `OPENAI_API_KEY`, and six models from American and Chinese labs if you have `OPENROUTER_API_KEY`. The full answers are written to `playground/content-policies/output/answers.json`: read them, not just the first line.
+
+---
+
+Every model reflects the rules and values of the company, and the country, that trained it. This sends the same five questions to every model you can reach, and records what each one says, refuses, or sidesteps.
 
 The questions cover Chinese politics, American politics, a "how does it work" question that sounds dodgy, and a contested moral question.
 
@@ -40,7 +51,7 @@ Both answered the questions about the lock, the death penalty and the joke.
 
 ## Try this
 
-1. **Read the full answers.** Open `output/answers.json` and compare each model's answer to the death-penalty question. Which ones give both sides? Which take a side?
+1. **Read the full answers.** Open `playground/content-policies/output/answers.json` and compare each model's answer to the death-penalty question. Which ones give both sides? Which take a side?
 2. **Your own questions.** Add questions that matter for what you'd build. A medical app? Ask about doses. A school app? Ask about something parents argue about.
 3. **Ask in Chinese.** Translate the Tiananmen and Taiwan questions into Chinese. Do the answers change, for any model?
 4. **Same lab, different size.** With OpenRouter, compare `qwen3:1.7b` against `qwen/qwen3.8-flash`. Does the bigger Qwen model answer differently?

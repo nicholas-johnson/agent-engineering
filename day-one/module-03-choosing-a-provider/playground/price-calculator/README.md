@@ -1,12 +1,24 @@
 # Price calculator
 
-Prices per million tokens are hard to picture. What would a real chatbot cost each month, on every model in `data/prices.json`?
+From the module folder (`day-one/module-03-choosing-a-provider`):
 
 ```bash
-uv run python play.py
+uv run python playground/price-calculator/play.py
 ```
 
-No API keys needed. The scenario is at the top of `play.py`: a company chatbot for 1,000 people, 20 messages each a working day, 1,500 tokens in and 200 out per message. The results are written to `output/monthly_costs.csv`.
+Or without `uv` (standard library only, no packages needed):
+
+```bash
+python3 playground/price-calculator/play.py
+```
+
+No API keys needed. The results are written to `playground/price-calculator/output/monthly_costs.csv`.
+
+---
+
+Prices per million tokens are hard to picture. What would a real chatbot cost each month, on every model in `data/prices.json`?
+
+The scenario is at the top of `play.py`: a company chatbot for 1,000 people, 20 messages each a working day, 1,500 tokens in and 200 out per message.
 
 ```text
 420,000 messages a month, prices checked 2026-11-10
@@ -32,7 +44,7 @@ The same chatbot costs anything from $32 to $10,500 a month: a factor of more th
 
 1. **Your own scenario.** Change the numbers to match something you'd build: a customer-support bot, a nightly report, a coding assistant.
 2. **Shorter memory.** Halve `INPUT_TOKENS_PER_MESSAGE`. Which models does that help most?
-3. **Fresh prices.** Run `uv run python ../../data/build_prices.py`, then run this again. Has anything changed since 10 November 2026?
+3. **Fresh prices.** Run `uv run python data/build_prices.py` (or `python3 data/build_prices.py`), then run this again. Has anything changed since 10 November 2026?
 4. **Add models.** Add more model IDs to `MODELS` in `data/build_prices.py`. The `model-catalogue` playground lists every ID.
 5. **Caching.** Many providers charge much less for input they've seen recently (prompt caching). OpenRouter's model list has an `input_cache_read` price. If 80% of each message's input were cached, how would the order change?
 6. **Is it worth it?** Pick three models from very different price points and run the same ten real questions through each. Is the expensive one 100 times better?

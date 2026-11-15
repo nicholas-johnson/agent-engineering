@@ -1,5 +1,21 @@
 # Other books
 
+From the module folder (`day-one/module-01-intro-to-language-models`):
+
+```bash
+uv run python playground/other-books/play.py
+```
+
+Or without `uv` (standard library only, no packages needed):
+
+```bash
+python3 playground/other-books/play.py
+```
+
+Each corpus gets three samples of 400 characters, written to `playground/other-books/output/<corpus>.txt`.
+
+---
+
 The model doesn't know anything about *Alice*. It only knows the text it counted. Give it different text and it writes like that instead.
 
 This runs the eight-letter model from demo 3 on three corpora:
@@ -10,11 +26,7 @@ This runs the eight-letter model from demo 3 on three corpora:
 | `looking-glass` | `looking-glass.txt` in this folder: *Through the Looking-Glass*, Carroll's sequel, from [Project Gutenberg](https://www.gutenberg.org/ebooks/12) |
 | `python` | Four modules from Python's own standard library (`argparse`, `calendar`, `shutil`, `textwrap`), read from your Python installation |
 
-```bash
-uv run python play.py
-```
-
-This time the text keeps its capital letters, line breaks and indentation, because code needs them. Each corpus gets three samples of 400 characters, written to `output/<corpus>.txt`.
+This time the text keeps its capital letters, line breaks and indentation, because code needs them.
 
 ```text
 === python ===

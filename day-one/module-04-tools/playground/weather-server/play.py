@@ -1,3 +1,10 @@
+# Weather server — a clean two-tool MCP agent template using the free Open-Meteo API.
+# Run from the module folder: uv run python playground/weather-server/play.py
+#                         or: source ../../.venv/bin/activate && python playground/weather-server/play.py
+#
+# To play: change QUESTION (try comparing several cities), add a new tool in server.py,
+# or copy this folder to wrap another free API of your own (see README.md).
+
 import asyncio
 import json
 import sys
@@ -18,11 +25,13 @@ MODEL = "gpt-6-luna"
 INSTRUCTIONS = "Answer in plain text, without LaTeX or Markdown."
 QUESTION = "Is tomorrow a good day for a picnic by the river in Oxford, where Lewis Carroll first told the story of Alice?"
 
+# Start server.py automatically as a subprocess.
 SERVER = StdioServerParameters(command=sys.executable, args=[str(HERE / "server.py")])
 openai = OpenAI()
 
 
 async def main():
+    # Connect to the weather MCP server, advertise its tools to the model, and run the loop.
     async with Client(SERVER) as weather:
         tools = [
             {"type": "function", "name": t.name, "description": t.description, "parameters": t.input_schema}

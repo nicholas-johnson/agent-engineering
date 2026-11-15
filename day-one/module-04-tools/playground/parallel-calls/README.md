@@ -1,12 +1,23 @@
 # Parallel calls
 
-Ask about five cards at once. Does the model look them up one at a time, or all together?
+From the module folder (`day-one/module-04-tools`):
 
 ```bash
-uv run python play.py
+uv run python playground/parallel-calls/play.py
 ```
 
-It needs `OPENAI_API_KEY` and an internet connection, and uses the cards server from demo 4. The whole conversation is written to `output/conversation.json`.
+Or without `uv` (set up `.venv` once at the repo root with `python3 -m venv .venv && .venv/bin/pip install -e .`):
+
+```bash
+source ../../.venv/bin/activate
+python playground/parallel-calls/play.py
+```
+
+Needs `OPENAI_API_KEY` in `.env` and an internet connection, and uses the cards server from demo 4 (`play.py` starts it automatically). The whole conversation is written to `playground/parallel-calls/output/conversation.json`.
+
+---
+
+Ask about five cards at once. Does the model look them up one at a time, or all together?
 
 ```text
 You: What are these Magic: The Gathering cards worth right now: Sol Ring, Lightning Bolt, Counterspell, Llanowar Elves and Dark Ritual? Which is the most expensive?

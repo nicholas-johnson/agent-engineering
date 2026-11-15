@@ -4,7 +4,7 @@ Short vertical videos that promote the course. Each clip is a web page built wit
 
 | Clip | Hook | Promotes |
 |------|------|----------|
-| 1. The square root: [script](01-square-root/script.md), [page](01-square-root/index.html) | "I'm going to explain MCP to you in sixty seconds." | Module 4: Tools |
+| 1. The square root: [script](01-square-root/script.md), [page](01-square-root/index.html) | "I'm going to explain MCP to you in ninety seconds." | Module 4: Tools |
 | 2. How an AI learns: [script](02-how-ai-learns/script.md), [page](02-how-ai-learns/index.html) | "I'm going to show you how an AI learns, in sixty seconds." | Module 1: Intro to Language Models |
 
 ## How a clip works

@@ -1,3 +1,10 @@
+# Parallel calls — ask about five Magic cards at once and watch the model batch tool calls.
+# Run from the module folder: uv run python playground/parallel-calls/play.py
+#                         or: source ../../.venv/bin/activate && python playground/parallel-calls/play.py
+#
+# To play: pass parallel_tool_calls=False to responses.create() to compare round counts,
+# or ask a question where one lookup depends on the result of another (see README.md).
+
 import asyncio
 import json
 import sys
@@ -21,7 +28,7 @@ QUESTION = (
     "Counterspell, Llanowar Elves and Dark Ritual? Which is the most expensive?"
 )
 
-# The cards server from demo 4.
+# Launch the Scryfall MCP server from demo/04_cards_server.py automatically.
 CARDS_SERVER = StdioServerParameters(
     command=sys.executable, args=[str(HERE.parent.parent / "demo" / "04_cards_server.py")]
 )
@@ -37,6 +44,7 @@ async def main():
         conversation = [{"role": "user", "content": QUESTION}]
         print(f"You: {QUESTION}")
 
+        # Count how many model round trips it takes; one response can request multiple calls.
         rounds = 0
         while True:
             response = openai.responses.create(

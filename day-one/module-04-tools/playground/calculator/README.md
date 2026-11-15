@@ -1,12 +1,23 @@
 # Calculator
 
-The maths server from the demos had one tool. This one has six: add, subtract, multiply, divide, power and square root. Give the agent questions that need several of them, and watch it plan.
+From the module folder (`day-one/module-04-tools`):
 
 ```bash
-uv run python play.py
+uv run python playground/calculator/play.py
 ```
 
-It needs `OPENAI_API_KEY`. `play.py` starts `server.py` itself. The three conversations, with every tool call, are written to `output/conversations.json`.
+Or without `uv` (set up `.venv` once at the repo root with `python3 -m venv .venv && .venv/bin/pip install -e .`):
+
+```bash
+source ../../.venv/bin/activate
+python playground/calculator/play.py
+```
+
+Needs `OPENAI_API_KEY` in `.env`. `play.py` starts `server.py` itself. The three conversations, with every tool call, are written to `playground/calculator/output/conversations.json`.
+
+---
+
+The maths server from the demos had one tool. This one has six: add, subtract, multiply, divide, power and square root. Give the agent questions that need several of them, and watch it plan.
 
 ```text
 You: A rectangle is 1,234.5 cm by 678.9 cm. How long is its diagonal?

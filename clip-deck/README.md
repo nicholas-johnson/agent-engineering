@@ -137,6 +137,22 @@ A step's state is every entry up to it, so later entries only say what changes. 
 
 `pnpm social:check` runs with reduced motion, so the network jumps straight to each step's final state for the pictures.
 
+**Outside a clip.** The slide decks use the same engine (see `NetworkSlide` in `slide-deck/`). Give it options and step it yourself:
+
+```js
+const net = new Network(svg, { stage: { width: 1300, height: 700 }, listen: false, steps: ["0", "1"] });
+net.script({ "0": { layers: [3, 6, 5] }, "1": { pulse: "forward" } });
+net.goTo(1, true); // show step 1; true plays its effects
+net.destroy(); // when done
+```
+
+| Option | Does |
+|--------|------|
+| `stage: { width, height }` | The drawing's size. Default: the 1080×1920 clip stage |
+| `box`, `pad` | Where the network sits by default, and the room inside it |
+| `steps` | The step keys in order, when there is no clip to supply `window.clip.steps` |
+| `listen: false` | Don't follow the clip's `clip:step` events |
+
 The engine follows the player through `window.clip.steps`, which lists every step's key in order. It also listens for the `clip:step` event, which fires on `document` with `{ key, index, forward }`. Any other script can follow along the same way.
 
 ## The stage
@@ -162,5 +178,7 @@ Open the clip in Chrome, press **F** for full screen, then **R**. Chrome asks wh
 | R | Start or stop recording |
 | C | Next camera |
 | F | Full screen |
+
+The dropdown at the top left switches to another clip. It's outside the stage, so it's never recorded, and it's locked while you record.
 
 Press R again to stop. The take is saved to Downloads as an MP4 of just the stage, with your microphone. On a Retina Mac it comes out at about 1100×1960. The address ends `#frame.step`, so reloading keeps your place.

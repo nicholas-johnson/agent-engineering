@@ -1,5 +1,22 @@
 # Your own generation loop
 
+From the module folder (`day-one/module-03-choosing-a-provider`):
+
+```bash
+uv run --extra local python playground/your-own-loop/play.py
+```
+
+Or without `uv` (set up `.venv` with the `local` extra once at the repo root: `python3 -m venv .venv && .venv/bin/pip install -e ".[local]"`):
+
+```bash
+source ../../.venv/bin/activate
+python playground/your-own-loop/play.py
+```
+
+The first run downloads `Qwen/Qwen3-1.7B` from Hugging Face (about 4 GB) if it isn't cached yet. Every step, with the top five choices, is written to `playground/your-own-loop/output/steps.json`.
+
+---
+
 In Module 1 we wrote a loop that completed *"alice was beginning to get"* one word at a time, by picking from a vector of probabilities. This is the same loop, written by hand, running on a real open model: Qwen3 1.7B, loaded with `transformers`.
 
 ```python
@@ -12,19 +29,13 @@ for _ in range(NEW_TOKENS):
 
 Ask the model for scores, turn them into probabilities, pick one, add it to the end, repeat. That's essentially what `model.generate()` does, plus some tricks for speed.
 
-```bash
-uv run --extra local python play.py
-```
-
-Run demo 5 first, so the model is already downloaded. Every step, with the top five choices, is written to `output/steps.json`.
-
 ```text
 Alice was beginning to get interested in teaching, but she had no time for it, because she had to study for her first degree.
 ```
 
 ## Things to notice
 
-Open `output/steps.json`. The first step:
+Open `playground/your-own-loop/output/steps.json`. The first step:
 
 ```text
 chosen ' interested'    top 5: ' tired' 27%, ' worried' 21%, ' nervous' 10%, ' a' 7%, ' the' 4%

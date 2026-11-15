@@ -1,3 +1,10 @@
+# Model shootout — send the same questions to four OpenAI models and compare speed & tokens.
+# Run from the module folder: uv run python playground/model-shootout/play.py
+#                         or: source ../../.venv/bin/activate && python playground/model-shootout/play.py
+#
+# To play: add harder questions to QUESTIONS, add or swap model IDs in MODELS,
+# or try reasoning={"effort": "high"} to compare latency and reasoning tokens.
+
 import json
 import time
 from pathlib import Path
@@ -19,6 +26,7 @@ QUESTIONS = [
 client = OpenAI()
 results = []
 
+# Time each model on each question; effort is "low" because gpt-6.1-sol requires reasoning.
 for question in QUESTIONS:
     print(f"=== {question} ===")
     for model in MODELS:
@@ -46,4 +54,5 @@ for question in QUESTIONS:
         print(f"{model:14} {seconds:5.1f}s  {usage.output_tokens:4} tokens  {response.output_text}")
     print()
 
+# Full answers and reasoning-token breakdowns go to output/shootout.json.
 (OUTPUT / "shootout.json").write_text(json.dumps(results, indent=2))

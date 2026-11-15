@@ -1,12 +1,25 @@
 # Vision
 
-Point the model at a folder of pictures and ask it about each one.
+From the module folder (`day-one/module-02-building-a-chatbot`):
 
 ```bash
-uv run python play.py
+uv run python playground/vision/play.py
 ```
 
-It describes every image in `images/` (PNG, JPEG, WebP or GIF) and writes the descriptions to `output/descriptions.txt`. The folder starts with four of John Tenniel's illustrations from *Alice* ([Project Gutenberg #114](https://www.gutenberg.org/ebooks/114), public domain). Add your own.
+Or without `uv` (set up `.venv` once at the repo root with `python3 -m venv .venv && .venv/bin/pip install -e .`):
+
+```bash
+source ../../.venv/bin/activate
+python playground/vision/play.py
+```
+
+Needs `OPENAI_API_KEY` in `.env`.
+
+---
+
+Point the model at a folder of pictures and ask it about each one.
+
+It describes every image in `playground/vision/images/` (PNG, JPEG, WebP or GIF) and writes the descriptions to `playground/vision/output/descriptions.txt`. The folder starts with four of John Tenniel's illustrations from *Alice* ([Project Gutenberg #114](https://www.gutenberg.org/ebooks/114), public domain). Add your own.
 
 ```text
 === caterpillar.png ===
@@ -18,7 +31,7 @@ A person is curled up asleep on a thick tree branch, nestled among the leafy bra
 
 ## Things to notice
 
-Open `images/cat-fading.png`. It is the Cheshire Cat disappearing into the leaves until only its grin is left. The model saw a person asleep on a branch, and said so with total confidence. Vision models can be **confidently wrong**, especially with unusual pictures.
+Open `playground/vision/images/cat-fading.png`. It is the Cheshire Cat disappearing into the leaves until only its grin is left. The model saw a person asleep on a branch, and said so with total confidence. Vision models can be **confidently wrong**, especially with unusual pictures.
 
 ## Try this
 

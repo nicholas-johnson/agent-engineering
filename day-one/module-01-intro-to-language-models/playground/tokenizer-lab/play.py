@@ -1,3 +1,10 @@
+# Tokenizer lab — build BPE vocabularies of different sizes and see how they split text.
+# Run from the module folder: uv run python playground/tokenizer-lab/play.py
+#                         or: python3 playground/tokenizer-lab/play.py
+#
+# To play: add strings to SAMPLES, try larger vocabulary SIZES (e.g. 5000),
+# or train on Python code instead of Alice (see README.md).
+
 import json
 import re
 from collections import Counter
@@ -7,6 +14,7 @@ MODULE = Path(__file__).parent.parent.parent
 OUTPUT = Path(__file__).parent / "output"
 OUTPUT.mkdir(exist_ok=True)
 
+# Vocabulary sizes to compare (the first N merges of one BPE run give a size-N vocabulary).
 SIZES = [100, 500, 2000]
 
 SAMPLES = [
@@ -20,6 +28,7 @@ SAMPLES = [
 
 
 def build_vocabulary(text, size):
+    # Start with single characters, then repeatedly merge the most frequent adjacent pair.
     pieces = Counter(re.findall(r" ?[a-z]+| ?[^a-z ]", text))
     words = {tuple(piece): count for piece, count in pieces.items()}
     tokens = sorted(set(text))
@@ -50,6 +59,7 @@ def build_vocabulary(text, size):
 
 
 def split_into_tokens(text, vocabulary):
+    # Greedy longest-match tokeniser; characters not in Alice stay as single characters.
     longest = max(len(token) for token in vocabulary)
     tokens = []
     i = 0
@@ -65,6 +75,7 @@ def split_into_tokens(text, vocabulary):
     return tokens
 
 
+# Learn up to max(SIZES) tokens from Alice, then slice out each vocabulary size.
 text = " ".join((MODULE / "data" / "alice.txt").read_text().lower().split())
 all_tokens = build_vocabulary(text, max(SIZES))
 
@@ -73,6 +84,7 @@ for size in SIZES:
     vocabularies[size] = set(all_tokens[:size])
     (OUTPUT / f"tokens_{size}.json").write_text(json.dumps(all_tokens[:size], indent=2))
 
+# Show how each sample gets split at every vocabulary size.
 for sample in SAMPLES:
     print(f"=== {sample} ===")
     for size in SIZES:

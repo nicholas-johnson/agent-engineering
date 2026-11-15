@@ -1,5 +1,21 @@
 # Backoff
 
+From the module folder (`day-one/module-01-intro-to-language-models`):
+
+```bash
+uv run python playground/backoff/play.py
+```
+
+Or without `uv` (standard library only, no packages needed):
+
+```bash
+python3 playground/backoff/play.py
+```
+
+Builds word models for windows 1 to 5 from `data/alice.txt`, and writes all five to `playground/backoff/output/backoff_counts.json`.
+
+---
+
 The five-word model from demo 2 has nothing to say about contexts it has never seen. **Backoff** is the classic fix, from before neural networks: if the last five words are unknown, try the last four. If those are unknown, try three, then two, then one.
 
 ```python
@@ -8,12 +24,6 @@ for window in range(5, 0, -1):
     if context in models[window]:
         ...
 ```
-
-```bash
-uv run python play.py
-```
-
-This builds its own word models for windows 1 to 5 from `data/alice.txt`, so no demos need to be run first. It writes all five to `output/backoff_counts.json`.
 
 Each generated word gets a small number showing which window it came from:
 

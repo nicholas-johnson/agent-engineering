@@ -2,6 +2,7 @@
 // clip-deck: run from a folder of clips (one folder per clip, each with an index.html).
 //
 //   clip-deck serve           serve the clips at http://127.0.0.1:8765, with the engine at /clip-deck/
+//                             and the list of clips at /clips.json
 //   clip-deck new 02-slug     start a new clip from the template
 //   clip-deck check [02-slug] step through a clip in Chrome: list its captions, report anything
 //                             cut off, and save a picture of every step to output/<clip>/
@@ -72,6 +73,12 @@ function server() {
     if (pathname === '/') {
       response.writeHead(200, { 'content-type': TYPES['.html'] });
       return response.end(await listing());
+    }
+    if (pathname === '/clips.json') {
+      const list = [];
+      for (const clip of await clips()) list.push({ clip, title: await title(clip) });
+      response.writeHead(200, { 'content-type': TYPES['.json'], 'cache-control': 'no-store' });
+      return response.end(JSON.stringify(list));
     }
     const [base, rest] = pathname.startsWith('/clip-deck/')
       ? [engine, pathname.slice('/clip-deck/'.length)]

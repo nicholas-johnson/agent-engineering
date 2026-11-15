@@ -1,5 +1,22 @@
 # Tool descriptions
 
+From the module folder (`day-one/module-04-tools`):
+
+```bash
+uv run python playground/tool-descriptions/play.py
+```
+
+Or without `uv` (set up `.venv` once at the repo root with `python3 -m venv .venv && .venv/bin/pip install -e .`):
+
+```bash
+source ../../.venv/bin/activate
+python playground/tool-descriptions/play.py
+```
+
+Needs `OPENAI_API_KEY` in `.env`. The results are written to `playground/tool-descriptions/output/results.json`.
+
+---
+
 A tool's description is all the model knows about it. So how much does the description matter? This gives the model the same square root function three times, each with a different description:
 
 | Label | Description |
@@ -8,11 +25,7 @@ A tool's description is all the model knows about it. So how much does the descr
 | `vague` | "Does a calculation." |
 | `wrong` | "Returns the cube root of a number." |
 
-```bash
-uv run python play.py
-```
-
-It needs `OPENAI_API_KEY`. There's no MCP server here: tools are defined straight in the Responses API, which is all MCP was doing for us. The results are written to `output/results.json`.
+There's no MCP server here: tools are defined straight in the Responses API, which is all MCP was doing for us.
 
 ```text
 === clear: "Return the square root of a number, exactly, to full precision." ===

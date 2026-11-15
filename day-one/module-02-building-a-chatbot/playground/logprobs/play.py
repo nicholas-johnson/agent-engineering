@@ -1,3 +1,10 @@
+# Log probabilities — inspect a real model's top-5 next-token probabilities at each step.
+# Run from the module folder: uv run python playground/logprobs/play.py
+#                         or: source ../../.venv/bin/activate && python playground/logprobs/play.py
+#
+# To play: add your own starters to PROMPTS — try famous quotes vs ambiguous questions
+# to see where the model is 100% certain and where it splits its bet.
+
 import json
 import math
 from pathlib import Path
@@ -20,6 +27,7 @@ PROMPTS = [
 client = OpenAI()
 results = {}
 
+# Request top-5 logprobs for each generated token (requires reasoning effort "none").
 for prompt in PROMPTS:
     response = client.responses.create(
         model=MODEL,
@@ -35,6 +43,7 @@ for prompt in PROMPTS:
     print(f"=== {prompt} ===")
     results[prompt] = []
     for token in tokens:
+        # Convert natural log probabilities back into 0..1 probabilities with math.exp().
         options = {option.token: round(math.exp(option.logprob), 4) for option in token.top_logprobs}
         results[prompt].append({"token": token.token, "top_5": options})
         print(f"{token.token!r:14} " + ", ".join(f"{t!r} {p:.0%}" for t, p in options.items()))

@@ -129,7 +129,7 @@ That's a chatbot. Until you try this:
 
 **Why this breaks:** the API is **stateless**. Each call is completely separate, and the model only sees what you send in that call. This is the context window from Module 1 again: the model predicts from the context it is given, and nothing else. It has no memory of its own.
 
-## 3. Memory
+## 3. The context window
 
 **Demo:** `demo/03_conversation.py`
 
@@ -222,7 +222,7 @@ How does a language model see? OpenAI doesn't publish the details, but the usual
 |------|---------------|----------------|
 | 1. One response | A single API call, with instructions | One question, then it stops |
 | 2. A chat loop | `input()` in a loop | It forgets everything: the API is stateless |
-| 3. Memory | Send the whole conversation every time | Slow to reply, and every turn costs more |
+| 3. The context window | Send the whole conversation every time | Slow to reply, and every turn costs more |
 | 4. Streaming | Print the reply as it is generated | It can only read text |
 | 5. Images | Send pictures as well as text | — |
 

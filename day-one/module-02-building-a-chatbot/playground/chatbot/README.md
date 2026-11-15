@@ -1,12 +1,23 @@
 # Chatbot
 
-A complete streaming chatbot with memory, with every setting at the top of the file. It's the chatbot from the demos, ready to take apart.
+From the module folder (`day-one/module-02-building-a-chatbot`):
 
 ```bash
-uv run python play.py
+uv run python playground/chatbot/play.py
 ```
 
-Press Enter on an empty line to stop. The conversation is saved to `output/conversation.txt` after every turn.
+Or without `uv` (set up `.venv` once at the repo root with `python3 -m venv .venv && .venv/bin/pip install -e .`):
+
+```bash
+source ../../.venv/bin/activate
+python playground/chatbot/play.py
+```
+
+Needs `OPENAI_API_KEY` in `.env`. Press Enter on an empty line to stop. The conversation is saved to `playground/chatbot/output/conversation.txt` after every turn.
+
+---
+
+A complete streaming chatbot with memory, with every setting at the top of the file. It's the chatbot from the demos, ready to take apart.
 
 ```text
 You: What is a token, in one sentence?

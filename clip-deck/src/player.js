@@ -155,9 +155,28 @@ caption.className = "caption";
 stage.append(caption);
 
 // Outside the stage, so it is never recorded.
-const statusLine = document.createElement("aside");
-statusLine.className = "status";
-document.body.append(statusLine);
+const statusPanel = document.createElement("aside");
+statusPanel.className = "status";
+statusPanel.innerHTML = '<select class="clips" hidden aria-label="Clip"></select><p></p>';
+document.body.append(statusPanel);
+const clipPicker = statusPanel.querySelector(".clips");
+const statusLine = statusPanel.querySelector("p");
+
+// The clips beside this one, from the server's /clips.json. Choosing one opens it.
+fetch("/clips.json")
+  .then((response) => response.json())
+  .then((list) => {
+    clipPicker.innerHTML = list
+      .map(({ clip, title }) => `<option value="${escape(clip)}">${escape(title)}</option>`)
+      .join("");
+    clipPicker.value = document.body.dataset.clip;
+    clipPicker.hidden = list.length < 2;
+  })
+  .catch(() => {});
+
+clipPicker.addEventListener("change", () => {
+  location.href = `/${clipPicker.value}/`;
+});
 
 let current = 0;
 let step = 0;
@@ -353,6 +372,7 @@ function renderStatus() {
       : "<strong>R to record</strong>";
   const devices = [cameraName, micName].filter(Boolean).map(escape).join(" · ") || "No camera yet";
   const keys = "Space next · ← back · Home start<br />R record · C camera · F full screen";
+  clipPicker.disabled = Boolean(countdown || recorder);
   statusLine.innerHTML = [state, devices, note && escape(note), keys].filter(Boolean).join("<br />");
 }
 
@@ -361,7 +381,7 @@ setInterval(() => recorder && renderStatus(), 250);
 // Keys
 
 document.addEventListener("keydown", (event) => {
-  if (event.repeat || event.metaKey || event.ctrlKey) return;
+  if (event.repeat || event.metaKey || event.ctrlKey || event.target === clipPicker) return;
   const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
   if (NEXT.includes(key)) next();
   else if (BACK.includes(key)) back();

@@ -1,14 +1,24 @@
 # Tokenizer lab
 
+From the module folder (`day-one/module-01-intro-to-language-models`):
+
+```bash
+uv run python playground/tokenizer-lab/play.py
+```
+
+Or without `uv` (standard library only, no packages needed):
+
+```bash
+python3 playground/tokenizer-lab/play.py
+```
+
+Takes a few seconds, and writes each vocabulary to `playground/tokenizer-lab/output/tokens_<size>.json`.
+
+---
+
 How big should a token vocabulary be, and what happens to text the tokenizer wasn't trained on?
 
 This builds a byte-pair encoding vocabulary from *Alice*, the same way as `data/build_tokens.py`, but carries on to 2,000 tokens. Because each merge is added to the end of the list, the first 100 tokens are a 100-token vocabulary, the first 500 are a 500-token vocabulary, and so on. It then splits some sample text with each one.
-
-```bash
-uv run python play.py
-```
-
-No demos need to be run first. It takes a few seconds, and writes each vocabulary to `output/tokens_<size>.json`.
 
 ```text
 === alice was beginning to get very tired of sitting by her sister ===

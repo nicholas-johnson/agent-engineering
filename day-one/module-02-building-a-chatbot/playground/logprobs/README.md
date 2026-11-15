@@ -1,12 +1,23 @@
 # Log probabilities
 
-Module 1 was all about vectors of next-token probabilities. A real model produces exactly the same thing, and the API will show you part of it: for each token it wrote, the five most likely tokens it could have written instead.
+From the module folder (`day-one/module-02-building-a-chatbot`):
 
 ```bash
-uv run python play.py
+uv run python playground/logprobs/play.py
 ```
 
-The full results are written to `output/logprobs.json`.
+Or without `uv` (set up `.venv` once at the repo root with `python3 -m venv .venv && .venv/bin/pip install -e .`):
+
+```bash
+source ../../.venv/bin/activate
+python playground/logprobs/play.py
+```
+
+Needs `OPENAI_API_KEY` in `.env`. The full results are written to `playground/logprobs/output/logprobs.json`.
+
+---
+
+Module 1 was all about vectors of next-token probabilities. A real model produces exactly the same thing, and the API will show you part of it: for each token it wrote, the five most likely tokens it could have written instead.
 
 ```text
 === Alice was beginning to get ===

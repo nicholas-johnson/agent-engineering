@@ -1,12 +1,23 @@
 # The protocol by hand
 
-The `mcp` package hides the protocol. This takes it away: it starts the maths server from demo 3 and talks to it by writing JSON to its standard input and reading JSON back from its standard output, one line per message. No API key, no model, no `mcp` client.
+From the module folder (`day-one/module-04-tools`):
 
 ```bash
-uv run python play.py
+uv run python playground/raw-protocol/play.py
 ```
 
-Every message, sent and received, is written to `output/messages.json`.
+Or without `uv` (set up `.venv` once at the repo root with `python3 -m venv .venv && .venv/bin/pip install -e .`):
+
+```bash
+source ../../.venv/bin/activate
+python playground/raw-protocol/play.py
+```
+
+No API key needed. Every message, sent and received, is written to `playground/raw-protocol/output/messages.json`.
+
+---
+
+The `mcp` package hides the protocol. This takes it away: it starts the maths server from demo 3 and talks to it by writing JSON to its standard input and reading JSON back from its standard output, one line per message. No API key, no model, no `mcp` client.
 
 ```text
 >> {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {"protocolVersion": "2025-11-25", ...}}

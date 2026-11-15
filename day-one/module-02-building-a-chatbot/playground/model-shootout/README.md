@@ -1,12 +1,23 @@
 # Model shootout
 
-The same questions, sent to four different OpenAI models. How long does each take, how many tokens does it use, and is it any better?
+From the module folder (`day-one/module-02-building-a-chatbot`):
 
 ```bash
-uv run python play.py
+uv run python playground/model-shootout/play.py
 ```
 
-Everything, including each model's full answer, is written to `output/shootout.json`.
+Or without `uv` (set up `.venv` once at the repo root with `python3 -m venv .venv && .venv/bin/pip install -e .`):
+
+```bash
+source ../../.venv/bin/activate
+python playground/model-shootout/play.py
+```
+
+Needs `OPENAI_API_KEY` in `.env`. Everything, including each model's full answer, is written to `playground/model-shootout/output/shootout.json`.
+
+---
+
+The same questions, sent to four different OpenAI models. How long does each take, how many tokens does it use, and is it any better?
 
 ```text
 === Why is a raven like a writing-desk? ===

@@ -2,11 +2,17 @@
 
 Things to play with between exercises. Each folder has a short script to run and a list of ideas to take it further. None of them are required, and there are no right answers.
 
-Run each one from inside its folder:
+From the module folder (`day-one/module-04-tools`):
 
 ```bash
-cd calculator
-uv run python play.py
+uv run python playground/calculator/play.py
+```
+
+Or without `uv` (set up `.venv` once at the repo root with `python3 -m venv .venv && .venv/bin/pip install -e .`):
+
+```bash
+source ../../.venv/bin/activate
+python playground/calculator/play.py
 ```
 
 | Folder | What it's about | Needs |

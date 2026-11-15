@@ -308,6 +308,9 @@ importers:
 
   slide-deck:
     dependencies:
+      clip-deck:
+        specifier: workspace:*
+        version: link:../clip-deck
       lucide-react:
         specifier: ^1.61.0
         version: 1.70.0(react@19.3.1)

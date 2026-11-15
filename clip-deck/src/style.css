@@ -250,6 +250,22 @@ body {
   color: var(--text);
 }
 
+.status .clips {
+  display: block;
+  width: 100%;
+  margin-bottom: 16px;
+  padding: 8px 10px;
+  font: inherit;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.status .clips[hidden] {
+  display: none;
+}
+
 .status .rec {
   color: #ef4444;
 }

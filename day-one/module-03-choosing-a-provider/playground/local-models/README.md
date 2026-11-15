@@ -1,13 +1,27 @@
 # Local models
 
-How small can a model be and still be useful? This asks the same three questions to two sizes of Qwen3 running in Ollama: 0.6 billion and 1.7 billion parameters.
+From the module folder (`day-one/module-03-choosing-a-provider`):
 
 ```bash
 ollama pull qwen3:0.6b
-uv run python play.py
+ollama pull qwen3:1.7b
+uv run python playground/local-models/play.py
 ```
 
-`qwen3:0.6b` is a 523 MB download. The answers are written to `output/answers.txt`.
+Or without `uv` (set up `.venv` once at the repo root with `python3 -m venv .venv && .venv/bin/pip install -e .`):
+
+```bash
+ollama pull qwen3:0.6b
+ollama pull qwen3:1.7b
+source ../../.venv/bin/activate
+python playground/local-models/play.py
+```
+
+Needs Ollama running (`qwen3:0.6b` is 523 MB; `qwen3:1.7b` is 1.4 GB). The answers are written to `playground/local-models/output/answers.txt`.
+
+---
+
+How small can a model be and still be useful? This asks the same three questions to two sizes of Qwen3 running in Ollama: 0.6 billion and 1.7 billion parameters.
 
 ```text
 === Who wrote Alice's Adventures in Wonderland, and in what year was it published? ===

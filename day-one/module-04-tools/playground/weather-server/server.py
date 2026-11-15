@@ -1,3 +1,9 @@
+# Weather MCP server — wraps Open-Meteo's free geocoding and forecast APIs (no key needed).
+# Started automatically by play.py; don't run this file directly.
+#
+# To play: add a third @server.tool(), such as get_air_quality(latitude, longitude),
+# or copy this file as a starting point for another HTTP API (see README.md).
+
 import json
 import urllib.parse
 import urllib.request
@@ -12,6 +18,7 @@ def open_meteo(url, **params):
         return json.load(response)
 
 
+# Step 1 tool: turn a place name into coordinates.
 @server.tool()
 def find_place(name: str) -> str:
     """Find a town or city by name. Returns its country, latitude and longitude."""
@@ -22,6 +29,7 @@ def find_place(name: str) -> str:
     return json.dumps({key: place[key] for key in ["name", "country", "latitude", "longitude"]})
 
 
+# Step 2 tool: fetch current weather and a 3-day forecast for those coordinates.
 @server.tool()
 def get_weather(latitude: float, longitude: float) -> str:
     """Get the current weather and a three-day forecast for a latitude and longitude.

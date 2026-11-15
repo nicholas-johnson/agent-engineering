@@ -15,36 +15,6 @@ export const slides = [
       icon: 'bot',
     },
   },
-  {
-    type: 'code',
-    content: {
-      title: 'From our model to theirs',
-      code: `"alice was beginning to get"
-
-'very'      -> 'very' 77%, 'rather' 15%, 'b' 5%, 't' 4%
-' tired'    -> ' tired' 100%
-' of'       -> ' of' 100%
-' sitting'  -> ' sitting' 100%`,
-      highlights: [
-        'Our Module 1 prompt, sent to `gpt-6-luna`',
-        'The first line of the book, word for word — it has read *Alice* too',
-        'Same job as our models: a vector of next-token probabilities',
-      ],
-    },
-  },
-  {
-    type: 'standard',
-    content: {
-      title: 'Getting set up',
-      icon: 'key',
-      points: [
-        'Create an API key at **platform.openai.com**',
-        'Copy `.env.example` to `.env` and put your key in it',
-        '`load_dotenv()` reads it — `.env` is never committed',
-        'Two packages: `openai` and `python-dotenv`',
-      ],
-    },
-  },
 
   // ---- Section 1: One response ----
   {
@@ -199,11 +169,11 @@ Cat: I don't know your name—you haven't told me.`,
     },
   },
 
-  // ---- Section 3: Memory ----
+  // ---- Section 3: The context window ----
   {
     type: 'title',
     content: {
-      title: '3. Memory',
+      title: '3. The context window',
       subtitle: 'Send the whole conversation, every time',
       icon: 'database',
     },
@@ -225,7 +195,7 @@ messages.append({"role": "assistant", "content": response.output_text})`,
   {
     type: 'title',
     content: {
-      title: 'Demo — Memory',
+      title: 'Demo — The context window',
       subtitle: 'Switch to terminal: python demo/03_conversation.py',
       icon: 'rocket',
     },
@@ -395,7 +365,7 @@ Cat: That's the Mad Hatter—the one wearing the enormous hat
       points: [
         '**One response** — a single call, with instructions',
         '**A chat loop** — which forgot everything',
-        '**Memory** — send the whole conversation every time',
+        '**The context window** — send the whole conversation every time',
         '**Streaming** — watch the reply being written',
         '**Images** — a model that can see',
       ],
@@ -415,17 +385,17 @@ Cat: That's the Mad Hatter—the one wearing the enormous hat
       ],
     },
   },
+
   {
     type: 'standard',
     content: {
-      title: 'Final exercise: further reading',
-      icon: 'book',
+      title: 'Getting set up',
+      icon: 'key',
       points: [
-        '**Ouyang et al. (2022)** — how a next-token predictor becomes an assistant',
-        '**Dosovitskiy et al. (2020)** — an image is worth 16×16 words',
-        '**Liu et al. (2023)** — lost in the middle of a long conversation',
-        'Pick a paper, connect it to a demo, then start an extension',
-        'Everything is in `further-reading/`',
+        'Create an API key at **platform.openai.com**',
+        'Copy `.env.example` to `.env` and put your key in it',
+        '`load_dotenv()` reads it — `.env` is never committed',
+        'Two packages: `openai` and `python-dotenv`',
       ],
     },
   },

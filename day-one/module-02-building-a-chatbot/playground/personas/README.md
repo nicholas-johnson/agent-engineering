@@ -1,12 +1,23 @@
 # Personas
 
-The same model, the same question, completely different answers. The only thing that changes is the **instructions**.
+From the module folder (`day-one/module-02-building-a-chatbot`):
 
 ```bash
-uv run python play.py
+uv run python playground/personas/play.py
 ```
 
-Pick a persona from the list, then chat. Each persona is a short text file in `instructions/`. The conversation is saved to `output/<persona>.txt`.
+Or without `uv` (set up `.venv` once at the repo root with `python3 -m venv .venv && .venv/bin/pip install -e .`):
+
+```bash
+source ../../.venv/bin/activate
+python playground/personas/play.py
+```
+
+Needs `OPENAI_API_KEY` in `.env`. Pick a persona from the list, then chat (press Enter on an empty line to stop). Each persona is a short text file in `playground/personas/instructions/`. The conversation is saved to `playground/personas/output/<persona>.txt`.
+
+---
+
+The same model, the same question, completely different answers. The only thing that changes is the **instructions**.
 
 | Persona | Instructions, in short |
 |---------|------------------------|

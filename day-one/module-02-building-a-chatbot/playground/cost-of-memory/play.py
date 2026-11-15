@@ -1,3 +1,10 @@
+# The cost of memory — watch input tokens grow turn by turn as history is resent.
+# Run from the module folder: uv run python playground/cost-of-memory/play.py
+#                         or: source ../../.venv/bin/activate && python playground/cost-of-memory/play.py
+#
+# To play: add more turns to QUESTIONS, or slice `input=messages[-4:]` to cap memory
+# and see what the chatbot forgets on the final question (see README.md).
+
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -27,6 +34,7 @@ messages = []
 rows = ["turn,input_tokens,cached_tokens,output_tokens"]
 total_input = 0
 
+# Play out the conversation, resending the entire `messages` list on every turn.
 print("Turn  Input tokens  Output tokens")
 for turn, question in enumerate(QUESTIONS, start=1):
     messages.append({"role": "user", "content": question})

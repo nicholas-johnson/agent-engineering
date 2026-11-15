@@ -4,11 +4,17 @@ Things to play with between exercises. Each folder has a short script to run and
 
 They all need your OpenAI API key in `.env` (see the module README). Each run costs a fraction of a cent.
 
-Run each one from inside its folder:
+From the module folder (`day-one/module-02-building-a-chatbot`):
 
 ```bash
-cd chatbot
-uv run python play.py
+uv run python playground/chatbot/play.py
+```
+
+Or without `uv` (set up `.venv` once at the repo root with `python3 -m venv .venv && .venv/bin/pip install -e .`):
+
+```bash
+source ../../.venv/bin/activate
+python playground/chatbot/play.py
 ```
 
 | Folder | What it's about |

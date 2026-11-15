@@ -133,16 +133,16 @@ Setting up a new deck:
 
 Things for delegates to play with between exercises. It should **build on what the module covered without repeating it**.
 
-- `playground/README.md`: a table of the folders, what each is about, and whether the demos must be run first.
+- `playground/README.md`: how to run the scripts (with `uv` and without), and a table of the folders and what each is about (plus a `Needs` column if any require API keys, local models or optional packages).
 - One folder per idea, short and descriptive (`temperature`, `tokenizer-lab`). Usually six or seven.
 - Each folder has `play.py` (or two scripts where that's clearer, like `train.py` and `complete.py`) and a `README.md` containing:
+  - how to run it from the module folder (both `uv run` and non-`uv`), right at the top
   - what it shows and why it's interesting, in a paragraph
-  - how to run it, and whether demos must be run first
   - real example output
   - **Things to notice** (optional)
   - **Try this**: five or six numbered ideas for extending it, from easy to hard
   - **Questions**, last: "For discussion. There are no right answers.", then three or four open questions as bullet points. They should start a conversation, not test knowledge: what the result means, when it matters, who decides, what could go wrong. Base them on what the script actually showed.
-- Same code style as demos. Where possible, load the files the demos wrote to `demo/output/` instead of rebuilding them.
+- Same code style as demos, plus a short `#` header at the top of each `.py` file (what it does, how to run it with and without `uv`, and a two-line "To play:" note) and brief one-line signposts on the main steps and settings. **Every playground must stand alone**: never require the demos to have been run first, and never load files from `demo/output/`. Build whatever is needed from `data/` instead.
 - Output goes in `output/` inside the folder (gitignored).
 - Good playgrounds turn a hidden setting into something you can change (temperature, window size, vocabulary size), run the model a different way (scoring instead of generating), or point it at different data.
 

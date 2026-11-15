@@ -1,3 +1,10 @@
+# Personas — same model, same questions, different system instructions.
+# Run from the module folder: uv run python playground/personas/play.py
+#                         or: source ../../.venv/bin/activate && python playground/personas/play.py
+#
+# To play: pick a persona and try to make it break character, edit the .txt files in
+# instructions/, or drop in a new .txt file of your own (see README.md).
+
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -11,6 +18,7 @@ OUTPUT.mkdir(exist_ok=True)
 
 MODEL = "gpt-6-luna"
 
+# Load every .txt file in instructions/ as a selectable persona.
 personas = sorted((HERE / "instructions").glob("*.txt"))
 for number, persona in enumerate(personas, start=1):
     print(f"{number}. {persona.stem}")
@@ -22,6 +30,7 @@ client = OpenAI()
 messages = []
 transcript = []
 
+# Chat loop: press Enter on an empty line to stop.
 while True:
     question = input("You: ")
     if not question:

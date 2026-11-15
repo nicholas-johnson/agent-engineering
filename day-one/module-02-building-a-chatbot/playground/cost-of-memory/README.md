@@ -1,12 +1,23 @@
 # The cost of memory
 
-Demo 3 gave the chatbot memory by sending the whole conversation every turn. This plays out a ten-turn conversation, Alice telling a chatbot about her day, and records how many tokens each turn costs.
+From the module folder (`day-one/module-02-building-a-chatbot`):
 
 ```bash
-uv run python play.py
+uv run python playground/cost-of-memory/play.py
 ```
 
-It needs no typing: the ten messages are in the script. The numbers are written to `output/tokens_per_turn.csv`, which opens in any spreadsheet.
+Or without `uv` (set up `.venv` once at the repo root with `python3 -m venv .venv && .venv/bin/pip install -e .`):
+
+```bash
+source ../../.venv/bin/activate
+python playground/cost-of-memory/play.py
+```
+
+Needs `OPENAI_API_KEY` in `.env`. It needs no typing: the ten messages are in the script. The numbers are written to `playground/cost-of-memory/output/tokens_per_turn.csv`, which opens in any spreadsheet.
+
+---
+
+Demo 3 gave the chatbot memory by sending the whole conversation every turn. This plays out a ten-turn conversation, Alice telling a chatbot about her day, and records how many tokens each turn costs.
 
 ```text
 Turn  Input tokens  Output tokens

@@ -17,7 +17,7 @@
 
       <!-- Beat 1: the promise, then the odd thing, full-face -->
       <section class="frame" data-camera="full">
-        <p class="cue">I'm going to explain <em>MCP</em> to you in sixty seconds.</p>
+        <p class="cue">I'm going to explain <em>MCP</em> to you in ninety seconds.</p>
         <p class="cue">I asked an AI the same maths question three times.</p>
       </section>
 
@@ -83,22 +83,26 @@ def square_root(number: float) -> float:
       <section class="frame tight">
         <p class="cue">Now when I ask, it doesn't guess.</p>
         <p class="cue">It asks <em>me</em> to run square_root on 7,654,321.</p>
+        <p class="cue">And this is a <em>tool call</em>.</p>
         <p class="cue">My code runs it…</p>
         <p class="cue">…and hands back the answer.</p>
         <p class="cue">Right first time. Every time.</p>
-        <h1>It asks for help</h1>
+        <div class="swap">
+          <h1 data-out="2">It asks for help</h1>
+          <h1 data-in="2">A tool call</h1>
+        </div>
         <div class="bubble you">What is the square root of 7,654,321, to 10 decimal places?</div>
         <div class="card ai" data-in="1">
           <p class="who">The AI: please run</p>
           <p class="says mono"><span class="type">square_root({"number":7654321})</span></p>
         </div>
-        <div class="arrow" data-in="2">↓</div>
-        <div class="card python" data-in="2">
+        <div class="arrow" data-in="3">↓</div>
+        <div class="card python" data-in="3">
           <p class="who">Your code runs it</p>
           <p class="says mono"><span class="type">→ 2766.644357339772</span></p>
         </div>
-        <div class="arrow" data-in="3">↓</div>
-        <div class="bubble ai" data-in="3">
+        <div class="arrow" data-in="4">↓</div>
+        <div class="bubble ai" data-in="4">
           <span class="stream">The square root of 7,654,321 to 10 decimal places is 2766.6443573398.</span>
         </div>
       </section>
@@ -108,7 +112,6 @@ def square_root(number: float) -> float:
         <p class="cue">And that tool? It's the same function…</p>
         <p class="cue">…plus four lines.</p>
         <p class="cue">That's an <em>MCP server</em>.</p>
-        <p class="cue">Write it once, and Claude, Cursor and VS&nbsp;Code can all use it.</p>
         <div class="swap">
           <h1 data-out="1">And the tool?<br />The same function…</h1>
           <h1 data-in="1">…plus four lines.<br />An MCP server.</h1>
@@ -125,6 +128,57 @@ def square_root(number: float) -> float:
     return math.sqrt(number)
 +
 + server.run()
+</pre>
+      </section>
+
+      <!-- Beat 4: what wrapping the tool in a server gives us (the four things the Module 4 demos show) -->
+      <section class="frame">
+        <p class="cue">So what does the wrapper give us?</p>
+        <p class="cue">It's <em>discoverable</em>: any app can ask what tools it has.</p>
+        <p class="cue">Each tool <em>describes itself</em>: its name, arguments and purpose.</p>
+        <p class="cue">It's a <em>standard</em>, so there's no custom glue for each app.</p>
+        <p class="cue">And it's <em>separate</em>: the AI never sees your code.</p>
+        <h1>What the wrapper gives us</h1>
+        <div class="servers">
+          <div class="card ai" data-in="1">
+            <h2>Discoverable</h2>
+            <p>Ask the server: what tools do you have?</p>
+          </div>
+          <div class="card python" data-in="2">
+            <h2>Described</h2>
+            <p>Name, arguments and purpose, from your code</p>
+          </div>
+          <div class="card calendar" data-in="3">
+            <h2>Standard</h2>
+            <p>One protocol, whichever app asks</p>
+          </div>
+          <div class="card gmail" data-in="4">
+            <h2>Separate</h2>
+            <p>Its own program: the AI never sees the code</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Beat 4: the tool as the model receives it (the tools list built in demo/03_agent.py, printed from the real server) -->
+      <section class="frame">
+        <p class="cue">And here is what the AI <em>actually</em> sees.</p>
+        <p class="cue">Not your code. Just a name, a description and the arguments.</p>
+        <p class="cue">Write it once, and Claude, Cursor and VS&nbsp;Code can all use it.</p>
+        <h1>What the AI sees</h1>
+        <pre class="code">
+{
+  "type": "function",
+  "name": "square_root",
+  "description": "Return the square root of
+    a number, exactly, to full precision.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "number": {"type": "number"}
+    },
+    "required": ["number"]
+  }
+}
 </pre>
       </section>
 

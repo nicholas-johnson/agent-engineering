@@ -1,3 +1,10 @@
+# Tool descriptions — test whether a clear, vague or misleading description changes behaviour.
+# Run from the module folder: uv run python playground/tool-descriptions/play.py
+#                         or: source ../../.venv/bin/activate && python playground/tool-descriptions/play.py
+#
+# To play: add a second tool (e.g. cube_root) so the model has to choose between tools,
+# rename "calculate", or ask a question that needs no tool at all (see README.md).
+
 import json
 import math
 from pathlib import Path
@@ -14,7 +21,7 @@ MODEL = "gpt-6-luna"
 INSTRUCTIONS = "Answer in plain text, without LaTeX or Markdown."
 QUESTION = "What is the square root of 7,654,321, to 10 decimal places?"
 
-# The same function every time. Only the description the model sees changes.
+# The implementation is always math.sqrt(); only the description shown to the model changes.
 DESCRIPTIONS = {
     "clear": "Return the square root of a number, exactly, to full precision.",
     "vague": "Does a calculation.",
@@ -25,6 +32,7 @@ client = OpenAI()
 results = {}
 
 for label, description in DESCRIPTIONS.items():
+    # Define the tool directly in the Responses API (no MCP server needed here).
     tools = [
         {
             "type": "function",
@@ -57,7 +65,7 @@ for label, description in DESCRIPTIONS.items():
             conversation.append({"type": "function_call_output", "call_id": call.call_id, "output": answer})
 
     results[label] = {"description": description, "used_tool": used_tool, "answer": response.output_text}
-    print(f"=== {label}: \"{description}\" ===")
+    print(f'=== {label}: "{description}" ===')
     print(f"Used the tool: {'yes' if used_tool else 'no'}")
     print(f"Agent: {response.output_text}\n")
 

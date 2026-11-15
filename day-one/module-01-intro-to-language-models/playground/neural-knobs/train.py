@@ -1,3 +1,10 @@
+# Neural knobs (part 1: train) — train the tiny neural language model and save it.
+# Run from the module folder: uv run python playground/neural-knobs/train.py
+#                         or: python3 playground/neural-knobs/train.py
+# Then generate text with:    uv run python playground/neural-knobs/complete.py
+#
+# To play: tweak one knob below at a time, retrain, and watch how the loss changes.
+
 import json
 import math
 import random
@@ -7,11 +14,12 @@ MODULE = Path(__file__).parent.parent.parent
 OUTPUT = Path(__file__).parent / "output"
 OUTPUT.mkdir(exist_ok=True)
 
-CONTEXT = 3
-EMBEDDING_SIZE = 16
-HIDDEN_SIZE = 32
-LEARNING_RATE = 0.05
-STEPS = 30000
+# Hyperparameters ("the knobs") — change one at a time and compare the final loss.
+CONTEXT = 3          # how many previous tokens the network looks at
+EMBEDDING_SIZE = 16  # numbers per token vector
+HIDDEN_SIZE = 32     # neurons in the hidden layer
+LEARNING_RATE = 0.05 # step size for gradient descent (try 0.005 or 0.5)
+STEPS = 30000        # random training examples to train on
 
 vocabulary = json.loads((MODULE / "data" / "tokens.json").read_text())
 token_ids = {token: i for i, token in enumerate(vocabulary)}
@@ -34,6 +42,7 @@ def random_matrix(rows, columns):
     return [[random.gauss(0, 0.1) for _ in range(columns)] for _ in range(rows)]
 
 
+# Network parameters: token embeddings -> tanh hidden layer -> output logits.
 embeddings = random_matrix(len(vocabulary), EMBEDDING_SIZE)
 hidden_weights = random_matrix(HIDDEN_SIZE, CONTEXT * EMBEDDING_SIZE)
 hidden_biases = [0.0] * HIDDEN_SIZE
@@ -42,6 +51,7 @@ output_biases = [0.0] * len(vocabulary)
 
 
 def forward(context):
+    # Look up context embeddings, run the hidden layer, and softmax scores into probabilities.
     inputs = [value for token in context for value in embeddings[token]]
     hidden = [
         math.tanh(sum(w * x for w, x in zip(row, inputs)) + bias)
@@ -58,6 +68,7 @@ def forward(context):
 
 
 def train(context, target):
+    # Forward pass, backpropagation by hand, and a gradient step on every weight.
     inputs, hidden, probabilities = forward(context)
 
     score_grads = probabilities[:]
@@ -86,11 +97,13 @@ def train(context, target):
     return -math.log(probabilities[target])
 
 
+# Prepare training examples from Alice and report the untrained baseline loss.
 text = " ".join((MODULE / "data" / "alice.txt").read_text().lower().split())
 tokens = split_into_tokens(text)
 examples = [(tokens[i : i + CONTEXT], tokens[i + CONTEXT]) for i in range(len(tokens) - CONTEXT)]
 print(f"Loss from random guessing: {math.log(len(vocabulary)):.2f}")
 
+# Train with stochastic gradient descent, printing average loss every 1,000 steps.
 total_loss = 0
 for step in range(1, STEPS + 1):
     context, target = random.choice(examples)
@@ -99,6 +112,7 @@ for step in range(1, STEPS + 1):
         print(f"Step {step}: loss {total_loss / 1000:.2f}")
         total_loss = 0
 
+# Save weights to output/model.json for complete.py to load.
 model = {
     "context": CONTEXT,
     "embeddings": embeddings,

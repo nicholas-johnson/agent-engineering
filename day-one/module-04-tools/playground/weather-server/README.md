@@ -1,15 +1,26 @@
 # Your own server: the weather
 
+From the module folder (`day-one/module-04-tools`):
+
+```bash
+uv run python playground/weather-server/play.py
+```
+
+Or without `uv` (set up `.venv` once at the repo root with `python3 -m venv .venv && .venv/bin/pip install -e .`):
+
+```bash
+source ../../.venv/bin/activate
+python playground/weather-server/play.py
+```
+
+Needs `OPENAI_API_KEY` in `.env` and an internet connection. `play.py` starts `server.py` itself. The conversation is written to `playground/weather-server/output/conversation.json`.
+
+---
+
 A second MCP server for a different free API, to copy when you write your own. It uses [Open-Meteo](https://open-meteo.com), which needs no key, and offers two tools:
 
 - `find_place(name)`: a town's latitude and longitude
 - `get_weather(latitude, longitude)`: the weather now, and a three-day forecast
-
-```bash
-uv run python play.py
-```
-
-It needs `OPENAI_API_KEY` and an internet connection. `play.py` starts `server.py` itself. The conversation is written to `output/conversation.json`.
 
 ```text
 You: Is tomorrow a good day for a picnic by the river in Oxford, where Lewis Carroll first told the story of Alice?

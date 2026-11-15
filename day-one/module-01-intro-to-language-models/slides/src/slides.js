@@ -1,3 +1,5 @@
+import { networkBackprop, networkDiagram, networkLearning } from './networks.js';
+
 export const slides = [
   {
     type: 'title',
@@ -22,20 +24,6 @@ export const slides = [
       icon: 'question',
       description:
         'Given some text, predict what comes next. A language model takes a **context** and returns a **probability for every possible next token**. To generate text, pick one, add it to the context, and ask again.',
-    },
-  },
-  {
-    type: 'standard',
-    content: {
-      title: 'Our corpus',
-      icon: 'book',
-      points: [
-        "*Alice's Adventures in Wonderland*, Lewis Carroll (Project Gutenberg)",
-        '**Small:** chapter 1, *Down the Rabbit-Hole* — about 2,200 words',
-        '**Large:** the whole book — about 27,000 words',
-        'Plain Python, no libraries, no GPU',
-        'Every demo writes what it learned to `demo/output/`',
-      ],
     },
   },
 
@@ -156,10 +144,10 @@ for word, next_word in zip(words, words[1:]):
   {
     type: 'description',
     content: {
-      title: 'Perfect English?',
+      title: 'Is this Generative?',
       icon: 'eye',
       description:
-        '*"alice was beginning to get very tired of sitting by her sister on the bank , and of having nothing to do ..."* — the first paragraph of the book, **word for word**. 99% of five-word contexts have only one possible next word. The model isn\'t predicting, it\'s **reciting**.',
+        '*"alice was beginning to get very tired of sitting by her sister on the bank , and of having nothing to do ..."* — It recites the first paragraph of the book, **word for word**. 99% of five-word contexts have only one possible next word.',
     },
   },
   {
@@ -182,10 +170,10 @@ for word, next_word in zip(words, words[1:]):
   {
     type: 'description',
     content: {
-      title: 'Never seen it',
+      title: 'The model has never seen most combinations',
       icon: 'ban',
       description:
-        '*"The Queen was beginning to get very cross with the Hatter."* — seven five-word contexts. The model has seen **one**. For the rest, it has nothing to say at all.',
+        '*"The Queen was beginning to get very cross with the Hatter."* - seven five-word contexts. Now ask it to give you recipe for a cupcake',
     },
   },
 
@@ -194,7 +182,7 @@ for word, next_word in zip(words, words[1:]):
     type: 'title',
     content: {
       title: '3. Letters',
-      subtitle: 'A tiny vocabulary, a longer window',
+      subtitle: 'A smaller vocabulary, a longer window',
       icon: 'hash',
     },
   },
@@ -221,17 +209,11 @@ for word, next_word in zip(words, words[1:]):
           'Vocabulary: 2,676',
           'Window: 5 words',
           'Possible contexts: 137 quadrillion',
-          'Recites the book',
         ],
       },
       right: {
         label: 'Eight letters',
-        items: [
-          'Vocabulary: 41',
-          'Window: 8 letters',
-          'Possible contexts: 8 trillion',
-          'Invents new sentences',
-        ],
+        items: ['Vocabulary: 41', 'Window: 8 letters', 'Possible contexts: 8 trillion'],
       },
     },
   },
@@ -334,18 +316,20 @@ for word, next_word in zip(words, words[1:]):
   {
     type: 'standard',
     content: {
-      title: 'Stop counting',
-      icon: 'lightbulb',
+      title: 'What is a neural network?',
+      icon: 'brain',
       points: [
-        'Instead of a table of every context, **learn a function**',
-        'Context in, vector of next-token probabilities out',
-        'A function works for **any** context — even ones it never saw',
-        'Based on Bengio et al. (2003), shrunk to fit in plain Python',
+        'A **function** built from layers of simple units called **neurons**',
+        'Each neuron multiplies its inputs by **weights**, adds them up, and squashes the result',
+        'The weights are what the network knows. They start out **random**',
+        '**Learning** is nudging the weights until the answers get better',
+        "A function works for **any** input — even ones it never saw. A table of counts can't",
       ],
-      credit:
-        'Bengio, Ducharme, Vincent & Jauvin (2003). "A Neural Probabilistic Language Model." JMLR 3:1137–1155',
     },
   },
+  { type: 'network', content: networkDiagram },
+  { type: 'network', content: networkLearning },
+  { type: 'network', content: networkBackprop },
   {
     type: 'code',
     content: {
@@ -364,6 +348,8 @@ one score for each of the 500 tokens
    ▼
 softmax → probabilities`,
       highlights: ['26,068 parameters, all starting random'],
+      credit:
+        'Bengio, Ducharme, Vincent & Jauvin (2003). "A Neural Probabilistic Language Model." JMLR 3:1137–1155',
     },
   },
   {
@@ -378,19 +364,6 @@ softmax → probabilities`,
         '**Backpropagation**: work out how each parameter affected the loss',
         '**Gradient descent**: nudge every parameter to reduce it',
         'Repeat 30,000 times',
-      ],
-    },
-  },
-  {
-    type: 'code',
-    content: {
-      title: 'Where backpropagation starts',
-      code: `score_grads = probabilities[:]
-score_grads[target] -= 1`,
-      highlights: [
-        'For softmax with this loss: **predicted minus actual**',
-        'Everything after this is the chain rule, by hand',
-        'Loss starts at 6.21 (random guessing) and falls to around 4.5',
       ],
     },
   },
@@ -415,20 +388,6 @@ score_grads[target] -= 1`,
         'A counting model has nothing for "the mouse said to"',
         'The neural model learned that mouse and queen are used alike',
         'The generated text is rough — 26,000 parameters, two minutes, one book',
-      ],
-    },
-  },
-  {
-    type: 'standard',
-    content: {
-      title: 'Embeddings',
-      icon: 'compass',
-      points: [
-        'Each token gets a learned vector of 16 numbers',
-        'Nobody told the model what any token means',
-        'Tokens used in similar ways end up with **similar vectors**',
-        'See `demo/output/05_neural_model_embeddings.txt`',
-        'We come back to embeddings later in the course',
       ],
     },
   },

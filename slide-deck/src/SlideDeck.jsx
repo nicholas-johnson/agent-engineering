@@ -21,6 +21,7 @@ import {
   EquationSlide,
   CardsSlide,
   DescriptionSlide,
+  NetworkSlide,
 } from "./components";
 
 // Keep in sync with scripts/export-slides-pdf.mjs (SLIDE_WIDTH / SLIDE_HEIGHT).
@@ -93,6 +94,8 @@ function SlideBody({ slide }) {
       return <CardsSlide content={slide.content} />;
     case "description":
       return <DescriptionSlide content={slide.content} />;
+    case "network":
+      return <NetworkSlide content={slide.content} />;
     default:
       return <StandardSlide content={slide.content} />;
   }
@@ -167,7 +170,8 @@ function SlideViewer({ slides }) {
 
   return (
     <div className="w-screen h-screen flex flex-col bg-slate-900 text-white overflow-hidden">
-      <SlideBody slide={slide} />
+      {/* Keyed, so a slide's own state (such as a network's step) never carries over to the next. */}
+      <SlideBody key={currentSlide} slide={slide} />
 
       <SlideFooter>
         <button

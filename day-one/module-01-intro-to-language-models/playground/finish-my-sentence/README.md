@@ -1,14 +1,22 @@
 # Finish my sentence
 
-Type the start of a sentence and watch all four counting models from the demos finish it, side by side. They are the models trained on the whole book.
+From the module folder (`day-one/module-01-intro-to-language-models`):
 
 ```bash
-uv run python play.py
+uv run python playground/finish-my-sentence/play.py
 ```
 
-Run demos 1–4 first: this loads the model files they write to `demo/output/`.
+Or without `uv` (standard library only, no packages needed):
 
-When a model reaches a context it has never seen, it gives up and prints `[stuck]`.
+```bash
+python3 playground/finish-my-sentence/play.py
+```
+
+Builds all four counting models directly from `data/alice.txt`. Press Enter on an empty line to stop.
+
+---
+
+Type the start of a sentence and watch all four counting models finish it, side by side. When a model reaches a context it has never seen, it gives up and prints `[stuck]`.
 
 ```text
 Start a sentence (Enter to stop): the queen said
@@ -30,7 +38,7 @@ Four tokens:   the queen said  [stuck]
 2. **Show the odds.** Print the probability of each word as it is chosen. Where is the model sure, and where is it guessing?
 3. **Don't get stuck.** When the five-word model is stuck, fall back to the word-pair model instead of giving up. (The `backoff` playground does this properly.)
 4. **Add the neural model.** Train one with the `neural-knobs` playground, then load its `model.json` here and add a fifth line. Does it ever get stuck?
-5. **Use chapter 1.** Swap in the `alice-chapter-1` model files. How much more often does each model get stuck?
+5. **Use chapter 1.** Change `CORPUS` at the top of `play.py` to `DATA / "alice-chapter-1.txt"`. How much more often does each model get stuck?
 
 ## Questions
 

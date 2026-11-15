@@ -1,3 +1,10 @@
+# Calculator — watch an agent plan multi-step calculations across six MCP maths tools.
+# Run from the module folder: uv run python playground/calculator/play.py
+#                         or: source ../../.venv/bin/activate && python playground/calculator/play.py
+#
+# To play: add multi-step word problems to QUESTIONS, remove "Use the tools for every
+# calculation." from INSTRUCTIONS, or add/remove tools in server.py (see README.md).
+
 import asyncio
 import json
 import sys
@@ -22,11 +29,13 @@ QUESTIONS = [
     "A rectangle is 1,234.5 cm by 678.9 cm. How long is its diagonal?",
 ]
 
+# Start server.py in a subprocess using the same Python interpreter that ran play.py.
 SERVER = StdioServerParameters(command=sys.executable, args=[str(HERE / "server.py")])
 openai = OpenAI()
 
 
 async def ask(calculator, tools, question):
+    # Tool loop: ask the model, run any tool calls it requests, and repeat until it answers.
     conversation = [{"role": "user", "content": question}]
     print(f"You: {question}")
     while True:
@@ -51,6 +60,7 @@ async def ask(calculator, tools, question):
 
 
 async def main():
+    # Connect to the MCP server, fetch its tool definitions, and run each question.
     async with Client(SERVER) as calculator:
         tools = [
             {"type": "function", "name": t.name, "description": t.description, "parameters": t.input_schema}

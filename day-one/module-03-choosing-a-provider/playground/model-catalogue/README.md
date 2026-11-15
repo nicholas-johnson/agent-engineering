@@ -1,12 +1,22 @@
 # Model catalogue
 
-There are far more models than the 32 in `data/prices.json`. This downloads OpenRouter's public list of every model it offers, and filters it by what you need.
+From the module folder (`day-one/module-03-choosing-a-provider`):
 
 ```bash
-uv run python play.py
+uv run python playground/model-catalogue/play.py
 ```
 
-No API key needed. The filters are at the top of `play.py`. The full list, with every detail OpenRouter publishes about each model, is written to `output/catalogue.json`: search it.
+Or without `uv` (standard library only, no packages needed):
+
+```bash
+python3 playground/model-catalogue/play.py
+```
+
+No API key needed (requires an internet connection). The full list, with every detail OpenRouter publishes about each model, is written to `playground/model-catalogue/output/catalogue.json`: search it.
+
+---
+
+There are far more models than the 32 in `data/prices.json`. This downloads OpenRouter's public list of every model it offers, and filters it by what you need. The filters are at the top of `play.py`.
 
 The starting filters ask for an open-weight model that reads images, has a context window of at least a million tokens, and costs at most $0.50 per million input tokens:
 
@@ -30,7 +40,7 @@ $ 0.100 in  $ 0.300 out  1,310,720 tokens  meta-llama/llama-4-scout
 ## Try this
 
 1. **Your requirements.** Set the filters for a project of your own. How many models are left?
-2. **Open `output/catalogue.json`.** Find a model and look at `supported_parameters`. Which models support `temperature`? Which have `reasoning`?
+2. **Open `playground/model-catalogue/output/catalogue.json`.** Find a model and look at `supported_parameters`. Which models support `temperature`? Which have `reasoning`?
 3. **Who has the most?** Count the models per lab (the part of the ID before the `/`). Which labs have the most models listed?
 4. **Newest first.** Each model has a `created` timestamp. List the ten newest. How many were released this month?
 5. **Speech and video.** Change the filter to models that take `audio` or `video` as input. Which labs offer them?

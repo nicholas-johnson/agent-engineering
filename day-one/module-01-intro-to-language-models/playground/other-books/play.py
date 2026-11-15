@@ -1,3 +1,10 @@
+# Other books — train the character model on prose, a sequel, and Python source code.
+# Run from the module folder: uv run python playground/other-books/play.py
+#                         or: python3 playground/other-books/play.py
+#
+# To play: change WINDOW or LENGTH below, or add your own text/code to `corpora`
+# (try combining Alice + Python into one corpus; see README.md).
+
 import argparse
 import calendar
 import random
@@ -11,11 +18,14 @@ MODULE = HERE.parent.parent
 OUTPUT = HERE / "output"
 OUTPUT.mkdir(exist_ok=True)
 
+# Number of characters of context, and how many characters to generate per sample.
 WINDOW = 8
 LENGTH = 400
 
+# Read four standard-library modules directly from your Python installation.
 python_code = "".join(Path(m.__file__).read_text() for m in [argparse, calendar, shutil, textwrap])
 
+# Each entry maps corpus name -> (training text, starting prompt).
 corpora = {
     "alice": ((MODULE / "data" / "alice.txt").read_text(), "Alice was "),
     "looking-glass": ((HERE / "looking-glass.txt").read_text(), "Alice was "),
@@ -24,6 +34,7 @@ corpora = {
 
 
 def build_model(text):
+    # Keep case, newlines and indentation intact so generated code looks like code.
     model = defaultdict(Counter)
     for i in range(len(text) - WINDOW):
         model[text[i : i + WINDOW]][text[i + WINDOW]] += 1
@@ -38,6 +49,7 @@ def generate(model, start):
     return text
 
 
+# Train on each corpus, save three samples to output/<name>.txt, and print the first.
 for name, (text, start) in corpora.items():
     model = build_model(text)
     samples = [generate(model, start) for _ in range(3)]

@@ -1,12 +1,23 @@
 # Open versus closed
 
-A small open model on your laptop against a hosted frontier model, on the same four questions: a fact from *Alice*, a classic trick question, a translation and some code.
+From the module folder (`day-one/module-03-choosing-a-provider`):
 
 ```bash
-uv run python play.py
+uv run python playground/open-vs-closed/play.py
 ```
 
-It needs `OPENAI_API_KEY`, and Ollama running with `qwen3:1.7b`. The answers are written to `output/answers.json`.
+Or without `uv` (set up `.venv` once at the repo root with `python3 -m venv .venv && .venv/bin/pip install -e .`):
+
+```bash
+source ../../.venv/bin/activate
+python playground/open-vs-closed/play.py
+```
+
+Needs `OPENAI_API_KEY` in `.env`, and Ollama running with `qwen3:1.7b` (`ollama pull qwen3:1.7b`). The answers are written to `playground/open-vs-closed/output/answers.json`.
+
+---
+
+A small open model on your laptop against a hosted frontier model, on the same four questions: a fact from *Alice*, a classic trick question, a translation and some code.
 
 ```text
 === What is the March Hare's excuse for there being no room at the tea table? ===

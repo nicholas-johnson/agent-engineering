@@ -1,16 +1,27 @@
 # Neural knobs
 
-The neural model from demo 5, with two changes:
-
-- **It saves what it learned.** `train.py` trains the model and writes it to `output/model.json`. `complete.py` loads that file, so you can train once and complete as many sentences as you like.
-- **It shows the loss as it trains**, so you can see what each setting does.
+From the module folder (`day-one/module-01-intro-to-language-models`):
 
 ```bash
-uv run python train.py
-uv run python complete.py
+uv run python playground/neural-knobs/train.py
+uv run python playground/neural-knobs/complete.py
 ```
 
-No demos need to be run first. Training takes a minute or two with the default settings.
+Or without `uv` (standard library only, no packages needed):
+
+```bash
+python3 playground/neural-knobs/train.py
+python3 playground/neural-knobs/complete.py
+```
+
+Training takes a minute or two with the default settings and saves `playground/neural-knobs/output/model.json`; `complete.py` is interactive (press Enter on an empty line to stop).
+
+---
+
+The neural model from demo 5, with two changes:
+
+- **It saves what it learned.** `train.py` trains the model and writes it to `playground/neural-knobs/output/model.json`. `complete.py` loads that file, so you can train once and complete as many sentences as you like.
+- **It shows the loss as it trains**, so you can see what each setting does.
 
 ```text
 Loss from random guessing: 6.21

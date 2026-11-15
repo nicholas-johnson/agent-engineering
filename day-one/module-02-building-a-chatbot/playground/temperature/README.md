@@ -1,12 +1,25 @@
 # Temperature
 
-In Module 1's temperature playground, temperature 5 turned our word-pair model into chaos. What does it do to a real model?
-
-This asks `gpt-6-luna` the same question eight times at each temperature from 0 to 2 (the API's maximum), and writes the answers to `output/temperatures.txt`.
+From the module folder (`day-one/module-02-building-a-chatbot`):
 
 ```bash
-uv run python play.py
+uv run python playground/temperature/play.py
 ```
+
+Or without `uv` (set up `.venv` once at the repo root with `python3 -m venv .venv && .venv/bin/pip install -e .`):
+
+```bash
+source ../../.venv/bin/activate
+python playground/temperature/play.py
+```
+
+Needs `OPENAI_API_KEY` in `.env`.
+
+---
+
+In Module 1's temperature playground, temperature 5 turned our word-pair model into chaos. What does it do to a real model?
+
+This asks `gpt-6-luna` the same question eight times at each temperature from 0 to 2 (the API's maximum), and writes the answers to `playground/temperature/output/temperatures.txt`.
 
 ```text
 0.0  Otter, Otter, Otter, Otter, Otter, Otter, Otter, Otter

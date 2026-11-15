@@ -9,6 +9,13 @@
 //
 // Keys are "frame.step", as in the address bar. Each step's state is every entry up to it, so
 // stepping back or reloading lands in the right place. See the clip-deck README for every field.
+//
+// Outside a clip (the slide decks use it), pass options and drive it yourself:
+//
+//   const net = new Network(svg, { stage: { width: 1600, height: 700 }, listen: false, steps: ["0", "1"] });
+//   net.script({ "0": { layers: [3, 6, 5] }, "1": { pulse: "forward" } });
+//   net.goTo(1, true);   // show step 1; true plays its effects
+//   net.destroy();       // when done
 
 (() => {
   const NS = "http://www.w3.org/2000/svg";
@@ -69,9 +76,16 @@
   }
 
   class Network {
-    constructor(target) {
+    // options: stage { width, height } (default: the 1080×1920 clip stage), box (where the network
+    // sits by default), pad, steps (the step keys, if there is no clip), and listen (follow the
+    // clip's "clip:step" events: on by default).
+    constructor(target, options = {}) {
       this.svg = typeof target === "string" ? document.querySelector(target) : target;
-      this.svg.setAttribute("viewBox", `0 0 ${STAGE.width} ${STAGE.height}`);
+      this.stage = { ...STAGE, ...options.stage };
+      this.defaultBox = { ...BOX, ...options.box };
+      this.defaultPad = { ...PAD, ...options.pad };
+      this.stepKeys = options.steps ?? null;
+      this.svg.setAttribute("viewBox", `0 0 ${this.stage.width} ${this.stage.height}`);
       const id = this.svg.id || "network";
 
       const defs = make("defs", {}, this.svg);
@@ -90,11 +104,28 @@
       this.bars = new Map();
       this.pulses = [];
       this.tweens = [];
-      this.view = { zoom: 0, cx: STAGE.width / 2, cy: STAGE.height / 2, field: 0, opacity: 1 };
-      this.box = { ...BOX };
+      this.view = { zoom: 0, cx: this.stage.width / 2, cy: this.stage.height / 2, field: 0, opacity: 1 };
+      this.box = { ...this.defaultBox };
       this.entries = new Map();
       this.tick = this.tick.bind(this);
-      document.addEventListener("clip:step", (event) => this.go(event.detail));
+      this.onStep = (event) => this.go(event.detail);
+      if (options.listen !== false) document.addEventListener("clip:step", this.onStep);
+    }
+
+    // Stop following the clip and stop animating. The caller removes the SVG's contents.
+    destroy() {
+      this.dead = true;
+      document.removeEventListener("clip:step", this.onStep);
+    }
+
+    // Every step's key, in order: the clip's, or the ones this network was given.
+    steps() {
+      return this.stepKeys ?? window.clip.steps;
+    }
+
+    // Show a step by its place in the list. Pass true when it is one step on, to play its effects.
+    goTo(index, forward = false) {
+      this.go({ key: this.steps()[index], index, forward });
     }
 
     script(entries) {
@@ -105,7 +136,7 @@
     // Everything up to and including a step, applied in order.
     stateAt(index) {
       const state = { layers: [], nudges: [] };
-      for (const key of window.clip.steps.slice(0, index + 1)) {
+      for (const key of this.steps().slice(0, index + 1)) {
         const entry = this.entries.get(key);
         if (!entry) continue;
         for (const [name, value] of Object.entries(entry)) {
@@ -157,8 +188,8 @@
 
     apply(state, animate, pulses) {
       const layers = state.layers;
-      const box = { ...BOX, ...state.box };
-      const { nodes, edges } = this.layout(layers, box, { ...PAD, ...state.pad }, state.radius, state.spacing);
+      const box = { ...this.defaultBox, ...state.box };
+      const { nodes, edges } = this.layout(layers, box, { ...this.defaultPad, ...state.pad }, state.radius, state.spacing);
       const time = (ms) => (animate ? ms : 0);
       const steps = Math.max(1, layers.length - 1);
 
@@ -322,6 +353,10 @@
     }
 
     tick(now) {
+      if (this.dead) {
+        this.running = false;
+        return;
+      }
       this.tweens = this.tweens.filter((tween) => {
         const progress = (now - tween.start) / tween.duration;
         if (progress < 0) return true;
@@ -418,7 +453,7 @@
       const { cx, cy } = this.view;
       this.svg.setAttribute(
         "viewBox",
-        `${cx - (cx * scale)} ${cy - (cy * scale)} ${STAGE.width * scale} ${STAGE.height * scale}`,
+        `${cx - (cx * scale)} ${cy - (cy * scale)} ${this.stage.width * scale} ${this.stage.height * scale}`,
       );
       this.field.setAttribute("opacity", this.view.field * 0.5);
       this.root.setAttribute("opacity", this.view.opacity);

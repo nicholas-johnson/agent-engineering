@@ -1,3 +1,10 @@
+# Vision — ask a multimodal model to describe every image in playground/vision/images/.
+# Run from the module folder: uv run python playground/vision/play.py
+#                         or: source ../../.venv/bin/activate && python playground/vision/play.py
+#
+# To play: drop your own PNG/JPEG/WebP/GIF files into images/, change QUESTION below,
+# or add "detail": "low" / "high" to the input_image dict (see README.md).
+
 import base64
 import mimetypes
 from pathlib import Path
@@ -17,6 +24,7 @@ QUESTION = "Describe this picture in two sentences."
 client = OpenAI()
 descriptions = []
 
+# Encode each image in images/ as a base64 data URL and send it alongside QUESTION.
 for image in sorted((HERE / "images").iterdir()):
     mime_type = mimetypes.guess_type(image.name)[0]
     if mime_type not in {"image/png", "image/jpeg", "image/webp", "image/gif"}:
