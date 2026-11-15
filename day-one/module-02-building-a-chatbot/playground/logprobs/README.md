@@ -39,11 +39,11 @@ The left column is the token the model chose, and the rest are its top choices a
 
 ## Things to notice
 
-- **It has memorised *Alice*.** After "very", it is 100% sure of every token: it is reciting the opening line of the book, just like our five-word model in Module 1.
+- **It has memorised _Alice_.** After "very", it is 100% sure of every token: it is reciting the opening line of the book, just like our five-word model in Module 1.
 - **`' Paris'` and `'Paris'` are different tokens.** One has a leading space. The model splits its bet between them, but either way the answer is Paris. This is Module 1's tokenizer at work.
 - **The model is usually very sure.** That's why the `temperature` playground needs temperature 1.5 before the answer changes.
 - The API calls these **log probabilities** (`logprob`), the natural log of the probability. The script turns them back into percentages with `math.exp`.
-- Log probabilities only work with reasoning effort `"none"`. Otherwise the API says *"logprobs are not supported with reasoning models."*
+- Log probabilities only work with reasoning effort `"none"`. Otherwise the API says _"logprobs are not supported with reasoning models."_
 
 ## Try this
 
@@ -68,7 +68,7 @@ For discussion. There are no right answers.
 
 ## Rabbit holes
 
-Optional. These leave the script.
+Optional extensions and interesting things to look at.
 
-1. **Semantic entropy.** **Farquhar, S., Kossen, J., Kuhn, L. & Gal, Y. (2024). "Detecting hallucinations in large language models using semantic entropy." *Nature* 630:625–630.** [PMC11186750](https://pmc.ncbi.nlm.nih.gov/articles/PMC11186750/). A token at 40% can be the same answer as the token at 60%. Sample several replies, group them by what they mean, and measure the uncertainty of the groups. The percentages in this playground are per token. Semantic entropy is per meaning.
+1. **Semantic entropy.** **Farquhar, S., Kossen, J., Kuhn, L. & Gal, Y. (2024). "Detecting hallucinations in large language models using semantic entropy." _Nature_ 630:625–630.** [PMC11186750](https://pmc.ncbi.nlm.nih.gov/articles/PMC11186750/). A token at 40% can be the same answer as the token at 60%. Sample several replies, group them by what they mean, and measure the uncertainty of the groups. The percentages in this playground are per token. Semantic entropy is per meaning.
 2. **A wrong answer it is sure of.** Ask something the model usually misses, several times. If every sample says the same wrong thing, both kinds of uncertainty are low: it is sure, and wrong. The paper is about the other case, where the words change and the meaning changes with them.

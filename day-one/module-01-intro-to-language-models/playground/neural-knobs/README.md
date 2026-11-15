@@ -42,15 +42,15 @@ the mouse said to a they!
 
 All at the top of `train.py`:
 
-| Setting | Default | What it is |
-|---------|---------|------------|
-| `CONTEXT` | 3 | How many tokens the model looks at |
-| `EMBEDDING_SIZE` | 16 | How many numbers describe each token |
-| `HIDDEN_SIZE` | 32 | How many neurons in the hidden layer |
-| `LEARNING_RATE` | 0.05 | How big a nudge each training step gives |
-| `STEPS` | 30000 | How many training examples it sees |
+| Setting          | Default | What it is                               |
+| ---------------- | ------- | ---------------------------------------- |
+| `CONTEXT`        | 3       | How many tokens the model looks at       |
+| `EMBEDDING_SIZE` | 16      | How many numbers describe each token     |
+| `HIDDEN_SIZE`    | 32      | How many neurons in the hidden layer     |
+| `LEARNING_RATE`  | 0.05    | How big a nudge each training step gives |
+| `STEPS`          | 30000   | How many training examples it sees       |
 
-Change one at a time, retrain, and compare the final loss and the completions. Lower loss is better, but remember the model only ever sees *Alice*, so a very low loss can just mean it has memorised the book.
+Change one at a time, retrain, and compare the final loss and the completions. Lower loss is better, but remember the model only ever sees _Alice_, so a very low loss can just mean it has memorised the book.
 
 ## Try this
 
@@ -71,12 +71,12 @@ For discussion. There are no right answers.
 
 ## Further reading
 
-- **Bengio, Y., Ducharme, R., Vincent, P. & Jauvin, C. (2003). "A Neural Probabilistic Language Model." *Journal of Machine Learning Research* 3:1137–1155.** [PDF](https://www.jmlr.org/papers/volume3/bengio03a/bengio03a.pdf). The model you are training. The introduction is the problem the knobs are for: too many contexts to count, so learn a vector for each word.
+- **Bengio, Y., Ducharme, R., Vincent, P. & Jauvin, C. (2003). "A Neural Probabilistic Language Model." _Journal of Machine Learning Research_ 3:1137–1155.** [PDF](https://www.jmlr.org/papers/volume3/bengio03a/bengio03a.pdf). The model you are training. The introduction is the problem the knobs are for: too many contexts to count, so learn a vector for each word.
 - **Kaplan, J., McCandlish, S., Henighan, T., Brown, T. B., Chess, B., Child, R., Gray, S., Radford, A., Wu, J. & Amodei, D. (2020). "Scaling Laws for Neural Language Models."** [arXiv:2001.08361](https://arxiv.org/abs/2001.08361). What happens to the loss as the model gets bigger and the training gets longer. It falls smoothly, as a power law.
 
 ## Rabbit holes
 
-Optional. These leave the script.
+Optional extensions and interesting things to look at.
 
 1. **makemore, part 2.** Andrej Karpathy's second makemore lecture, on [karpathy.ai/zero-to-hero](https://karpathy.ai/zero-to-hero.html), builds this model line by line: a vector per word, one hidden layer, a loss, a backward pass.
 2. **Check the gradients.** Rebuild `forward` in PyTorch and compare its gradients with the ones `train.py` works out by hand. Where they disagree, the hand-written backward pass is wrong.

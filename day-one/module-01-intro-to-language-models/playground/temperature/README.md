@@ -58,11 +58,11 @@ For discussion. There are no right answers.
 
 ## Further reading
 
-- **Holtzman, A., Buys, J., Du, L., Forbes, M. & Choi, Y. (2020). "The Curious Case of Neural Text Degeneration." *ICLR 2020*.** [arXiv:1904.09751](https://arxiv.org/abs/1904.09751). Why always picking the most likely word goes round in circles, on large neural models as well as this one. **Top-p** sampling, in the exercises, comes from this paper.
+- **Holtzman, A., Buys, J., Du, L., Forbes, M. & Choi, Y. (2020). "The Curious Case of Neural Text Degeneration." _ICLR 2020_.** [arXiv:1904.09751](https://arxiv.org/abs/1904.09751). Why always picking the most likely word goes round in circles, on large neural models as well as this one. **Top-p** sampling, in the exercises, comes from this paper.
 
 ## Rabbit holes
 
-Optional. These leave the script.
+Optional extensions and interesting things to look at.
 
 1. **llama.cpp's sampler.** Temperature, top-k, top-p and min-p are separate steps in a chain. Read `llama_sampler` in [llama.cpp](https://github.com/ggml-org/llama.cpp) and match each step to the formula above.
-2. **Min-p.** **Nguyen, M. N. et al. (2025). "Turning Up the Heat: Min-p Sampling for Creative and Coherent LLM Outputs." *ICLR 2025*.** [arXiv:2407.01082](https://arxiv.org/abs/2407.01082). Drop every token whose probability is below a fraction of the top token's. Implement it beside top-p, and see which one still makes sense at a high temperature.
+2. **Min-p.** **Nguyen, M. N. et al. (2025). "Turning Up the Heat: Min-p Sampling for Creative and Coherent LLM Outputs." _ICLR 2025_.** [arXiv:2407.01082](https://arxiv.org/abs/2407.01082). Drop every token whose probability is below a fraction of the top token's. Implement it beside top-p, and see which one still makes sense at a high temperature.

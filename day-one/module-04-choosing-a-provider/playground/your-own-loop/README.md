@@ -68,12 +68,12 @@ For discussion. There are no right answers.
 
 ## Further reading
 
-- **Holtzman, A., Buys, J., Du, L., Forbes, M. & Choi, Y. (2020). "The Curious Case of Neural Text Degeneration." *ICLR 2020*.** [arXiv:1904.09751](https://arxiv.org/abs/1904.09751). The line that picks the next token. Temperature, and why always taking the top token starts to repeat. The first two exercises are this paper.
-- **Pope, R. et al. (2023). "Efficiently Scaling Transformer Inference." *MLSys 2023*.** [arXiv:2211.05102](https://arxiv.org/abs/2211.05102). Why each step runs the whole sequence through the model again, and the cache that avoids it. That is the last exercise.
+- **Holtzman, A., Buys, J., Du, L., Forbes, M. & Choi, Y. (2020). "The Curious Case of Neural Text Degeneration." _ICLR 2020_.** [arXiv:1904.09751](https://arxiv.org/abs/1904.09751). The line that picks the next token. Temperature, and why always taking the top token starts to repeat. The first two exercises are this paper.
+- **Pope, R. et al. (2023). "Efficiently Scaling Transformer Inference." _MLSys 2023_.** [arXiv:2211.05102](https://arxiv.org/abs/2211.05102). Why each step runs the whole sequence through the model again, and the cache that avoids it. That is the last exercise.
 
 ## Rabbit holes
 
-Optional. These leave the script.
+Optional extensions and interesting things to look at.
 
 1. **`GenerationMixin._sample`.** In the `transformers` source, `src/transformers/generation/utils.py`. Find the loop. The lines that take the last logits, turn them into probabilities, sample, and append are this playground.
 2. **The cache beside it.** `past_key_values` is updated on each pass through that loop, which is why the library doesn't run the whole sequence again. That is the last exercise, with the real names on it.

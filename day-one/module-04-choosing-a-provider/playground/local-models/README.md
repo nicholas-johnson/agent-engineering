@@ -37,7 +37,7 @@ qwen3:1.7b    1.2s  ... ### Final Answer: **17**
 
 ## Things to notice
 
-- **Bigger isn't always right.** The 1.7B model blended Charles Dickens with Charles Dodgson (Lewis Carroll's real name). On an earlier run it got the name right but gave the year as 1871, which is when *Through the Looking-Glass* came out. Small models know facts loosely and get them wrong with complete confidence.
+- **Bigger isn't always right.** The 1.7B model blended Charles Dickens with Charles Dodgson (Lewis Carroll's real name). On an earlier run it got the name right but gave the year as 1871, which is when _Through the Looking-Glass_ came out. Small models know facts loosely and get them wrong with complete confidence.
 - **Both are fast.** Under a second for a short answer, on a laptop, for free.
 
 ## Try this
@@ -60,11 +60,11 @@ For discussion. There are no right answers.
 ## Further reading
 
 - **Qwen Team (2025). "Qwen3 Technical Report."** [arXiv:2505.09388](https://arxiv.org/abs/2505.09388). The family in this playground. Look for how one family covers sizes from 0.6 billion parameters up, and how the small models learn from the big ones.
-- **Frantar, E., Ashkboos, S., Hoefler, T. & Alistarh, D. (2023). "GPTQ: Accurate Post-Training Quantization for Generative Pre-trained Transformers." *ICLR 2023*.** [arXiv:2210.17323](https://arxiv.org/abs/2210.17323). How a trained model's weights are squeezed into a few bits. This is why `qwen3:1.7b` is a 1.4 GB download rather than 3.4 GB.
+- **Frantar, E., Ashkboos, S., Hoefler, T. & Alistarh, D. (2023). "GPTQ: Accurate Post-Training Quantization for Generative Pre-trained Transformers." _ICLR 2023_.** [arXiv:2210.17323](https://arxiv.org/abs/2210.17323). How a trained model's weights are squeezed into a few bits. This is why `qwen3:1.7b` is a 1.4 GB download rather than 3.4 GB.
 
 ## Rabbit holes
 
-Optional. These leave the script.
+Optional extensions and interesting things to look at.
 
 1. **The modelfile.** `ollama show qwen3:1.7b --modelfile`. It names the quant, the chat template, and the stop tokens. The template is why thinking is on or off.
 2. **The file format.** The [GGUF spec](https://github.com/ggml-org/ggml/blob/master/docs/gguf.md) is what that quant name means: which weights were stored, and at how many bits. Pull a second quant from the [tags page](https://ollama.com/library/qwen3/tags), ask the same three questions, and note where the answers change.

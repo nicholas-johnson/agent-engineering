@@ -35,7 +35,7 @@ Turn  Input tokens  Output tokens
 Total input tokens over 10 turns: 3217
 ```
 
-Each message is short, but every turn resends every message before it. Turn 10 sends 25 times as much as turn 1. Over the whole conversation the input adds up roughly with the *square* of the number of turns: double the length of the conversation and you roughly quadruple the cost.
+Each message is short, but every turn resends every message before it. Turn 10 sends 25 times as much as turn 1. Over the whole conversation the input adds up roughly with the _square_ of the number of turns: double the length of the conversation and you roughly quadruple the cost.
 
 The last message asks the chatbot to remind Alice of everything that has happened, and it can, because it has the whole conversation in front of it.
 
@@ -57,12 +57,12 @@ For discussion. There are no right answers.
 
 ## Further reading
 
-- **Liu, N. F. et al. (2024). "Lost in the Middle: How Language Models Use Long Contexts." *Transactions of the ACL* 12:157–173.** [arXiv:2307.03172](https://arxiv.org/abs/2307.03172). Hide a fact in a long context and models find it at the start or the end, and often miss it in the middle. Figure 1 is the U-shape. Worth knowing once a conversation is long enough to be expensive.
+- **Liu, N. F. et al. (2024). "Lost in the Middle: How Language Models Use Long Contexts." _Transactions of the ACL_ 12:157–173.** [arXiv:2307.03172](https://arxiv.org/abs/2307.03172). Hide a fact in a long context and models find it at the start or the end, and often miss it in the middle. Figure 1 is the U-shape. Worth knowing once a conversation is long enough to be expensive.
 - **Packer, C. et al. (2023). "MemGPT: Towards LLMs as Operating Systems."** [arXiv:2310.08560](https://arxiv.org/abs/2310.08560). When the conversation will not fit, keep the recent part and let the model fetch the rest. A larger version of the summarising exercise.
 
 ## Rabbit holes
 
-Optional. These leave the script.
+Optional extensions and interesting things to look at.
 
 1. **The cache, in bytes.** A KV cache is about `2 × layers × kv_heads × head_dim × tokens × 2`, the last 2 being bytes in a 16-bit cache. Work it out for this ten-turn chat, then for 100,000 tokens. The `cached_tokens` column is how much of that a provider managed to reuse.
 2. **Prompt caching.** OpenAI's [prompt caching guide](https://developers.openai.com/api/docs/guides/prompt-caching). The hosted version of the same sum: what has to stay identical at the start of the request, and when the discount starts.

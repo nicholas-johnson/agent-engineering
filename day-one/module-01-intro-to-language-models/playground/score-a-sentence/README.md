@@ -60,12 +60,12 @@ For discussion. There are no right answers.
 
 ## Further reading
 
-- **Chen, S. F. & Goodman, J. (1999). "An empirical study of smoothing techniques for language modeling." *Computer Speech & Language* 13(4):359–394.** What to do about word pairs the model has never seen. They compare the methods of the time on the same data. Read it after trying `SMOOTHING = 1`.
-- **Shannon, C. E. (1951). "Prediction and Entropy of Printed English." *Bell System Technical Journal* 30(1):50–64.** How surprised a reader is by the next letter of English. Perplexity, the number this playground prints, is that surprise measured on words.
+- **Chen, S. F. & Goodman, J. (1999). "An empirical study of smoothing techniques for language modeling." _Computer Speech & Language_ 13(4):359–394.** What to do about word pairs the model has never seen. They compare the methods of the time on the same data. Read it after trying `SMOOTHING = 1`.
+- **Shannon, C. E. (1951). "Prediction and Entropy of Printed English." _Bell System Technical Journal_ 30(1):50–64.** How surprised a reader is by the next letter of English. Perplexity, the number this playground prints, is that surprise measured on words.
 
 ## Rabbit holes
 
-Optional. These leave the script.
+Optional extensions and interesting things to look at.
 
-1. **GLTR.** **Gehrmann, S., Strobelt, H. & Rush, A. M. (2019). "GLTR: Statistical Detection and Visualization of Generated Text." *ACL System Demonstrations*, 111–116.** [Paper](https://aclanthology.org/P19-3019.pdf), and the tool at [gltr.io](http://gltr.io/). `scores.txt` is already most of what they built: colour each word by its probability.
+1. **GLTR.** **Gehrmann, S., Strobelt, H. & Rush, A. M. (2019). "GLTR: Statistical Detection and Visualization of Generated Text." _ACL System Demonstrations_, 111–116.** [Paper](https://aclanthology.org/P19-3019.pdf), and the tool at [gltr.io](http://gltr.io/). `scores.txt` is already most of what they built: colour each word by its probability.
 2. **Their demo.** Paste the real sentence and the backwards one into the tool, and compare its colours with `scores.txt`. Their model was trained on different text, so the colours will not match. Where do the two still agree?

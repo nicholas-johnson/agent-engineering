@@ -68,12 +68,12 @@ For discussion. There are no right answers.
 
 ## Further reading
 
-- **Noels, S. et al. (2025). "What Large Language Models Do Not Talk About: An Empirical Study of Moderation and Censorship Practices." *ECML PKDD 2025*, 265–281.** [arXiv:2504.03803](https://arxiv.org/abs/2504.03803). The same kind of comparison, on 14 models. They separate a refusal from an answer that quietly leaves something out. Reread `answers.json` with that distinction in mind.
+- **Noels, S. et al. (2025). "What Large Language Models Do Not Talk About: An Empirical Study of Moderation and Censorship Practices." _ECML PKDD 2025_, 265–281.** [arXiv:2504.03803](https://arxiv.org/abs/2504.03803). The same kind of comparison, on 14 models. They separate a refusal from an answer that quietly leaves something out. Reread `answers.json` with that distinction in mind.
 - **Bai, Y. et al. (2022). "Constitutional AI: Harmlessness from AI Feedback."** [arXiv:2212.08073](https://arxiv.org/abs/2212.08073). One way a lab writes down what its model should refuse: a short list of principles. Useful beside the question of who decides.
 
 ## Rabbit holes
 
-Optional. These leave the script.
+Optional extensions and interesting things to look at.
 
 1. **The principle list.** In that same paper, read the principles themselves. Mark which of this playground's five questions each one would cover.
 2. **Article 4.** The [Interim Measures for the Management of Generative Artificial Intelligence Services](https://www.chinalawtranslate.com/en/generative-ai-interim/) (China, 2023), in English. Article 4 is the rule about core socialist values. Mark the same five questions against it.

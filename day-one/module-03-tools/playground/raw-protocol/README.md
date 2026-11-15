@@ -68,7 +68,7 @@ For discussion. There are no right answers.
 
 ## Rabbit holes
 
-Optional. These leave the script.
+Optional extensions and interesting things to look at.
 
 1. **The inspector.** From the module folder: `npx @modelcontextprotocol/inspector uv run python demo/03_maths_server.py`. Open the Protocol tab and diff its transcript with `playground/raw-protocol/output/messages.json`. The interesting lines are the fields this script never sends. The [inspector guide](https://modelcontextprotocol.io/docs/2025-11-25/tools/inspector) explains the tabs.
 2. **Prompts and resources.** The server advertises both, and this script ignores them. In the inspector they are tabs you can click. Call one, and compare the JSON with a `tools/call`.
