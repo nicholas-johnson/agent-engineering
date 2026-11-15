@@ -10,8 +10,8 @@ export const slides = [
   {
     type: 'title',
     content: {
-      title: 'Module 4 — Tools',
-      subtitle: 'Giving the model something to do',
+      title: 'Module 3 — Tools',
+      subtitle: 'Giving the agent hands and feet',
       icon: 'wrench',
     },
   },
@@ -19,23 +19,13 @@ export const slides = [
     type: 'comparison',
     content: {
       title: 'Two kinds of clever',
-      left: {
-        label: 'A language model',
-        items: [
-          'Reads any question',
-          'Understands what you meant',
-          'Explains the answer',
-          'Predicts text — never calculates',
-        ],
-      },
       right: {
+        label: 'A language model',
+        items: ['Unpredictable', 'Flexible', 'Inefficient', 'Understands what you mean'],
+      },
+      left: {
         label: 'A computer program',
-        items: [
-          'Exact, every time',
-          'Instant',
-          'Can reach the internet',
-          'Only does what it is told',
-        ],
+        items: ['Exact, every time.', 'Idempotent.', 'Fast', 'Only does what it is told'],
       },
     },
   },
@@ -60,7 +50,7 @@ response = client.responses.create(
     reasoning={"effort": "none"},
     input=QUESTION,
 )`,
-      highlights: ['Asked three times', "Compared with Python's `math.sqrt`"],
+      highlights: ['2766.6443573398'],
     },
   },
   {
@@ -81,9 +71,8 @@ Model: ... is 2,766.6442826149.
 
 The right answer: 2766.6443573398`,
       highlights: [
-        'Three answers, all confident, all wrong',
+        'Three answers, all confidently wrong',
         'It is **predicting** digits, not calculating them',
-        'Nothing tells you which digits to trust',
       ],
     },
   },
@@ -95,9 +84,8 @@ The right answer: 2766.6443573398`,
       points: [
         'Turn reasoning effort up, and it works it through step by step',
         'Six tries at `low`, `medium` and `high`: right every time',
-        'But **9 to 57 seconds**, and 668 to 4,543 thinking tokens each',
-        'Still a model predicting digits — no guarantee',
-        "The tool we're about to build: about a second, and exact",
+        'But **9 to 57 seconds**, and 668 to 4,543 tokens each',
+        "There's still no guarantee",
       ],
     },
   },
@@ -121,7 +109,7 @@ The right answer: 2766.6443573398`,
 
 
 print(f"square_root(7654321) = {square_root(7654321):.10f}")`,
-      highlights: ['One line of real work', 'Remember the docstring — it matters soon'],
+      highlights: ['One line of real work', 'Notice the docstring'],
     },
   },
   {
@@ -188,10 +176,37 @@ server.run()`,
     },
   },
   {
+    type: 'comparison',
+    content: {
+      title: 'A subprocess, not a server',
+      left: {
+        label: 'What we use: stdio',
+        items: [
+          'The agent starts the server as a child process',
+          'JSON messages over stdin and stdout',
+          'Lives as long as `async with Client(...)`',
+          'One agent, one machine',
+        ],
+      },
+      right: {
+        label: 'A persistent server: HTTP',
+        items: [
+          'Started once, and left running',
+          'Agents connect to its URL',
+          'Can live on another machine',
+          'Many agents can share it',
+        ],
+      },
+    },
+  },
+  {
     type: 'code',
     content: {
       title: 'Giving the tools to the model',
-      code: `MATHS_SERVER = StdioServerParameters(
+      code: `from mcp import Client
+from mcp.client.stdio import StdioServerParameters
+
+MATHS_SERVER = StdioServerParameters(
     command=sys.executable, args=["03_maths_server.py"]
 )
 
@@ -202,7 +217,7 @@ async with Client(MATHS_SERVER) as maths:
         for tool in (await maths.list_tools()).tools
     ]`,
       highlights: [
-        'The agent starts the server, and talks to it over stdin and stdout',
+        '`Client` starts the server; `maths` is our connection to it',
         'Ask the server for its tools; describe them to OpenAI',
       ],
     },
@@ -210,18 +225,90 @@ async with Client(MATHS_SERVER) as maths:
   {
     type: 'code',
     content: {
-      title: 'The tool loop',
-      code: `            ┌───────────────────────────────────┐
-            ▼                                   │
-question ─▶ model ─▶ asks for a tool? ── yes ─▶ run it on the server,
-                          │                     add the result to the conversation
-                          no
-                          ▼
-                        answer`,
+      title: 'What the model sees',
+      code: `tools = [
+  {
+    "type": "function",
+    "name": "square_root",
+    "description": "Return the square root of a number, exactly, to full precision.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "number": {"title": "Number", "type": "number"}
+      },
+      "required": ["number"],
+      "title": "square_rootArguments"
+    }
+  }
+]`,
       highlights: [
-        'The model decides when it needs a tool',
-        'Our code runs it',
-        'Repeat until the model answers',
+        'The function name, its docstring, and its type hints, as JSON',
+        '`parameters` is a JSON Schema: one number, and it is required',
+      ],
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'Passing the tools to the model',
+      code: `conversation = [{"role": "user", "content": QUESTION}]
+
+response = openai.responses.create(
+    model="gpt-6-luna",
+    reasoning={"effort": "none"},
+    instructions=INSTRUCTIONS,
+    input=conversation,
+    tools=tools,
+)`,
+      highlights: [
+        'The same call as Module 2, plus `tools=tools`',
+        'The model can now answer, **or** ask us to run one of these tools',
+      ],
+    },
+  },
+  {
+    type: 'tool-loop',
+    content: {
+      title: 'The tool loop',
+      steps: [
+        {
+          caption: 'The question goes to the model, with the tools',
+          at: 'ask',
+          message: {
+            kind: 'you',
+            text: 'What is the square root of 7,654,321, to 10 decimal places?',
+          },
+        },
+        {
+          caption: "The model doesn't answer: it **asks for a tool**",
+          at: 'call',
+          message: {
+            kind: 'call',
+            label: 'The model: please run',
+            text: 'square_root({"number":7654321})',
+          },
+        },
+        {
+          caption: 'Our code runs it on the MCP server',
+          at: 'run',
+          message: {
+            kind: 'result',
+            label: 'Our code runs it',
+            text: '→ 2766.644357339772',
+          },
+        },
+        {
+          caption: 'The result joins the conversation, and goes back to the model',
+          at: 'back',
+        },
+        {
+          caption: 'No tool call this time: **that is the answer**',
+          at: 'answer',
+          message: {
+            kind: 'answer',
+            text: 'The square root of 7,654,321 to 10 decimal places is 2766.6443573398.',
+          },
+        },
       ],
     },
   },
@@ -286,15 +373,6 @@ Agent: The square root of 7,654,321 to 10 decimal places is 2766.6443573398.`,
         label: 'Python',
         items: ['Did the exact calculation', '...and nothing else'],
       },
-    },
-  },
-  {
-    type: 'description',
-    content: {
-      title: 'Why this breaks',
-      icon: 'warning',
-      description:
-        "A model that can decide to take actions, in a loop, until the job is done: that's an **agent**. Ours can now do one thing exactly. But everything it knows about the world is still frozen in its training. **It can't look anything up.**",
     },
   },
 

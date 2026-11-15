@@ -1,9 +1,9 @@
 {
-  "name": "@agent-engineering/module-03-slides",
+  "name": "@agent-engineering/module-04-slides",
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "Slides: Module 3 — Choosing a Provider",
+  "description": "Slides: Module 4 — Choosing a Provider",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

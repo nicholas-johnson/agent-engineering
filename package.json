@@ -17,7 +17,8 @@
     "social:new": "pnpm --filter @agent-engineering/social-scripts new",
     "social:check": "pnpm --filter @agent-engineering/social-scripts check",
     "lint:slides": "eslint slide-deck/",
-    "format:slides": "prettier --write slide-deck/ \"day-*/module-*/slides/src/**\""
+    "format:slides": "prettier --write slide-deck/ \"day-*/module-*/slides/src/**\"",
+    "test": "uv run pytest"
   },
   "engines": {
     "node": ">=22.22.0"

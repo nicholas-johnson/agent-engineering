@@ -16,3 +16,23 @@ local = [
     "torch>=2.15.0",
     "transformers>=5.22.2",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+markers = [
+    "offline: runs without network access, API keys, or local model servers",
+    "slow: pure-Python training or BPE loops that take >10s",
+    "network: calls a public HTTP API (no API key required)",
+    "api: calls a hosted LLM API (requires API key in .env)",
+    "ollama: calls a local Ollama model on port 11434",
+    "local: loads weights in-process with torch and transformers (--extra local)",
+    "slides: lints, checks formatting, validates, and builds slide decks",
+    "clips: checks social clip scripts and layouts",
+]
+

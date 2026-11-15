@@ -11,5 +11,6 @@ export { EquationSlide } from "./EquationSlide";
 export { CardsSlide } from "./CardsSlide";
 export { DescriptionSlide } from "./DescriptionSlide";
 export { NetworkSlide } from "./NetworkSlide";
+export { ToolLoopSlide } from "./ToolLoopSlide";
 export { SlideIcon, availableIcons } from "./SlideIcon";
 export { InlineMarkdown, parseInlineMarkdown } from "./InlineMarkdown";

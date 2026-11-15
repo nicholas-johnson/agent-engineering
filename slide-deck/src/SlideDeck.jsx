@@ -22,6 +22,7 @@ import {
   CardsSlide,
   DescriptionSlide,
   NetworkSlide,
+  ToolLoopSlide,
 } from "./components";
 
 // Keep in sync with scripts/export-slides-pdf.mjs (SLIDE_WIDTH / SLIDE_HEIGHT).
@@ -96,6 +97,8 @@ function SlideBody({ slide }) {
       return <DescriptionSlide content={slide.content} />;
     case "network":
       return <NetworkSlide content={slide.content} />;
+    case "tool-loop":
+      return <ToolLoopSlide content={slide.content} />;
     default:
       return <StandardSlide content={slide.content} />;
   }

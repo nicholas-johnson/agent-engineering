@@ -15,6 +15,7 @@ Course materials for _Agent Engineering_, a hands-on Python course on building A
   - `pnpm format:slides`: format the slides with Prettier
   - `pnpm social`: serve the social clips at http://127.0.0.1:8765/
   - `pnpm social:new NN-slug`, `pnpm social:check NN-slug`: start a clip from the template; step through one and report problems
+  - `uv run pytest` (or `pnpm test`): run the test suite in `tests/` (`--offline` skips network/API/local-model calls; `-m "not slow"` skips pure-Python training loops)
 
 ## Building or changing a module
 

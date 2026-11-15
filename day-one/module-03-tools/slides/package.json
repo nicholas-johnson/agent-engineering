@@ -1,9 +1,9 @@
 {
-  "name": "@agent-engineering/module-04-slides",
+  "name": "@agent-engineering/module-03-slides",
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "Slides: Module 4 — Tools",
+  "description": "Slides: Module 3 — Tools",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
