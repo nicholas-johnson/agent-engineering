@@ -10,8 +10,8 @@ export const slides = [
   {
     type: 'title',
     content: {
-      title: 'Module 3 — Choosing a Provider',
-      subtitle: 'Which way ought I to go from here?',
+      title: 'Module 4 — Choosing a Provider',
+      subtitle: 'Which model?',
       icon: 'compass',
     },
   },
@@ -21,7 +21,7 @@ export const slides = [
       title: 'It depends',
       icon: 'question',
       description:
-        '*"That depends a good deal on where you want to get to."* Every provider sells the same thing: a model that predicts the next token. What differs is **everything around it**.',
+        'Every provider sells the same thing: a model that predicts the next token. What differs are the tokens you get, the APIs you call, and the prices you pay.',
     },
   },
   {
@@ -84,11 +84,75 @@ export const slides = [
       cards: [
         {
           heading: 'OpenAI',
-          points: ['The broadest platform', 'The API most others copy'],
+          points: [
+            '**ChatGPT** for conversation',
+            '**Codex** for writing code',
+            'The API the others copy',
+          ],
         },
-        { heading: 'Anthropic', points: ['Claude', 'Coding, agents, long documents'] },
-        { heading: 'Google', points: ['Gemini', 'Text, images, audio and video'] },
-        { heading: 'xAI', points: ['Grok', 'Built into X, searches X posts'] },
+        {
+          heading: 'Anthropic',
+          points: [
+            '**Claude**, in a desktop app',
+            '**Claude Code** for software',
+            '**Claude Cowork** for the rest',
+          ],
+        },
+        {
+          heading: 'Google',
+          points: [
+            '**Gemini**, inside Search and Android',
+            '**Gemini Notebook** for your sources',
+            '**Antigravity**, their coding IDE',
+          ],
+        },
+        {
+          heading: 'xAI',
+          points: [
+            '**Grok**, the new contender',
+            '**Grok Bot**, with its own computer',
+            '**Cursor**, the code editor',
+          ],
+        },
+      ],
+    },
+  },
+  {
+    type: 'cards',
+    content: {
+      title: 'Input / output, $ per million tokens',
+      cards: [
+        {
+          heading: 'OpenAI',
+          points: [
+            '**Astra** $10 / $50',
+            '**Sol** $2 / $10',
+            '**Terra** $1 / $5',
+            '**Luna** $0.10 / $0.50',
+          ],
+        },
+        {
+          heading: 'Anthropic',
+          points: [
+            '**Fable** $8 / $40',
+            '**Opus** $4 / $20',
+            '**Sonnet** $2 / $10',
+            '**Haiku** $0.10 / $0.50',
+          ],
+        },
+        {
+          heading: 'Google',
+          points: [
+            '**Carbon** $2 / $10',
+            '**Argon** $2 / $10',
+            '**3.8 Flash** $0.80 / $4',
+            '**Flash Lite** $0.30 / $2.50',
+          ],
+        },
+        {
+          heading: 'xAI',
+          points: ['**Grok 4.7** $2 / $6', '**Grok Build** $1 / $2'],
+        },
       ],
     },
   },
@@ -147,70 +211,11 @@ OpenAI(base_url="https://api.x.ai/v1").responses.create(...)`,
     },
   },
 
-  // ---- Section 2: One key for everything ----
+  // ---- Section 2: The Chinese labs ----
   {
     type: 'title',
     content: {
-      title: '2. One key for everything',
-      subtitle: 'Routers',
-      icon: 'route',
-    },
-  },
-  {
-    type: 'code',
-    content: {
-      title: 'OpenRouter',
-      code: `client = OpenAI(
-    base_url="https://openrouter.ai/api/v1",
-    api_key=os.environ["OPENROUTER_API_KEY"],
-)
-
-for model in ["openai/gpt-6-luna", "anthropic/claude-haiku-5.5",
-              "google/gemini-3.8-flash", "mistralai/mistral-large-4-0"]:
-    response = client.responses.create(model=model, instructions=..., input=...)`,
-      highlights: [
-        'One account, one key, one bill, one API',
-        'Switching model is changing one string',
-        '469 models listed today',
-      ],
-    },
-  },
-  {
-    type: 'title',
-    content: {
-      title: 'Demo — One key for everything',
-      subtitle: 'Switch to terminal: python demo/02_one_key.py',
-      icon: 'rocket',
-    },
-  },
-  {
-    type: 'comparison',
-    content: {
-      title: 'Routers',
-      left: {
-        label: 'Known for',
-        items: [
-          'Trying many models side by side',
-          'Switching without rewriting code',
-          'One bill instead of ten',
-        ],
-      },
-      right: {
-        label: 'Watch out for',
-        items: [
-          'One more company in the middle',
-          'Your data passes through it too',
-          'Some provider-only features missing',
-        ],
-      },
-    },
-  },
-
-  // ---- Section 3: The Chinese labs ----
-  {
-    type: 'title',
-    content: {
-      title: '3. The Chinese labs',
+      title: '2. The Chinese labs',
       subtitle: 'Open weights, low prices',
       icon: 'globe',
     },
@@ -259,6 +264,22 @@ openai/gpt-6-astra            $10,500.00   USA`,
       highlights: [
         'Prices checked 10 November 2026 — see `data/prices.json`',
         'From the `price-calculator` playground',
+      ],
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'Through OpenRouter',
+      code: `client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=os.environ["OPENROUTER_API_KEY"],
+)
+
+client.responses.create(model="deepseek/deepseek-v4.1-flash", ...)`,
+      highlights: [
+        'One key reaches these labs',
+        'Your data passes through OpenRouter as well as the lab',
       ],
     },
   },
@@ -313,11 +334,11 @@ gpt-6-luna   It depends on what you mean by "country." Taiwan
     },
   },
 
-  // ---- Section 4: Self-hosting with Ollama ----
+  // ---- Section 3: Self-hosting with Ollama ----
   {
     type: 'title',
     content: {
-      title: '4. Self-hosting with Ollama',
+      title: '3. Self-hosting with Ollama',
       subtitle: 'A model on your own laptop',
       icon: 'server',
     },
@@ -385,11 +406,11 @@ client.responses.create(
     },
   },
 
-  // ---- Section 5: Self-hosting in Python ----
+  // ---- Section 4: Self-hosting in Python ----
   {
     type: 'title',
     content: {
-      title: '5. Self-hosting in Python',
+      title: '4. Self-hosting in Python',
       subtitle: 'The weights, in your program',
       icon: 'code',
     },
@@ -474,11 +495,11 @@ anywhere, you must first find the cake.`,
     },
   },
 
-  // ---- Section 6: Choosing ----
+  // ---- Section 5: Choosing ----
   {
     type: 'title',
     content: {
-      title: '6. Choosing',
+      title: '5. Choosing',
       subtitle: 'Measure what matters',
       icon: 'scale',
     },
@@ -490,10 +511,11 @@ anywhere, you must first find the cake.`,
       icon: 'clipboard',
       points: [
         'The same question to every option you can reach',
+        'The **reply**, so the answers can be compared',
         'Time to the **first word**, and in total',
         'Tokens out',
         '**Cost per 1,000 chats**, from `data/prices.json`',
-        'One streaming function for all: OpenAI, OpenRouter and Ollama',
+        'One streaming function: OpenAI and Ollama speak the same API',
       ],
     },
   },
@@ -536,7 +558,7 @@ qwen3:1.7b           1.6s    2.8s         170             free`,
       icon: 'award',
       points: [
         'Every provider sells next-token prediction — **everything else** differs',
-        "Each lab's API is shaped differently; routers hide the difference",
+        "Each lab's API is shaped differently",
         '**Open weights** let anyone run a model, anywhere',
         'Small local models are free and private, and get more wrong',
         'Compare on cost, speed, data and content — with **your** tasks',

@@ -1,12 +1,11 @@
 # Module 3 — Choosing a Provider
 
-> In Module 2, Alice asked the Cheshire Cat which way she ought to go, and the Cat said *"That depends a good deal on where you want to get to."* That is also the honest answer to "which AI provider should I use?" This module is a survey. We send the same Cheshire Cat to the big American labs, to a router that reaches hundreds of models with one key, to the Chinese labs, and to two models running on your own laptop, one through Ollama and one in plain Python. Along the way we look at what each is known for, what it costs, where your data goes, and what it will and won't say. We finish with a scorecard.
+> In Module 2, Alice asked the Cheshire Cat which way she ought to go, and the Cat said *"That depends a good deal on where you want to get to."* That is also the honest answer to "which AI provider should I use?" This module is a survey. We send the same Cheshire Cat to the big American labs, to the Chinese labs, and to two models running on your own laptop, one through Ollama and one in plain Python. Along the way we look at what each is known for, what it costs, where your data goes, and what it will and won't say. We finish with a scorecard.
 
 ## Learning goals
 
 - Name the main **model providers** (American, Chinese and European) and what each is known for.
 - Call several providers from Python, and see that each one's **API** is shaped differently.
-- Use a **router** (OpenRouter) to reach hundreds of models with one key and one API.
 - Explain **open weights**, and what it does and doesn't mean.
 - Run an open model on your own machine, with **Ollama** and with Hugging Face **`transformers`**, and explain **quantization**.
 - Compare providers on **cost per task**, **speed**, **where your data goes** and **content policies**, not just on how clever they are.
@@ -39,12 +38,14 @@ Prices are from [OpenRouter's public model list](https://openrouter.ai/api/v1/mo
 
 | Lab | Known for |
 |-----|-----------|
-| **OpenAI** | The broadest platform: text, images, audio, built-in tools. The API most others copy. |
-| **Anthropic** | Claude. Known for coding, agents and long documents, and for its safety research. |
-| **Google** | Gemini. Reads text, images, audio and video, with million-token context windows. |
-| **xAI** | Grok. Built into X (Twitter), with search over X posts. |
+| **OpenAI** | **ChatGPT** for conversation, and **Codex** for writing code. The API most other labs copy. |
+| **Anthropic** | **Claude** in a desktop app: chat, **Claude Code** for software, and **Claude Cowork** for everything else. |
+| **Google** | **Gemini**, already inside Search and Android. **Gemini Notebook** answers from sources you give it. **Antigravity** is their coding IDE. |
+| **xAI** | **Grok**, the new contender, built into X (Twitter). **Grok Bot** is an agent with its own computer. |
 | **Meta** | Its newer Muse models are mostly closed, with one open-weight model. Its older Llama models are open. |
 | **Amazon** | Nova models, mainly used inside Amazon Bedrock. |
+
+Two things people open are not labs at all. **Cursor** is an editor, and the model inside it comes from one of these labs. **Microsoft Copilot** sits in Windows, Office and GitHub, and is often what a company already pays for.
 
 | Lab | Model | Input $/M | Output $/M | Context | Open weights | Takes |
 |-----|-------|----------:|-----------:|--------:|:------------:|-------|
@@ -156,7 +157,6 @@ Demo 5 needs the optional packages: `uv run --extra local python demo/05_python.
 | Demo | Needs | Writes |
 |------|-------|--------|
 | `01_big_labs.py` | Any of the four lab keys | `01_big_labs.json` |
-| `02_one_key.py` | `OPENROUTER_API_KEY` | `02_one_key.json` |
 | `03_chinese_labs.py` | `OPENROUTER_API_KEY` | `03_chinese_labs.json` |
 | `04_ollama.py` | Ollama | `04_ollama.txt` |
 | `05_python.py` | `uv sync --extra local` | `05_python.json` |
@@ -193,30 +193,11 @@ The models: `gpt-6-luna`, `claude-opus-5-5`, `gemini-3.8-flash` and `grok-4.7`. 
 
 **Known for / watch out for:** each lab's own package gives you its newest features first. But every one is shaped differently, so switching provider means rewriting your code.
 
-## 2. One key for everything
-
-**Demo:** `demo/02_one_key.py`
-
-A **router** sits between you and the labs. One account, one key, one bill, and one API (OpenAI's) for hundreds of models:
-
-```python
-client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key=os.environ["OPENROUTER_API_KEY"])
-
-for model in MODELS:
-    response = client.responses.create(model=model, instructions=INSTRUCTIONS, input=QUESTION)
-```
-
-Switching model is changing one string: `"anthropic/claude-haiku-5.5"`, `"google/gemini-3.8-flash"`, `"mistralai/mistral-large-4-0"`. The demo sends the Cat to seven models from six labs.
-
-*Output to come.*
-
-**Known for / watch out for:** perfect for trying models side by side, and for switching without rewriting code. But it's one more company in the middle, OpenRouter's Responses API is stateless (no `previous_response_id`), the newest provider-only features may not be there, and your data passes through OpenRouter as well as the lab.
-
-## 3. The Chinese labs
+## 2. The Chinese labs
 
 **Demo:** `demo/03_chinese_labs.py`
 
-The same router, six Chinese labs: DeepSeek, Qwen, Kimi, GLM, MiniMax and ERNIE.
+The demo sends the Cat to six Chinese labs: DeepSeek, Qwen, Kimi, GLM, MiniMax and ERNIE. It reaches them through **OpenRouter**, one key and one API, with the model named by a string such as `deepseek/deepseek-v4.1-flash`. Your data passes through OpenRouter as well as the lab.
 
 *Output to come.*
 
@@ -227,7 +208,7 @@ Look back at the map. Most of these models have **open weights**, and many cost 
 - **Where your data goes.** Using a Chinese lab's own API generally means your prompts are processed in China, under Chinese law. Many companies' policies don't allow that. But the *same open weights* can be run by an American or European host, or on your own machine. "Which model?" and "who runs it?" are separate questions.
 - **Content policies.** Models trained in China must follow Chinese rules on generated content, and they often follow the Chinese government's position on political topics. Western models have their own refusals and biases too. The `content-policies` playground shows the difference, and why you should test before you choose.
 
-## 4. Self-hosting with Ollama
+## 3. Self-hosting with Ollama
 
 **Demo:** `demo/04_ollama.py`
 
@@ -251,7 +232,7 @@ Small models think too: Qwen3 writes hidden "thinking" before it answers, unless
 
 **Known for / watch out for:** free, private and offline. But a model small enough for a laptop knows far less and gets far more wrong than a frontier model (see the `local-models` and `open-vs-closed` playgrounds). The big open models need hundreds of gigabytes of GPU memory.
 
-## 5. Self-hosting in Python
+## 4. Self-hosting in Python
 
 **Demo:** `demo/05_python.py`
 
@@ -295,13 +276,15 @@ That's 73 tokens. The empty `<think></think>` is how "thinking off" works: the t
 
 **Known for / watch out for:** complete control: any model on Hugging Face, every probability, your own generation loop (see the `your-own-loop` playground). But you manage memory, GPUs and speed yourself, and it's far more work to serve many users than Ollama or a hosted API.
 
-## 6. Choosing
+## 5. Choosing
 
 **Demo:** `demo/06_choosing.py`
 
-Send the same question to every option you can reach, and measure what matters: how long until the first word, how long in total, how many tokens, and what 1,000 such chats would cost at the prices in `data/prices.json`.
+Send one question to every option you can reach, print the reply, and measure what matters: how long until the first word, how long in total, how many tokens, and what 1,000 such chats would cost at the prices in `data/prices.json`.
 
-Every option uses the same streaming code, because OpenAI, OpenRouter and Ollama all speak the Responses API. Each model runs with its own default settings.
+The question is a short logic puzzle, so a stronger model and a weaker one can come apart without a long answer. Three tins are labelled marmalade, treacle, and marmalade and treacle, and every label is wrong. The tin labelled marmalade and treacle contains only marmalade, so the tin labelled treacle is the mixture and the tin labelled marmalade is treacle. Replies are capped at 250 tokens, and reasoning is turned off, so the text you see is the answer rather than a hidden chain of thought.
+
+Every option uses the same streaming code. OpenAI and Ollama speak the Responses API, and OpenRouter does too. Each model runs with its own default settings.
 
 ```text
 Model                            First word   Total Tokens out  Per 1,000 chats
@@ -327,7 +310,6 @@ The scorecard is a starting point, not an answer. Add the questions from the sta
 | Option | Good for | Watch out for |
 |--------|----------|---------------|
 | A lab's own API | Newest features, best support | Every API is different: lock-in |
-| A router | Trying many models, one key, easy switching | One more company in the middle; some features missing |
 | Chinese labs | Price, open weights | Where data is processed; content policies |
 | Ollama | Free, private, offline, same code as the APIs | Small models know less and get more wrong |
 | Python + `transformers` | Total control, see every probability | You manage memory, GPUs and speed |

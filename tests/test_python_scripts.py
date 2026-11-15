@@ -209,11 +209,6 @@ SCRIPTS: tuple[ScriptCase, ...] = (
     ),
     # --- Choosing a Provider ---
     ScriptCase(
-        f"{PROVIDERS}/demo/02_one_key.py",
-        outputs=("02_one_key.json",),
-        keys=("OPENROUTER_API_KEY",),
-    ),
-    ScriptCase(
         f"{PROVIDERS}/demo/03_chinese_labs.py",
         outputs=("03_chinese_labs.json",),
         keys=("OPENROUTER_API_KEY",),
@@ -392,7 +387,6 @@ def test_big_labs_live(pytestconfig: pytest.Config) -> None:
 @pytest.mark.parametrize(
     "rel_path",
     [
-        f"{PROVIDERS}/demo/02_one_key.py",
         f"{PROVIDERS}/demo/03_chinese_labs.py",
     ],
 )
