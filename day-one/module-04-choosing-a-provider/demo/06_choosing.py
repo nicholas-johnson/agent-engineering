@@ -19,9 +19,10 @@ INSTRUCTIONS = "Answer directly. One sentence of working, then the answer. No ro
 # Every label is wrong, and one tin has been opened. Weaker models swap the remaining two.
 # Reasoning is off: otherwise a model can spend the whole cap thinking and print no answer.
 QUESTION = (
-    "Three tins are labelled 'marmalade', 'treacle' and 'marmalade and treacle'. "
-    "Every label is wrong. You open the tin labelled 'marmalade and treacle' and find only marmalade. "
-    "What is in each tin?"
+    "Three tins hold, in some order, one of marmalade, treacle, and a mixture of the two — "
+    "one tin of each. They are labelled 'marmalade', 'treacle' and 'marmalade and treacle', "
+    "but every label is on the wrong tin. You open the tin labelled 'marmalade and treacle' "
+    "and find only marmalade. What is in each tin?"
 )
 # A cap keeps a reply short, and stops OpenRouter reserving tens of thousands of tokens.
 MAX_OUTPUT_TOKENS = 500

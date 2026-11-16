@@ -53,20 +53,6 @@ export const slides = [
       ],
     },
   },
-  {
-    type: 'standard',
-    content: {
-      title: 'Getting set up',
-      icon: 'key',
-      points: [
-        'Keys in `.env`: OpenAI, Anthropic, Google, xAI, OpenRouter — any you have',
-        'Every demo runs what it can and skips the rest',
-        'Install Ollama, then `ollama pull qwen3:1.7b` (1.4 GB)',
-        '`uv sync --extra local` for `transformers` and PyTorch',
-        "Download before the session — conference Wi-Fi won't cope",
-      ],
-    },
-  },
 
   // ---- Section 1: The big American labs ----
   {
@@ -120,7 +106,7 @@ export const slides = [
   {
     type: 'cards',
     content: {
-      title: 'Input / output, $ per million tokens',
+      title: 'Cost: Input / output, $ per million tokens',
       cards: [
         {
           heading: 'OpenAI',
@@ -157,6 +143,62 @@ export const slides = [
     },
   },
   {
+    type: 'standard',
+    content: {
+      title: 'OpenAI — scale and reach',
+      icon: 'globe',
+      points: [
+        'Mission: build **AGI that benefits all of humanity**',
+        'First mover — **ChatGPT** made AI mainstream',
+        'The API every other lab copies',
+        'Huge consumer reach and the biggest developer ecosystem',
+        'Backed by Microsoft; enormous compute',
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Anthropic — safety',
+      icon: 'shield',
+      points: [
+        'Founded in 2021 by researchers who **left OpenAI**',
+        '**Safety and alignment** are the stated mission',
+        '**Constitutional AI**: trained against a written set of principles',
+        'Careful, deliberate releases',
+        'Claude is strong at coding and long, careful reasoning',
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Google — research and reach',
+      icon: 'search',
+      points: [
+        "**DeepMind's** deep research pedigree",
+        'Runs on its own chips (**TPUs**), not just Nvidia',
+        'Built into **Search, Android, Gmail, Workspace**',
+        'Enormous data and distribution',
+        'Gemini is natively multimodal — text, images, audio, video',
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'xAI — free speech',
+      icon: 'message-square',
+      points: [
+        'Founded by **Elon Musk** in 2023',
+        'A **"truth-seeking"** AI, less filtered than its rivals',
+        'Willing to answer where others refuse',
+        'Trained on its own giant GPU cluster (**Colossus**)',
+        'The newest of the four, moving fast',
+      ],
+    },
+  },
+  {
     type: 'code',
     content: {
       title: 'Four shapes',
@@ -181,33 +223,54 @@ OpenAI(base_url="https://api.x.ai/v1").responses.create(...)`,
     },
   },
   {
+    type: 'standard',
+    content: {
+      title: 'AWS Bedrock',
+      icon: 'server',
+      points: [
+        'One API to **many models** — Claude, Llama, Mistral, Amazon Nova',
+        'The models run **inside your AWS account and region**',
+        'Your prompts are not used to train the models',
+        'Enterprise plumbing: IAM, VPC, logging, compliance',
+        'Amazon is a major Anthropic backer — Claude is first-class here',
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Google Cloud — Vertex AI',
+      icon: 'cpu',
+      points: [
+        '**Gemini** plus third-party models (Claude, Llama) in Model Garden',
+        'Runs in **your GCP project**, with data-residency controls',
+        'Backed by Google infrastructure and **TPUs**',
+        'Enterprise plumbing: IAM, VPC Service Controls, audit logs',
+        'Tight fit if you already live in Google Cloud',
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Microsoft Azure — Foundry',
+      icon: 'layers',
+      points: [
+        '**Microsoft Foundry** (renamed from Azure AI Foundry, late 2025)',
+        'The enterprise home for **OpenAI** models (Azure OpenAI)',
+        'A wider catalogue too — Llama, Mistral, DeepSeek, xAI, and more',
+        'Runs in **your Azure tenant and region**',
+        'Enterprise plumbing: Entra ID, private networking, compliance',
+        'Tight fit with the Microsoft stack — Copilot, Microsoft 365',
+      ],
+    },
+  },
+  {
     type: 'title',
     content: {
       title: 'Demo — The big American labs',
       subtitle: 'Switch to terminal: python demo/01_big_labs.py',
       icon: 'rocket',
-    },
-  },
-  {
-    type: 'comparison',
-    content: {
-      title: "A lab's own API",
-      left: {
-        label: 'Known for',
-        items: [
-          'Newest models and features first',
-          'Best documentation and support',
-          "Each lab's own strengths",
-        ],
-      },
-      right: {
-        label: 'Watch out for',
-        items: [
-          'Every API is shaped differently',
-          'Switching means rewriting code: **lock-in**',
-          'A key and a bill for every lab',
-        ],
-      },
     },
   },
 
@@ -507,18 +570,83 @@ anywhere, you must first find the cake.`,
   {
     type: 'standard',
     content: {
-      title: 'A scorecard',
-      icon: 'clipboard',
+      title: 'Cost',
+      icon: 'calculator',
       points: [
-        'The same question to every option you can reach',
-        'The **reply**, so the answers can be compared',
-        'Time to the **first word**, and in total',
-        'Tokens out',
-        '**Cost per 1,000 chats**, from `data/prices.json`',
-        'One streaming function: OpenAI and Ollama speak the same API',
+        'Priced per million tokens, **input and output** separately',
+        'Output usually costs several times more than input',
+        'What matters is **cost per task**, not cost per token',
+        'A chatty, reasoning-heavy model can beat a cheaper one on cost',
+        'Semantic Caching can cut the bill',
       ],
     },
   },
+  {
+    type: 'standard',
+    content: {
+      title: 'Speed',
+      icon: 'zap',
+      points: [
+        '**Latency**: time to the first word',
+        '**Throughput**: words per second after that',
+        'Reasoning models think before they speak — slower to start',
+        'Does a person wait on it, or is it a background job?',
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Capability',
+      icon: 'target',
+      points: [
+        'Is it good enough for your task?',
+        'Golden Tests let you know how well it performs',
+        'Large agents can improve smaller agents',
+        "Bigger isn't always better; small models win on narrow jobs",
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Data',
+      icon: 'database',
+      points: [
+        '**Where** is it processed, and under **whose laws**?',
+        'Is your data **kept**, or used to train the next model?',
+        'Cloud hosts keep it in **your** account and region',
+        'Sensitive data may force you to self-host',
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Content',
+      icon: 'message-square',
+      points: [
+        'What will it refuse? Whose values shaped it?',
+        'Every model carries the biases of its makers and country',
+        'Over-refusal breaks real tasks as surely as under-refusal',
+        'Test with the prompts you actually expect to send (Golden Tests)',
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Openness',
+      icon: 'package',
+      points: [
+        'Can you **download the weights** and run them yourself?',
+        'Open: no lock-in, runs offline, total control',
+        'Closed: newest features first, nothing to operate',
+        'How hard would it be to **switch later**?',
+      ],
+    },
+  },
+
   {
     type: 'title',
     content: {
@@ -543,6 +671,21 @@ gemini-3.8-flash
         'Haiku swaps the tins. The small local model does not',
         'Gemini spends the 500 token cap and never finishes',
         'Grok cannot turn reasoning off: 11s and 874 tokens',
+      ],
+    },
+  },
+
+  {
+    type: 'standard',
+    content: {
+      title: 'Getting set up',
+      icon: 'key',
+      points: [
+        'Keys in `.env`: OpenAI, Anthropic, Google, xAI, OpenRouter — any you have',
+        'Every demo runs what it can and skips the rest',
+        'Install Ollama, then `ollama pull qwen3:1.7b` (1.4 GB)',
+        '`uv sync --extra local` for `transformers` and PyTorch',
+        "Download before the session — conference Wi-Fi won't cope",
       ],
     },
   },
