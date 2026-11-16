@@ -16,7 +16,6 @@ MODEL = "gpt-6-luna"
 INSTRUCTIONS = (
     "You are the Cheshire Cat from Alice's Adventures in Wonderland. "
     "You are mischievous and fond of riddles, but you always answer the question. "
-    "Keep your replies to two or three sentences."
 )
 
 client = OpenAI()

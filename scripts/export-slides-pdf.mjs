@@ -49,6 +49,7 @@ Usage:
   pnpm slides:pdf              all modules, plus pdf/slides.pdf
   pnpm slides:pdf 10           one module, by number
   pnpm slides:pdf 03 langchain several modules, concatenated when more than one
+  pnpm slides:pdf day-one-closing   a day's closing deck
 `);
 }
 
@@ -58,12 +59,27 @@ async function moduleDirs() {
     if (!day.isDirectory() || !day.name.startsWith('day-')) continue;
     const dayDir = path.join(root, day.name);
     for (const entry of await readdir(dayDir, { withFileTypes: true })) {
-      if (entry.isDirectory() && entry.name.startsWith('module-')) {
-        dirs.push({ name: entry.name, dir: path.join(dayDir, entry.name) });
+      if (!entry.isDirectory()) continue;
+      const dir = path.join(dayDir, entry.name);
+      if (entry.name.startsWith('module-')) {
+        dirs.push({ name: entry.name, day: day.name, dir });
+      } else if (entry.name === 'closing') {
+        dirs.push({ name: `${day.name}-closing`, day: day.name, closing: true, dir });
       }
     }
   }
   return dirs;
+}
+
+// A day's closing deck sorts straight after that day's last module.
+function sortKey(mod, modules) {
+  if (!mod.closing) return mod.name;
+  const last = modules
+    .filter((other) => other.day === mod.day && !other.closing)
+    .map((other) => other.name)
+    .sort()
+    .at(-1);
+  return `${last ?? mod.name}~`;
 }
 
 async function listModules() {
@@ -75,9 +91,9 @@ async function listModules() {
     } catch {
       continue;
     }
-    modules.push({ name: entry.name, slidesDir });
+    modules.push({ ...entry, slidesDir });
   }
-  modules.sort((a, b) => a.name.localeCompare(b.name));
+  modules.sort((a, b) => sortKey(a, modules).localeCompare(sortKey(b, modules)));
   return modules;
 }
 
@@ -103,7 +119,9 @@ function selectModules(modules, args) {
   }
   if (missing.length > 0) {
     const names = modules.map((mod) => mod.name).join('\n  ');
-    throw new Error(`No slide deck matched: ${missing.join(', ')}\n\nModules:\n  ${names}`);
+    throw new Error(
+      `No slide deck matched: ${missing.join(', ')}\n\nModules:\n  ${names}`,
+    );
   }
   return [...new Map(chosen.map((mod) => [mod.name, mod])).values()];
 }
@@ -185,7 +203,9 @@ async function concatenate(files, dest) {
     for (const page of pages) merged.addPage(page);
   }
   if (merged.getPageCount() !== expected) {
-    throw new Error(`Combined PDF has ${merged.getPageCount()} pages, expected ${expected}`);
+    throw new Error(
+      `Combined PDF has ${merged.getPageCount()} pages, expected ${expected}`,
+    );
   }
   await writeFile(dest, await merged.save());
   return merged.getPageCount();
@@ -249,7 +269,11 @@ async function main() {
       const { child, ready } = startVite(mod.slidesDir, port);
       try {
         await ready;
-        const slideCount = await exportDeck(browser, `http://127.0.0.1:${port}/print`, dest);
+        const slideCount = await exportDeck(
+          browser,
+          `http://127.0.0.1:${port}/print`,
+          dest,
+        );
         const pages = await pdfPageCount(dest);
         if (pages !== slideCount) {
           throw new Error(`PDF has ${pages} pages, deck has ${slideCount} slides`);

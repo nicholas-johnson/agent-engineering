@@ -15,6 +15,20 @@ export const slides = [
       icon: 'bot',
     },
   },
+  {
+    type: 'standard',
+    content: {
+      title: 'Five steps to a Chatbot',
+      icon: 'list',
+      points: [
+        '**1. One response**',
+        '**2. A chat loop**',
+        '**3. The context window**',
+        '**4. Streaming**',
+        '**5. Multimodal**',
+      ],
+    },
+  },
 
   // ---- Section 1: One response ----
   {
@@ -278,7 +292,7 @@ for event in stream:
   {
     type: 'title',
     content: {
-      title: '5. Images',
+      title: '5. Multimodal',
       subtitle: 'A model that can see',
       icon: 'image',
     },
@@ -367,7 +381,7 @@ Cat: That's the Mad Hatter—the one wearing the enormous hat
         '**A chat loop** — which forgot everything',
         '**The context window** — send the whole conversation every time',
         '**Streaming** — watch the reply being written',
-        '**Images** — a model that can see',
+        '**Multimodal** — a model that can see',
       ],
     },
   },

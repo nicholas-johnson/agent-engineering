@@ -83,7 +83,6 @@ The right answer: 2766.6443573398`,
       icon: 'brain',
       points: [
         'Turn reasoning effort up, and it works it through step by step',
-        'Six tries at `low`, `medium` and `high`: right every time',
         'But **9 to 57 seconds**, and 668 to 4,543 tokens each',
         "There's still no guarantee",
       ],

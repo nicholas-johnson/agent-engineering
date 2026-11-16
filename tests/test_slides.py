@@ -94,7 +94,14 @@ def test_eslint_slide_deck() -> None:
 @pytest.mark.slides
 def test_prettier_module_slides() -> None:
     result = subprocess.run(
-        ["pnpm", "exec", "prettier", "--check", "day-*/module-*/slides/src/**"],
+        [
+            "pnpm",
+            "exec",
+            "prettier",
+            "--check",
+            "day-*/module-*/slides/src/**",
+            "day-*/closing/slides/src/**",
+        ],
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,
