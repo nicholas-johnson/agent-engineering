@@ -95,7 +95,7 @@ pnpm social:check 02-embeddings
 
 ## Networks
 
-`src/network.js` draws neural networks on the stage and animates them: neurons and weights, data travelling forwards, error travelling backwards, probability bars, and a camera that zooms out over a field of copies. [Clip 2](../social-scripts/02-how-ai-learns/) uses it throughout.
+`src/network.js` draws neural networks on the stage and animates them: neurons and weights, data travelling forwards, error travelling backwards, probability bars, and a camera that zooms out while the network extends into one vast network around it. [Clip 2](../social-scripts/02-how-ai-learns/) uses it throughout.
 
 Three things go on the page:
 
@@ -131,8 +131,10 @@ A step's state is every entry up to it, so later entries only say what changes. 
 | `values: { "1.0": 0.26, random: 5 }` | How lit each neuron is, from 0 to 1. Any not named are 0, or random with a seed in `random`. |
 | `showValues`, `showWeights` | Write the numbers inside neurons and along weights |
 | `labels: { "0.0": "dark clouds" }`, `monoLabels` | Text beside a neuron: left of the inputs, right of the outputs, above the rest. `monoLabels` sets them in Menlo, for tokens. |
-| `bars: { "2.0": { label: "the", value: 0.16 } }` | A labelled probability bar beside an output neuron, scaled to the biggest || `pulse: "forward"`, `"backward"`, or a list | Dots travel through the network, layer by layer: data forwards in white, error backwards in red. Neurons light up as the data reaches them, and weights change as the error passes. |
-| `zoom: 90`, `zoomTime: 5000`, `field: true` | Pull the camera back that many times, around the network's box, over that many milliseconds. `field` fills the space with copies of the network. |
+| `bars: { "2.0": { label: "the", value: 0.16 } }` | A labelled probability bar beside an output neuron, scaled to the biggest |
+| `pulse: "forward"`, `"backward"`, or a list | Dots travel through the network, layer by layer: data forwards in white, error backwards in red. Neurons light up as the data reaches them, and weights change as the error passes. |
+| `zoom: 24`, `zoomTime: 5000` | Pull the camera back that many times, around the network's box, over that many milliseconds |
+| `extend: true` | The network carries on far beyond its box as one vast network: more layers on either side, and more neurons above and below, on the same grid. The network on the stage is part of it. It's drawn dimmer, with WebGL, on a canvas just behind the SVG, so pair it with `zoom` to see it. `extend: { layers: [-45, 47], neurons: [-130, 130] }` sets how far it reaches, counted in layers and neurons from the network on the stage; those are the defaults. It lines up best when layer sizes alternate odd and even, as in `[3, 6, 5]`. |
 | `show: false` | Hide the network |
 
 `pnpm social:check` runs with reduced motion, so the network jumps straight to each step's final state for the pictures.

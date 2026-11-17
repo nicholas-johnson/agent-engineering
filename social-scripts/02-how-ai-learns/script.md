@@ -39,7 +39,7 @@ To camera, full-screen:
 
 > "This little one has 48 weights to nudge. The big ones have billions. Same trick: be wrong, nudge, repeat."
 
-**Screen:** the camera pulls back. The network shrinks into a field of copies, until they're too small to see.
+**Screen:** the camera pulls back, and the little network turns out to be a tiny part of one vast network, with more layers on either side and more neurons above and below. By the end the whole vast network is on screen, with the little one a bright speck at its centre.
 
 ### 5. Sign-off
 
@@ -68,8 +68,8 @@ The captions are the `<p class="cue">` lines in `index.html`, and the network's 
 | 12 | Train one on a book, and it learns to predict the next word… | A model like Module 1's: *queen*, *said*, *to* in, and bars for the next word out: *the*, *alice*, *"*, *herself*, *this* |
 | 13 | …or the next part of a word, which we call a *token*. | The heading becomes "The next token", and the outputs shorten to tokens: *the*, *al*, *"*, *her*, *th* |
 | 14 | It gives every possible next word a chance. | — |
-| 15 | This little one has 48 weights to nudge. | The camera pulls back three times, over a field of copies |
-| 16 | The big ones have *billions*. | It keeps pulling back, to ninety times, over five seconds; the heading becomes "Billions" |
+| 15 | This little one has 48 weights to nudge. | The labels and bars fade, and the camera pulls back three times as the network extends into a vast one around it |
+| 16 | The big ones have *billions*. | It keeps pulling back, to 24 times, over five seconds, until the whole vast network is on screen; the heading becomes "Billions" |
 | 17 | Same trick: be wrong, nudge, repeat. | — |
 | 18 | I'm Nicholas Johnson. I'm a principal dev working with AI. | You, full-screen again |
 | 19 | I'm doing a series on *AI fundamentals*. | — |
@@ -91,7 +91,7 @@ For the description under the video, not on it. Repeat the promise, then the cou
 - **The layered network is a diagram.** Its weights and lit neurons are made up, so you can see the shape. They're not from a trained model.
 - **The words are real; the tokens are illustrative.** "The next word" shows Module 1's real output after "the queen said to": *the* 16%, *alice* 13%, *"* 8%, *herself* 5%, *this* 3%. On "token", the same bars are relabelled with made-up word pieces (*al*, *her*, *th*), to show that a token is often part of a word. Module 1's own tokeniser actually keeps these particular words whole, because its 500-token vocabulary happens to include them.
 - **Module 1's model is squeezed to fit.** It really has 48 inputs (three tokens of 16 numbers each), 32 hidden neurons and 500 outputs. The diagram shows three tokens, six hidden neurons and five outputs.
-- **The zoom shows copies of the same network,** to give a sense of scale. A real large model isn't many small networks side by side.
+- **The vast network is illustrative.** It's about 93 layers of 261 neurons, each joined to the seven nearest in the next layer, to give a sense of scale. Real large models are far bigger, and connected differently.
 - **If the explanation runs over sixty seconds,** drop "It gives every possible next word a chance." first. It has no change on screen, so nothing else needs to move.
 
 ## Where the material comes from

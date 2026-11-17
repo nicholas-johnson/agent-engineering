@@ -1,6 +1,7 @@
 // A small SVG engine for neural network diagrams on the stage: neurons and weights, data and
-// error travelling through them, probability bars, and a camera that can zoom right out over a
-// field of copies. A clip makes one in its scene.js and says what it looks like at each step:
+// error travelling through them, probability bars, and a camera that can zoom right out while
+// the network extends into one vast network around it (drawn with WebGL, as SVG can't draw that
+// many). A clip makes one in its scene.js and says what it looks like at each step:
 //
 //   new Network("#net").script({
 //     "2.0": { layers: [2, 1], weights: { "0.0-0": -0.35 } },
@@ -86,14 +87,8 @@
       this.defaultPad = { ...PAD, ...options.pad };
       this.stepKeys = options.steps ?? null;
       this.svg.setAttribute("viewBox", `0 0 ${this.stage.width} ${this.stage.height}`);
-      const id = this.svg.id || "network";
-
-      const defs = make("defs", {}, this.svg);
-      this.pattern = make("pattern", { id: `${id}-field`, patternUnits: "userSpaceOnUse" }, defs);
-      this.copy = make("use", { href: `#${id}-body` }, this.pattern);
       this.root = make("g", {}, this.svg);
-      this.field = make("rect", { x: -3e5, y: -3e5, width: 6e5, height: 6e5, fill: `url(#${id}-field)` }, this.root);
-      this.body = make("g", { id: `${id}-body` }, this.root);
+      this.body = make("g", {}, this.root);
       this.edgeLayer = make("g", {}, this.body);
       this.nodeLayer = make("g", {}, this.body);
       this.overlay = make("g", {}, this.root);
@@ -104,7 +99,8 @@
       this.bars = new Map();
       this.pulses = [];
       this.tweens = [];
-      this.view = { zoom: 0, cx: this.stage.width / 2, cy: this.stage.height / 2, field: 0, opacity: 1 };
+      this.view = { zoom: 0, cx: this.stage.width / 2, cy: this.stage.height / 2, extend: 0, opacity: 1 };
+      this.extension = null;
       this.box = { ...this.defaultBox };
       this.entries = new Map();
       this.tick = this.tick.bind(this);
@@ -116,6 +112,7 @@
     destroy() {
       this.dead = true;
       document.removeEventListener("clip:step", this.onStep);
+      this.extension?.remove();
     }
 
     // Every step's key, in order: the clip's, or the ones this network was given.
@@ -161,17 +158,28 @@
       const height = box.h - pad.top - pad.bottom;
       const gap = spacing ?? Math.min(height / Math.max(1, ...layers), 170);
       const r = radius ?? Math.min(48, gap * 0.3);
+      const centre = box.y + pad.top + height / 2;
       layers.forEach((count, l) => {
         const x = box.x + pad.left + (layers.length === 1 ? width / 2 : (width * l) / (layers.length - 1));
         for (let i = 0; i < count; i++) {
-          const y = box.y + pad.top + height / 2 + (i - (count - 1) / 2) * gap;
+          const y = centre + (i - (count - 1) / 2) * gap;
           nodes.push({ id: `${l}.${i}`, layer: l, index: i, x, y, r });
           if (l + 1 < layers.length) {
             for (let j = 0; j < layers[l + 1]; j++) edges.push({ id: `${l}.${i}-${j}`, from: `${l}.${i}`, to: `${l + 1}.${j}`, layer: l });
           }
         }
       });
-      return { nodes, edges };
+      // The grid these neurons sit on, for the vast network that extends from them. A layer with an
+      // even number of neurons sits half a gap off the centre line, so layers alternate.
+      const lattice = {
+        x: box.x + pad.left,
+        layerGap: layers.length > 1 ? width / (layers.length - 1) : gap * 1.6,
+        y: centre,
+        gap,
+        r,
+        phase: ((layers[0] ?? 1) - 1) % 2 ? 0.5 : 0,
+      };
+      return { nodes, edges, lattice };
     }
 
     weightOf(state, id) {
@@ -189,7 +197,7 @@
     apply(state, animate, pulses) {
       const layers = state.layers;
       const box = { ...this.defaultBox, ...state.box };
-      const { nodes, edges } = this.layout(layers, box, { ...this.defaultPad, ...state.pad }, state.radius, state.spacing);
+      const { nodes, edges, lattice } = this.layout(layers, box, { ...this.defaultPad, ...state.pad }, state.radius, state.spacing);
       const time = (ms) => (animate ? ms : 0);
       const steps = Math.max(1, layers.length - 1);
 
@@ -250,16 +258,15 @@
       }
 
       this.box = box;
-      this.pattern.setAttribute("x", box.x);
-      this.pattern.setAttribute("y", box.y);
-      this.pattern.setAttribute("width", box.w);
-      this.pattern.setAttribute("height", box.h);
-      this.copy.setAttribute("x", -box.x);
-      this.copy.setAttribute("y", -box.y);
+      this.lattice = lattice;
+      if (state.extend) {
+        this.extension ??= Extension.create(this.svg, this.stage);
+        this.span = { layers: [-45, 47], neurons: [-130, 130], ...(state.extend === true ? {} : state.extend) };
+      }
       this.tween(this.view, "zoom", Math.log2(state.zoom ?? 1), time(state.zoomTime ?? TIME.zoom));
       this.tween(this.view, "cx", box.x + box.w / 2, time(TIME.move));
       this.tween(this.view, "cy", box.y + box.h / 2, time(TIME.move));
-      this.tween(this.view, "field", state.field ? 1 : 0, time(TIME.move));
+      this.tween(this.view, "extend", state.extend ? 1 : 0, time(TIME.move));
       this.tween(this.view, "opacity", state.show === false ? 0 : 1, time(TIME.move));
       this.start();
     }
@@ -451,16 +458,180 @@
       // The camera: zoom out around the network's box, keeping it where it is on the stage.
       const scale = 2 ** this.view.zoom;
       const { cx, cy } = this.view;
-      this.svg.setAttribute(
-        "viewBox",
-        `${cx - (cx * scale)} ${cy - (cy * scale)} ${this.stage.width * scale} ${this.stage.height * scale}`,
-      );
-      this.field.setAttribute("opacity", this.view.field * 0.5);
+      const viewBox = [cx - cx * scale, cy - cy * scale, this.stage.width * scale, this.stage.height * scale];
+      this.svg.setAttribute("viewBox", viewBox.join(" "));
       this.root.setAttribute("opacity", this.view.opacity);
+      // Dimmer than the network on the stage, so that one still stands out.
+      this.extension?.draw(viewBox, this.lattice, this.span, 0.6 * this.view.extend * this.view.opacity);
     }
 
     *all() {
       for (const maps of [this.nodes, this.edges, this.bars]) for (const [id, thing] of maps) yield [maps, id, thing];
+    }
+  }
+
+  // The vast network that the one on the stage extends into. It sits on the same grid as the
+  // stage's neurons, so they look like part of it. Far too many neurons for SVG, so a WebGL shader
+  // works out each pixel from the grid instead: sharp at any zoom, and a soft glow when the lines
+  // get finer than a pixel.
+  const EXTENSION_VERTEX = `#version 300 es
+in vec2 corner;
+void main() {
+  gl_Position = vec4(corner, 0.0, 1.0);
+}`;
+
+  const EXTENSION_FRAGMENT = `#version 300 es
+precision highp float;
+
+uniform vec2 size;      // the canvas, in pixels: the same as the stage
+uniform vec4 view;      // the camera: x, y, width and height, on the stage
+uniform vec4 lattice;   // x of the first layer, gap between layers, y of the centre line, gap between neurons
+uniform float radius;
+uniform float phase;    // 0, or 0.5 if the first layer sits half a gap off the centre line
+uniform vec4 span;      // first and last layer, first and last neuron, counted from the stage's network
+uniform float opacity;
+out vec4 colour;
+
+const int REACH = 3;  // each neuron connects to the seven nearest in the next layer
+const vec3 POSITIVE = vec3(0.220, 0.741, 0.973);
+const vec3 NEGATIVE = vec3(0.753, 0.518, 0.988);
+const vec3 NODE = vec3(0.043, 0.071, 0.133);
+const vec3 LIT = vec3(0.055, 0.647, 0.914);
+const vec3 RING = vec3(0.278, 0.333, 0.412);
+
+float hash(vec3 p) {
+  p = fract(p * vec3(0.1031, 0.1030, 0.0973));
+  p += dot(p, p.yxz + 33.33);
+  return fract((p.x + p.y) * p.z);
+}
+
+// How far a layer's neurons sit off the centre line, in neuron gaps. Layers alternate.
+float offset(float layer) {
+  return mod(phase + 0.5 * layer, 1.0);
+}
+
+void main() {
+  vec2 p = view.xy + vec2(gl_FragCoord.x, size.y - gl_FragCoord.y) / size * view.zw;
+  float pixel = view.z / size.x;
+  float layerGap = lattice.y;
+  float gap = lattice.w;
+  float column = (p.x - lattice.x) / layerGap;
+  vec4 paint = vec4(0.0);
+
+  // The weights between this layer and the next.
+  float c = floor(column);
+  float t = column - c;
+  if (c >= span.x && c < span.y) {
+    float shift = offset(c + 1.0) - offset(c);
+    for (int k = -REACH; k <= REACH; k++) {
+      float rise = float(k) + shift;
+      float row = floor((p.y - lattice.z - t * rise * gap) / gap - offset(c) + 0.5);
+      float target = row + float(k);
+      if (row < span.z || row > span.w || target < span.z || target > span.w) continue;
+      float y = lattice.z + (row + offset(c) + t * rise) * gap;
+      float slope = rise * gap / layerGap;
+      float distance = abs(p.y - y) / sqrt(1.0 + slope * slope);
+      float weight = hash(vec3(c, row, float(k))) * 2.0 - 1.0;
+      float width = 1.5 + abs(weight) * 4.0;
+      float drawn = max(width, pixel);
+      float cover = smoothstep(drawn * 0.5 + pixel * 0.5, drawn * 0.5 - pixel * 0.5, distance) * width / drawn;
+      vec3 tint = weight >= 0.0 ? POSITIVE : NEGATIVE;
+      paint += vec4(tint, 1.0) * cover * (0.3 + 0.45 * abs(weight)) * (1.0 - paint.a);
+    }
+  }
+
+  // The neurons, over the weights.
+  float layer = floor(column + 0.5);
+  if (layer >= span.x && layer <= span.y) {
+    float row = floor((p.y - lattice.z) / gap - offset(layer) + 0.5);
+    if (row >= span.z && row <= span.w) {
+      vec2 centre = vec2(lattice.x + layer * layerGap, lattice.z + (row + offset(layer)) * gap);
+      float distance = length(p - centre);
+      float lit = hash(vec3(layer, row, 9.0));
+      float fill = smoothstep(radius + pixel, radius - pixel, distance);
+      float ring = smoothstep(1.5 + pixel, max(0.0, 1.5 - pixel), abs(distance - radius)) * min(1.0, 3.0 / pixel);
+      paint = vec4(mix(NODE, LIT, lit * lit), 1.0) * fill + paint * (1.0 - fill);
+      paint = vec4(mix(RING, POSITIVE, lit), 1.0) * ring + paint * (1.0 - ring);
+    }
+  }
+
+  // From far away the lines are finer than a pixel and shimmer, so fade to their average glow.
+  vec2 low = vec2(lattice.x + span.x * layerGap, lattice.z + (span.z - 0.5) * gap);
+  vec2 high = vec2(lattice.x + span.y * layerGap, lattice.z + (span.w + 1.0) * gap);
+  float inside = step(low.x, p.x) * step(p.x, high.x) * step(low.y, p.y) * step(p.y, high.y);
+  vec4 glow = vec4(mix(POSITIVE, NEGATIVE, 0.35), 1.0) * 0.2 * inside;
+  float detail = smoothstep(1.5, 5.0, gap / pixel);
+  colour = mix(glow, paint, detail) * opacity;
+}`;
+
+  class Extension {
+    // A canvas just behind the SVG, or null if there's no WebGL (the zoom still works without it).
+    static create(svg, stage) {
+      const canvas = document.createElement("canvas");
+      canvas.className = "network-extension";
+      canvas.width = stage.width;
+      canvas.height = stage.height;
+      const gl = canvas.getContext("webgl2");
+      if (!gl) return null;
+      try {
+        return new Extension(svg, canvas, gl);
+      } catch (error) {
+        console.error("Network extension off:", error.message);
+        return null;
+      }
+    }
+
+    constructor(svg, canvas, gl) {
+      const compile = (type, source) => {
+        const shader = gl.createShader(type);
+        gl.shaderSource(shader, source);
+        gl.compileShader(shader);
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(shader));
+        return shader;
+      };
+      const program = gl.createProgram();
+      gl.attachShader(program, compile(gl.VERTEX_SHADER, EXTENSION_VERTEX));
+      gl.attachShader(program, compile(gl.FRAGMENT_SHADER, EXTENSION_FRAGMENT));
+      gl.linkProgram(program);
+      if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(program));
+      gl.useProgram(program);
+
+      gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+      const corner = gl.getAttribLocation(program, "corner");
+      gl.enableVertexAttribArray(corner);
+      gl.vertexAttribPointer(corner, 2, gl.FLOAT, false, 0, 0);
+
+      this.uniforms = Object.fromEntries(
+        ["size", "view", "lattice", "radius", "phase", "span", "opacity"].map((name) => [name, gl.getUniformLocation(program, name)]),
+      );
+      this.canvas = canvas;
+      this.gl = gl;
+      this.shown = false;
+      svg.before(canvas);
+    }
+
+    draw(view, lattice, span, opacity) {
+      const { gl, uniforms } = this;
+      if (opacity <= 0.001 || !lattice || !span) {
+        if (this.shown) gl.clear(gl.COLOR_BUFFER_BIT);
+        this.shown = false;
+        return;
+      }
+      this.shown = true;
+      gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+      gl.uniform2f(uniforms.size, this.canvas.width, this.canvas.height);
+      gl.uniform4f(uniforms.view, ...view);
+      gl.uniform4f(uniforms.lattice, lattice.x, lattice.layerGap, lattice.y, lattice.gap);
+      gl.uniform1f(uniforms.radius, lattice.r);
+      gl.uniform1f(uniforms.phase, lattice.phase);
+      gl.uniform4f(uniforms.span, span.layers[0], span.layers[1], span.neurons[0], span.neurons[1]);
+      gl.uniform1f(uniforms.opacity, opacity);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    }
+
+    remove() {
+      this.canvas.remove();
     }
   }
 

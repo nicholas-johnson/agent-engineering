@@ -120,8 +120,10 @@ body {
   justify-content: flex-start;
 }
 
-/* A network diagram from network.js: it covers the stage, between the backdrop and the frames */
-.network {
+/* A network diagram from network.js: it covers the stage, between the backdrop and the frames.
+   The vast network it extends into is a canvas just behind it, the same size. */
+.network,
+.network-extension {
   position: absolute;
   inset: 0;
   width: 1080px;

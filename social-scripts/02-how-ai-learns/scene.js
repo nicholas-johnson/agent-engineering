@@ -78,7 +78,7 @@ new Network("#net").script({
     },
   },
 
-  // Zoom right out
-  "5.0": { zoom: 3, field: true },
-  "5.1": { zoom: 90, zoomTime: 5000 },
+  // Zoom right out: this little network turns out to be a tiny part of one vast one
+  "5.0": { zoom: 3, extend: true, labels: {}, bars: {} },
+  "5.1": { zoom: 24, zoomTime: 5000 },
 });
