@@ -2,7 +2,7 @@
 
 A second MCP server, for the weather, to copy when you write your own. You'll ask a question in plain English and watch the agent chain its tools to answer.
 
-From the module folder (`day-one/module-04-tools`):
+From the module folder (`day-one/module-03-tools`):
 
 ```bash
 uv run python playground/weather-server/play.py

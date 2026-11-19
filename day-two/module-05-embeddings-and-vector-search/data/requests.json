@@ -1,0 +1,170 @@
+[
+  {
+    "request": "Customer changed the temperature while the thermostat was offline and isn't sure it worked",
+    "platform": "android",
+    "expected": [
+      "TS-1129"
+    ]
+  },
+  {
+    "request": "Can someone still see the household's details on the dashboard after logging out?",
+    "platform": "web",
+    "expected": [
+      "TS-1354"
+    ]
+  },
+  {
+    "request": "The same thermostat shows up twice in the home after adding it again",
+    "platform": "ios",
+    "expected": [
+      "TS-1558"
+    ]
+  },
+  {
+    "request": "Energy use for just the bedroom, not the whole house",
+    "platform": "web",
+    "expected": [
+      "TS-1568"
+    ]
+  },
+  {
+    "request": "Did last night's software update keep my heating settings?",
+    "platform": "ios",
+    "expected": [
+      "TS-1719"
+    ]
+  },
+  {
+    "request": "Holding the knob down for a while makes the temperature jump",
+    "platform": "device",
+    "expected": [
+      "TS-1958"
+    ]
+  },
+  {
+    "request": "What happens when someone tries to add more rooms than allowed?",
+    "platform": "android",
+    "expected": [
+      "TS-1111"
+    ]
+  },
+  {
+    "request": "A family member who isn't the owner managed to remove someone from the home",
+    "platform": "android",
+    "expected": [
+      "TS-1985"
+    ]
+  },
+  {
+    "request": "Someone taken off the household can still see the energy charts",
+    "platform": "ios",
+    "expected": [
+      "TS-1248"
+    ]
+  },
+  {
+    "request": "A partially sighted user can't read the schedule on the thermostat's screen",
+    "platform": "device",
+    "expected": [
+      "TS-1997"
+    ]
+  },
+  {
+    "request": "Closed the app halfway through updating the thermostat and now the progress is wrong",
+    "platform": "ios",
+    "expected": [
+      "TS-1665"
+    ]
+  },
+  {
+    "request": "Screen reader users can't tell which room's controls they're on",
+    "platform": "android",
+    "expected": [
+      "TS-1688"
+    ]
+  },
+  {
+    "request": "A thermostat that hasn't been given a room is changing another room's settings",
+    "platform": "device",
+    "expected": [
+      "TS-1614"
+    ]
+  },
+  {
+    "request": "The thermostat says 21 but the room feels colder. Is its reading accurate?",
+    "platform": "device",
+    "expected": [
+      "TS-1465"
+    ]
+  },
+  {
+    "request": "Customer sees E-217 on the thermostat",
+    "platform": "device",
+    "expected": [
+      "TS-1010",
+      "TS-1289",
+      "TS-1332",
+      "TS-1379",
+      "TS-1650",
+      "TS-1727",
+      "TS-1845"
+    ]
+  },
+  {
+    "request": "E-221 showing on the display",
+    "platform": "device",
+    "expected": [
+      "TS-1122",
+      "TS-1466",
+      "TS-1673",
+      "TS-1727",
+      "TS-1832",
+      "TS-1888"
+    ]
+  },
+  {
+    "request": "E-104 came up while setting up a new thermostat",
+    "platform": "device",
+    "expected": [
+      "TS-1026",
+      "TS-1488",
+      "TS-1702",
+      "TS-1769"
+    ]
+  },
+  {
+    "request": "E-101 on the screen after moving house",
+    "platform": "device",
+    "expected": [
+      "TS-1154",
+      "TS-1233",
+      "TS-1366",
+      "TS-1474",
+      "TS-1900",
+      "TS-1916",
+      "TS-1990"
+    ]
+  },
+  {
+    "request": "Display says E-312",
+    "platform": "device",
+    "expected": [
+      "TS-1135",
+      "TS-1173",
+      "TS-1353",
+      "TS-1396",
+      "TS-1443",
+      "TS-1509"
+    ]
+  },
+  {
+    "request": "E-510 after last night's update",
+    "platform": "device",
+    "expected": [
+      "TS-1065",
+      "TS-1214",
+      "TS-1239",
+      "TS-1844"
+    ]
+  }
+]

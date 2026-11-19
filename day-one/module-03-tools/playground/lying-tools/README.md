@@ -2,7 +2,7 @@
 
 What an agent does when a tool is wrong, or when a tool's result contains instructions. You'll ask for the same square root from an honest tool, a buggy one, and one that tries to change how the agent talks.
 
-From the module folder (`day-one/module-04-tools`):
+From the module folder (`day-one/module-03-tools`):
 
 ```bash
 uv run python playground/lying-tools/play.py

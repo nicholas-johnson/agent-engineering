@@ -2,7 +2,7 @@
 
 MCP as plain JSON, one message per line. You'll start the maths server and talk to it yourself.
 
-From the module folder (`day-one/module-04-tools`):
+From the module folder (`day-one/module-03-tools`):
 
 ```bash
 uv run python playground/raw-protocol/play.py

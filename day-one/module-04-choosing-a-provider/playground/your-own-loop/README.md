@@ -2,7 +2,7 @@
 
 Module 1's generation loop, written by hand, running on a real open model. You'll watch it pick the next token from a vector of probabilities, one step at a time.
 
-From the module folder (`day-one/module-03-choosing-a-provider`):
+From the module folder (`day-one/module-04-choosing-a-provider`):
 
 ```bash
 uv run --extra local python playground/your-own-loop/play.py

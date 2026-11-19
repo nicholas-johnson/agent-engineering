@@ -2,7 +2,7 @@
 
 OpenRouter's full list of models. You'll filter it by price, context length, inputs and whether the weights are open.
 
-From the module folder (`day-one/module-03-choosing-a-provider`):
+From the module folder (`day-one/module-04-choosing-a-provider`):
 
 ```bash
 uv run python playground/model-catalogue/play.py

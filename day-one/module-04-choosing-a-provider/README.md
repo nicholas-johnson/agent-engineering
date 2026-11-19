@@ -1,4 +1,4 @@
-# Module 3 — Choosing a Provider
+# Module 4 — Choosing a Provider
 
 > In Module 2, Alice asked the Cheshire Cat which way she ought to go, and the Cat said *"That depends a good deal on where you want to get to."* That is also the honest answer to "which AI provider should I use?" This module is a survey. We send the same Cheshire Cat to the big American labs, to the Chinese labs, and to two models running on your own laptop, one through Ollama and one in plain Python. Along the way we look at what each is known for, what it costs, where your data goes, and what it will and won't say. We finish with a scorecard.
 
@@ -331,5 +331,5 @@ The final exercise is in [`further-reading/`](further-reading/): papers on how o
 ## Slides
 
 ```bash
-pnpm slides:03
+pnpm slides:04
 ```

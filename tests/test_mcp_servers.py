@@ -14,6 +14,7 @@ from mcp.client.stdio import StdioServerParameters
 from tests.conftest import REPO_ROOT, check_requirements, find_module
 
 TOOLS = find_module("tools")
+EMBEDDINGS = find_module("embeddings-and-vector-search")
 
 SERVER_TOOLS: dict[str, set[str]] = {
     f"{TOOLS}/demo/03_maths_server.py": {"square_root"},
@@ -27,6 +28,7 @@ SERVER_TOOLS: dict[str, set[str]] = {
         "square_root",
     },
     f"{TOOLS}/playground/weather-server/server.py": {"find_place", "get_weather"},
+    f"{EMBEDDINGS}/demo/05_search_server.py": {"find_test_scripts"},
 }
 
 COVERED_SERVERS: frozenset[str] = frozenset(SERVER_TOOLS)

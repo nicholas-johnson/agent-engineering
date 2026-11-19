@@ -2,7 +2,7 @@
 
 Token prices, turned into a monthly bill. You'll cost out one company chatbot on every model in `data/prices.json`.
 
-From the module folder (`day-one/module-03-choosing-a-provider`):
+From the module folder (`day-one/module-04-choosing-a-provider`):
 
 ```bash
 uv run python playground/price-calculator/play.py

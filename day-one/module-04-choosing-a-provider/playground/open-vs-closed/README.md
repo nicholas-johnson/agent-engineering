@@ -2,7 +2,7 @@
 
 A small open model on your laptop, next to a hosted frontier model. You'll read both answers to the same four questions.
 
-From the module folder (`day-one/module-03-choosing-a-provider`):
+From the module folder (`day-one/module-04-choosing-a-provider`):
 
 ```bash
 uv run python playground/open-vs-closed/play.py

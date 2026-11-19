@@ -2,7 +2,7 @@
 
 Every model reflects the rules and values of the people who trained it. You'll send the same five questions to every model you can reach, and compare what each one says, refuses, or sidesteps.
 
-From the module folder (`day-one/module-03-choosing-a-provider`):
+From the module folder (`day-one/module-04-choosing-a-provider`):
 
 ```bash
 uv run python playground/content-policies/play.py

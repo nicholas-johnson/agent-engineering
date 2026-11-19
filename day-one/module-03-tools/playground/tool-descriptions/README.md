@@ -2,7 +2,7 @@
 
 A tool's description is all the model knows about it. You'll give the model the same square root function three times, each time with a different description.
 
-From the module folder (`day-one/module-04-tools`):
+From the module folder (`day-one/module-03-tools`):
 
 ```bash
 uv run python playground/tool-descriptions/play.py

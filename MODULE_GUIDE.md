@@ -74,12 +74,12 @@ Module 2 is the reference for these.
 - Interactive demos read from `input()` and stop on an empty line. Write the transcript to `demo/output/`.
 - Check a model or parameter against OpenAI's documentation, and with a real call, before relying on it. Model names and supported parameters change.
 - Test interactive scripts by piping input in: `printf 'Hello\n\n' | uv run python demo/02_chat_loop.py`.
-- Other providers: prefer one that speaks the Responses API (OpenRouter, xAI and Ollama all do) through the `openai` package with a different `base_url`. Otherwise use the provider's own package (`anthropic`, `google-genai`). Module 3 is the reference.
+- Other providers: prefer one that speaks the Responses API (OpenRouter, xAI and Ollama all do) through the `openai` package with a different `base_url`. Otherwise use the provider's own package (`anthropic`, `google-genai`). Module 4 is the reference.
 - A demo that needs a key the delegate may not have checks for it (`if KEY in os.environ`) and skips that provider with a clear message, rather than crashing.
 
 ### Survey modules
 
-Most modules tell a story where each step breaks and leads to the next. A **survey** module (Module 3) instead looks at one group of options per section. The differences:
+Most modules tell a story where each step breaks and leads to the next. A **survey** module (Module 4) instead looks at one group of options per section. The differences:
 
 - Each section's demo is followed by a **Known for / Watch out for** slide (a `comparison` slide) instead of "Why this breaks".
 - The module ends with a way to choose, such as a scorecard, rather than a final step.

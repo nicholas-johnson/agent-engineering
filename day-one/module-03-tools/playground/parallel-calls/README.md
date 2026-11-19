@@ -2,7 +2,7 @@
 
 Five card lookups in one question. You'll see whether the model asks for them one at a time or all in a single round.
 
-From the module folder (`day-one/module-04-tools`):
+From the module folder (`day-one/module-03-tools`):
 
 ```bash
 uv run python playground/parallel-calls/play.py

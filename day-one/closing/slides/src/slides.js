@@ -109,7 +109,7 @@ export const slides = [
     type: 'title',
     content: {
       title: 'See you tomorrow',
-      subtitle: 'Day Two: embeddings, vector stores and RAG',
+      subtitle: 'Day Two: search, RAG, security and AI-assisted development',
       icon: 'rocket',
     },
   },

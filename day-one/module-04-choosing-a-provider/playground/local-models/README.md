@@ -2,7 +2,7 @@
 
 How small can a model be and still be useful? You'll ask the same three questions of two Qwen models running on your laptop.
 
-From the module folder (`day-one/module-03-choosing-a-provider`):
+From the module folder (`day-one/module-04-choosing-a-provider`):
 
 ```bash
 ollama pull qwen3:0.6b

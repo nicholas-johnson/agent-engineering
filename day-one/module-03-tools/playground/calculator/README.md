@@ -2,7 +2,7 @@
 
 An agent with six maths tools: add, subtract, multiply, divide, power and square root. You'll ask questions that need several of them, and watch it plan the calculation.
 
-From the module folder (`day-one/module-04-tools`):
+From the module folder (`day-one/module-03-tools`):
 
 ```bash
 uv run python playground/calculator/play.py

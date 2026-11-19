@@ -1,4 +1,4 @@
-# Module 4 — Tools
+# Module 3 — Tools
 
 > A language model is brilliant with words and hopeless at arithmetic: ask it for a square root to ten decimal places and it confidently makes one up, differently every time. Python gets it right instantly, but can't read a question. In this module we join the two. We write a function, turn it into a **tool** on an **MCP server**, and give it to the model with a **tool loop**: the model decides when it needs the tool, our code runs it, and the model uses the result. Then we connect a second server that reaches out to a live API on the internet, and our agent can look things up in the real world.
 
@@ -258,5 +258,5 @@ The final exercise is in [`further-reading/`](further-reading/): papers on teach
 ## Slides
 
 ```bash
-pnpm slides:04
+pnpm slides:03
 ```

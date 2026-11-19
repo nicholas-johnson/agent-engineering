@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -33,12 +34,15 @@ class ScriptCase:
     needs_local: bool = False
     needs_internet: bool = False
     slow: bool = False
+    timeout: int = 240
 
 
 INTRO = find_module("intro-to-language-models")
 CHATBOT = find_module("building-a-chatbot")
 TOOLS = find_module("tools")
 PROVIDERS = find_module("choosing-a-provider")
+EMBEDDINGS = find_module("embeddings-and-vector-search")
+RAG = find_module("rag-and-proprietary-knowledge")
 
 SCRIPTS: tuple[ScriptCase, ...] = (
     # --- Intro to Language Models (all offline) ---
@@ -258,6 +262,96 @@ SCRIPTS: tuple[ScriptCase, ...] = (
         outputs=("steps.json",),
         needs_local=True,
     ),
+    # --- Embeddings and Vector Search ---
+    ScriptCase(
+        f"{EMBEDDINGS}/demo/01_keyword_search.py",
+        outputs=("01_keyword_search.json",),
+    ),
+    ScriptCase(
+        f"{EMBEDDINGS}/demo/02_embeddings.py",
+        outputs=("02_embeddings.json",),
+        keys=("OPENAI_API_KEY",),
+    ),
+    ScriptCase(
+        f"{EMBEDDINGS}/demo/03_vector_database.py",
+        outputs=("03_vector_database.json",),
+        keys=("OPENAI_API_KEY",),
+    ),
+    ScriptCase(
+        f"{EMBEDDINGS}/demo/04_hybrid_search.py",
+        outputs=("04_hybrid_search.json",),
+        keys=("OPENAI_API_KEY",),
+    ),
+    ScriptCase(
+        f"{EMBEDDINGS}/demo/05_agent.py",
+        outputs=("05_agent.json",),
+        keys=("OPENAI_API_KEY",),
+    ),
+    ScriptCase(
+        f"{EMBEDDINGS}/playground/similarity-explorer/play.py",
+        stdin="The heating works\nThe heating does not work\n\n\n",
+        outputs=("similarities.json",),
+        keys=("OPENAI_API_KEY",),
+    ),
+    ScriptCase(
+        f"{EMBEDDINGS}/playground/what-to-embed/play.py",
+        outputs=("ranks.json",),
+        keys=("OPENAI_API_KEY",),
+    ),
+    ScriptCase(
+        f"{EMBEDDINGS}/playground/duplicate-finder/play.py",
+        outputs=("duplicates.json",),
+        keys=("OPENAI_API_KEY",),
+    ),
+    ScriptCase(
+        f"{EMBEDDINGS}/playground/other-languages/play.py",
+        outputs=("ranks.json",),
+        keys=("OPENAI_API_KEY",),
+    ),
+    ScriptCase(
+        f"{EMBEDDINGS}/playground/shrink-the-vectors/play.py",
+        outputs=("results.json",),
+        keys=("OPENAI_API_KEY",),
+    ),
+    ScriptCase(
+        f"{EMBEDDINGS}/playground/fusion-knobs/play.py",
+        outputs=("results.json",),
+        keys=("OPENAI_API_KEY",),
+    ),
+    # --- RAG and Proprietary Knowledge ---
+    ScriptCase(
+        f"{RAG}/demo/01_just_ask.py",
+        outputs=("01_just_ask.json",),
+        keys=("OPENAI_API_KEY",),
+    ),
+    ScriptCase(
+        f"{RAG}/demo/02_whole_manual.py",
+        outputs=("02_whole_manual.json",),
+        keys=("OPENAI_API_KEY",),
+    ),
+    ScriptCase(
+        f"{RAG}/demo/03_retrieve_and_answer.py",
+        outputs=("03_retrieve_and_answer.json", "chunks.json"),
+        keys=("OPENAI_API_KEY",),
+    ),
+    # The first run embeds every chunk and question, which can take a few minutes.
+    ScriptCase(
+        f"{RAG}/demo/04_faq.py",
+        outputs=("04_faq.json",),
+        keys=("OPENAI_API_KEY",),
+        timeout=600,
+    ),
+    ScriptCase(
+        f"{RAG}/demo/05_citations.py",
+        outputs=("05_citations.json",),
+        keys=("OPENAI_API_KEY",),
+        timeout=600,
+    ),
+    ScriptCase(
+        f"{RAG}/demo/06_keep_it_current.py",
+        outputs=("06_keep_it_current.json",),
+        keys=("OPENAI_API_KEY",),
+    ),
     # --- Social clip companion script ---
     ScriptCase("social-scripts/02-how-ai-learns/neuron.py"),
 )
@@ -270,6 +364,11 @@ DEDICATED_SCRIPTS: frozenset[str] = frozenset(
         f"{INTRO}/playground/neural-knobs/complete.py",
         f"{PROVIDERS}/data/build_prices.py",
         f"{PROVIDERS}/demo/01_big_labs.py",
+        # Writes the committed library with a model: rerunning it changes the data. Checked below instead.
+        f"{EMBEDDINGS}/data/build_test_scripts.py",
+        # Write the committed knowledge base and its FAQ with a model, so the same applies.
+        f"{RAG}/data/build_docs.py",
+        f"{RAG}/data/build_faq.py",
     }
 )
 
@@ -309,6 +408,7 @@ def test_script(case: ScriptCase, pytestconfig: pytest.Config) -> None:
         REPO_ROOT / case.path,
         stdin=case.stdin,
         outputs=case.outputs,
+        timeout=case.timeout,
     )
 
 
@@ -338,6 +438,33 @@ def test_build_tokens_matches_committed_data(tmp_path: Path) -> None:
     committed = json.loads((data_dir / "tokens.json").read_text(encoding="utf-8"))
     assert len(generated) == 500
     assert generated == committed
+
+
+@pytest.mark.offline
+def test_test_script_library_is_consistent() -> None:
+    """The committed library, the hand-written scripts inside it, and the requests' answers agree."""
+    data_dir = REPO_ROOT / EMBEDDINGS / "data"
+    library = json.loads((data_dir / "test-scripts.json").read_text(encoding="utf-8"))
+    small = json.loads((data_dir / "test-scripts-small.json").read_text(encoding="utf-8"))
+    requests = json.loads((data_dir / "requests.json").read_text(encoding="utf-8"))
+
+    by_id = {script["id"]: script for script in library}
+    assert len(library) == 1000
+    assert sorted(by_id) == [f"TS-{n}" for n in range(1000, 2000)]
+    fields = {"id", "title", "platform", "component", "priority", "minutes", "preconditions", "steps", "expected"}
+    for script in library:
+        assert set(script) == fields, script["id"]
+        assert script["platform"] in {"android", "ios", "web", "device"}, script["id"]
+        assert script["priority"] in {"high", "medium", "low"}, script["id"]
+        assert script["steps"], script["id"]
+    for script in small:
+        assert by_id[script["id"]] == script, f"{script['id']} differs between the small and large libraries"
+
+    assert len(requests) == 20
+    for request in requests:
+        assert request["expected"], request["request"]
+        for script_id in request["expected"]:
+            assert by_id[script_id]["platform"] == request["platform"], (request["request"], script_id)
 
 
 @pytest.mark.network
@@ -419,3 +546,48 @@ def test_demos_run_from_any_working_directory(tmp_path: Path) -> None:
     )
     assert result.returncode == 0, result.stderr
     assert "=== alice ===" in result.stdout
+
+
+@pytest.mark.offline
+def test_knowledge_base_is_consistent() -> None:
+    """The documents have their fields, Warm Wake's details live in one place, and the questions can be answered."""
+    module = REPO_ROOT / RAG / "data"
+    documents = {path.name: path.read_text(encoding="utf-8") for path in sorted((module / "docs").glob("*.md"))}
+    questions = json.loads((module / "questions.json").read_text(encoding="utf-8"))
+    assert len(documents) > 250
+
+    fields = ["title", "product", "type", "audience", "firmware", "updated"]
+    for name, text in documents.items():
+        assert text.isascii(), name
+        front = text.split("---", 2)[1].strip().splitlines()
+        assert [line.split(": ", 1)[0] for line in front] == fields, name
+        assert f"audience: {'internal' if 'type: internal' in front else 'customer'}" in front, name
+
+    # Firmware 4.2 changes Warm Wake, so only these documents may say how it works.
+    for name, text in documents.items():
+        if name not in {"user-guide.md", "firmware-4-0-release-notes.md"}:
+            assert not re.search(r"minutes early|90 minutes|> Warm Wake", text, re.IGNORECASE), name
+
+    def has(text: str, fact: str) -> bool:
+        text = re.sub(r"\s*>\s*", ">", " ".join(text.lower().split()))
+        return any(re.search(rf"\b{re.escape(option.lower())}\b", text) for option in fact.split("|"))
+
+    guide = documents["user-guide.md"]
+    for question in questions:
+        if question["kind"] in ("everyday", "error code"):
+            assert question["facts"], question["id"]
+            assert all(has(guide, fact) for fact in question["facts"]), question["id"]
+
+    # Only internal documents explain the relay click, so a customer answer that explains it has leaked one.
+    holders = [name for name, text in documents.items() if "click" in text.lower()]
+    assert holders and all("audience: internal" in documents[name] for name in holders)
+
+    updates = sorted(path.name for path in (module / "updates").glob("*.md"))
+    assert updates == ["release-notes-4.2.md", "user-guide.md"]
+
+    # data/build_faq.py wrote questions for (nearly) every chunk, and each has some.
+    faq = json.loads((module / "faq.json").read_text(encoding="utf-8"))
+    assert len(faq) > 1700
+    assert all(entry["questions"] and len(entry["checksum"]) == 64 for entry in faq.values())
+    assert "user-guide.md#warm-wake" in faq
+

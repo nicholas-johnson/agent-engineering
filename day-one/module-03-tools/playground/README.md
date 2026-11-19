@@ -2,7 +2,7 @@
 
 Things to play with between exercises: an agent that calls tools, and the messages those calls are made of. Each folder has a short script to run and a list of ideas to take it further. None of them are required, and there are no right answers.
 
-From the module folder (`day-one/module-04-tools`):
+From the module folder (`day-one/module-03-tools`):
 
 ```bash
 uv run python playground/calculator/play.py
