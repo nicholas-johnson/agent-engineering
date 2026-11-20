@@ -11,7 +11,8 @@ from tests.conftest import REPO_ROOT
 from tests.test_mcp_servers import COVERED_SERVERS
 from tests.test_python_scripts import COVERED_SCRIPTS
 
-IGNORED_DIRS = {".git", ".venv", "node_modules", "__pycache__", ".pytest_cache"}
+# output/ folders are generated and gitignored; a coding agent demo copies a whole project into one.
+IGNORED_DIRS = {".git", ".venv", "node_modules", "__pycache__", ".pytest_cache", "output"}
 
 
 def _all_repo_python_files() -> list[Path]:

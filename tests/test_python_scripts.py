@@ -43,6 +43,7 @@ TOOLS = find_module("tools")
 PROVIDERS = find_module("choosing-a-provider")
 EMBEDDINGS = find_module("embeddings-and-vector-search")
 RAG = find_module("rag-and-proprietary-knowledge")
+AI_DEV = find_module("ai-assisted-development")
 
 SCRIPTS: tuple[ScriptCase, ...] = (
     # --- Intro to Language Models (all offline) ---
@@ -352,6 +353,82 @@ SCRIPTS: tuple[ScriptCase, ...] = (
         outputs=("06_keep_it_current.json",),
         keys=("OPENAI_API_KEY",),
     ),
+    # --- AI-Assisted Development ---
+    ScriptCase(
+        f"{AI_DEV}/demo/01_just_build_it.py",
+        outputs=("01_prototype.html",),
+        keys=("OPENAI_API_KEY",),
+    ),
+    ScriptCase(
+        f"{AI_DEV}/demo/02_company_brain.py",
+        outputs=("02_spec.md", "02_prototype.html"),
+        keys=("OPENAI_API_KEY",),
+    ),
+    ScriptCase(
+        f"{AI_DEV}/demo/03_coding_agent.py",
+        outputs=("03_changes.diff", "03_transcript.json"),
+        keys=("OPENAI_API_KEY",),
+        timeout=600,
+    ),
+    ScriptCase(
+        f"{AI_DEV}/demo/04_plan_first.py",
+        stdin="y\n",
+        outputs=("04_plan.md", "04_changes.diff", "04_transcript.json"),
+        keys=("OPENAI_API_KEY",),
+        timeout=600,
+    ),
+    ScriptCase(
+        f"{AI_DEV}/demo/05_skills.py",
+        outputs=("05_review.md", "05_test-plan.md", "05_change-summary.md"),
+        keys=("OPENAI_API_KEY",),
+    ),
+    ScriptCase(
+        f"{AI_DEV}/demo/06_out_the_door.py",
+        outputs=("06_launch/release-notes.md", "06_launch/social-post.md", "06_launch/sales-sheet.md"),
+        keys=("OPENAI_API_KEY",),
+    ),
+    ScriptCase(
+        f"{AI_DEV}/playground/brain-pieces/play.py",
+        outputs=("nothing.txt", "product-decisions-design-voice.txt"),
+        keys=("OPENAI_API_KEY",),
+    ),
+    # Says yes to every change the agent asks to make.
+    ScriptCase(
+        f"{AI_DEV}/playground/permissions/play.py",
+        stdin="y\n" * 60,
+        outputs=("changes.diff", "transcript.json"),
+        keys=("OPENAI_API_KEY",),
+        timeout=600,
+    ),
+    ScriptCase(
+        f"{AI_DEV}/playground/test-first/play.py",
+        outputs=("tests.diff", "changes.diff", "transcript.json"),
+        keys=("OPENAI_API_KEY",),
+        timeout=600,
+    ),
+    # The Claude review needs ANTHROPIC_API_KEY too, and is skipped without it.
+    ScriptCase(
+        f"{AI_DEV}/playground/second-opinion/play.py",
+        outputs=("gpt-6-luna-none.md", "gpt-6-luna-high.md"),
+        keys=("OPENAI_API_KEY",),
+        timeout=600,
+    ),
+    ScriptCase(
+        f"{AI_DEV}/playground/write-a-skill/play.py",
+        outputs=("support-reply.md",),
+        keys=("OPENAI_API_KEY",),
+    ),
+    ScriptCase(
+        f"{AI_DEV}/playground/feedback-themes/play.py",
+        outputs=("themes.json",),
+        keys=("OPENAI_API_KEY",),
+    ),
+    ScriptCase(
+        f"{AI_DEV}/playground/voice-check/play.py",
+        stdin="\n",
+        outputs=("check.json",),
+        keys=("OPENAI_API_KEY",),
+    ),
     # --- Social clip companion script ---
     ScriptCase("social-scripts/02-how-ai-learns/neuron.py"),
 )
@@ -369,6 +446,11 @@ DEDICATED_SCRIPTS: frozenset[str] = frozenset(
         # Write the committed knowledge base and its FAQ with a model, so the same applies.
         f"{RAG}/data/build_docs.py",
         f"{RAG}/data/build_faq.py",
+        # The small codebase the coding agents change: its own unit tests run below.
+        *(
+            str(path.relative_to(REPO_ROOT))
+            for path in sorted((REPO_ROOT / AI_DEV / "data" / "project").rglob("*.py"))
+        ),
     }
 )
 
@@ -590,4 +672,36 @@ def test_knowledge_base_is_consistent() -> None:
     assert len(faq) > 1700
     assert all(entry["questions"] and len(entry["checksum"]) == 64 for entry in faq.values())
     assert "user-guide.md#warm-wake" in faq
+
+
+@pytest.mark.offline
+def test_dormouse_project_tests_pass() -> None:
+    """The codebase the coding agents start from must pass its own tests, or the demos mean nothing."""
+    project = REPO_ROOT / AI_DEV / "data" / "project"
+    result = subprocess.run(
+        [sys.executable, "-m", "unittest"], cwd=project, capture_output=True, text=True, timeout=60
+    )
+    assert result.returncode == 0, result.stderr
+    assert "Ran 16 tests" in result.stderr
+
+
+@pytest.mark.offline
+def test_ai_dev_data_is_consistent() -> None:
+    """The skills load, the saved change applies to the project, and the ticket matches the feedback."""
+    module = REPO_ROOT / AI_DEV / "data"
+    for skill in sorted((module / "skills").glob("*/SKILL.md")):
+        _, front, body = skill.read_text().split("---", 2)
+        fields = dict(line.split(": ", 1) for line in front.strip().splitlines())
+        assert fields["name"] == skill.parent.name
+        assert fields["description"] and body.strip()
+    for path in [*module.glob("brain/*.md"), *module.glob("skills/*/SKILL.md"), module / "tickets" / "DOR-231.md"]:
+        assert path.read_text().isascii(), f"{path} is not plain ASCII"
+    # The saved change must start from the committed project.
+    diff = (module / "changes" / "DOR-231.diff").read_text()
+    for removed in re.findall(r"^-(?!--)(.*)$", diff, re.MULTILINE):
+        names = re.findall(r"^--- a/(\S+)", diff, re.MULTILINE)
+        assert any(removed in (module / "project" / name).read_text() for name in names), removed
+    feedback = json.loads((module / "feedback.json").read_text())
+    assert len(feedback) == 30
+    assert "14 of 30" in (module / "tickets" / "DOR-231.md").read_text()
 

@@ -1,0 +1,149 @@
+--- a/dormouse/pages.py
++++ b/dormouse/pages.py
+@@ -6,10 +6,11 @@
+ SECTIONS = {
+     "Heating": [
+         ("boost_temperature", "Boost temperature", "The temperature a boost heats to, for one hour."),
+-        ("warm_wake", "Warm Wake", "Starts the heating up to 90 minutes early, so the home is warm when each period starts."),
+     ],
+     "Schedule": [
+         ("week_starts_on", "Week starts on", "The first day shown in the Schedule tab."),
++        ("warm_wake", "Warm Wake", "Starts the heating early, so the home is warm when each period starts."),
++        ("how_early", "How early", "Warm Wake starts the heating no more than this many minutes before a period."),
+     ],
+     "Away": [
+         ("away_temperature", "Away temperature", "The temperature while away mode is on."),
+@@ -28,6 +29,12 @@
+             f'<option{" selected" if day == value else ""}>{day}</option>' for day in ("Monday", "Sunday")
+         )
+         return f'<select name="{name}">{options}</select>'
++    if name == "how_early":
++        options = "".join(
++            f'<option value="{minutes}"{" selected" if minutes == value else ""}>{minutes} minutes</option>'
++            for minutes in (30, 60, 90)
++        )
++        return f'<select name="{name}">{options}</select>'
+     return f'<input type="number" name="{name}" value="{value}" step="0.5"> degrees'
+ 
+ 
+@@ -37,6 +44,8 @@
+     for section, rows in SECTIONS.items():
+         html.append(f"<h2>{section}</h2>")
+         for name, label, explanation in rows:
++            if name == "how_early" and not settings["warm_wake"]:
++                continue
+             html.append(
+                 f'<div class="setting"><label>{escape(label)}</label>'
+                 f"<p>{escape(explanation)}</p>{control(name, settings[name])}</div>"
+--- a/dormouse/settings.py
++++ b/dormouse/settings.py
+@@ -3,6 +3,7 @@
+ DEFAULTS = {
+     "boost_temperature": 21.0,
+     "warm_wake": True,
++    "how_early": 60,
+     "week_starts_on": "Monday",
+     "away_temperature": 16.0,
+     "geofencing": False,
+@@ -24,6 +25,9 @@
+             raise ValueError(f"{name} must be a number")
+         if not low <= value <= high or value * 2 != round(value * 2):
+             raise ValueError(f"{name} must be from {low} to {high} degrees, in half-degree steps")
++    elif name == "how_early":
++        if isinstance(value, bool) or value not in (30, 60, 90):
++            raise ValueError("how_early must be 30, 60 or 90 minutes")
+     elif name in ("warm_wake", "geofencing"):
+         if not isinstance(value, bool):
+             raise ValueError(f"{name} must be on or off")
+--- a/dormouse/warm_wake.py
++++ b/dormouse/warm_wake.py
+@@ -2,8 +2,6 @@
+ 
+ import math
+ from datetime import timedelta
+-
+-MAX_MINUTES_EARLY = 90
+ 
+ 
+ def minutes_to_heat(room, target, degrees_per_hour):
+@@ -17,5 +15,5 @@
+     """The time to switch the heating on for a schedule period that starts at period_start."""
+     if not settings["warm_wake"]:
+         return period_start
+-    minutes = min(minutes_to_heat(room, target, degrees_per_hour), MAX_MINUTES_EARLY)
++    minutes = min(minutes_to_heat(room, target, degrees_per_hour), settings["how_early"])
+     return period_start - timedelta(minutes=minutes)
+--- a/tests/test_pages.py
++++ b/tests/test_pages.py
+@@ -21,8 +21,23 @@
+         headings = re.findall(r"<h2>(.*?)</h2>", settings_page(DEFAULTS))
+         self.assertEqual(headings, ["Heating", "Schedule", "Away"])
+ 
+-    def test_warm_wake_is_under_heating(self):
+-        self.assertIn("Warm Wake", section(settings_page(DEFAULTS), "Heating"))
++    def test_warm_wake_and_how_early_are_under_schedule(self):
++        html = settings_page(DEFAULTS)
++        heating = section(html, "Heating")
++        schedule = section(html, "Schedule")
++        self.assertNotIn("Warm Wake", heating)
++        self.assertIn("Warm Wake", schedule)
++        self.assertIn("How early", schedule)
++
++    def test_how_early_shows_the_three_choices(self):
++        html = settings_page(DEFAULTS)
++        control = re.search(r'<select name="how_early">(.*?)</select>', html).group(1)
++        self.assertEqual(re.findall(r"\d+ minutes", control), ["30 minutes", "60 minutes", "90 minutes"])
++
++    def test_how_early_is_hidden_when_warm_wake_is_off(self):
++        html = settings_page({**DEFAULTS, "warm_wake": False})
++        self.assertNotIn('name="how_early"', html)
++        self.assertNotIn("How early", html)
+ 
+     def test_switches_show_their_state(self):
+         html = settings_page({**DEFAULTS, "geofencing": True})
+--- a/tests/test_settings.py
++++ b/tests/test_settings.py
+@@ -7,6 +7,18 @@
+     def test_every_default_is_allowed(self):
+         for name, value in DEFAULTS.items():
+             check(name, value)
++
++    def test_how_early_defaults_to_60_minutes(self):
++        self.assertEqual(DEFAULTS["how_early"], 60)
++
++    def test_how_early_allows_30_60_or_90_minutes(self):
++        for minutes in (30, 60, 90):
++            check("how_early", minutes)
++
++    def test_how_early_rejects_other_values(self):
++        for value in (0, 31, 45, 120, "60", True):
++            with self.subTest(value=value), self.assertRaises(ValueError):
++                check("how_early", value)
+ 
+     def test_unknown_setting_is_rejected(self):
+         with self.assertRaises(ValueError):
+--- a/tests/test_warm_wake.py
++++ b/tests/test_warm_wake.py
+@@ -1,5 +1,5 @@
+ import unittest
+-from datetime import datetime
++from datetime import datetime, timedelta
+ 
+ from dormouse.settings import DEFAULTS
+ from dormouse.warm_wake import heating_start, minutes_to_heat
+@@ -18,9 +18,12 @@
+         start = heating_start(SEVEN, 17, 20, 4, dict(DEFAULTS))
+         self.assertEqual(start, datetime(2026, 11, 20, 6, 15))
+ 
+-    def test_never_more_than_90_minutes_early(self):
+-        start = heating_start(SEVEN, 10, 21, 2, dict(DEFAULTS))
+-        self.assertEqual(start, datetime(2026, 11, 20, 5, 30))
++    def test_never_starts_earlier_than_the_how_early_setting(self):
++        for minutes in (30, 60, 90):
++            with self.subTest(minutes=minutes):
++                settings = {**DEFAULTS, "how_early": minutes}
++                start = heating_start(SEVEN, 10, 21, 2, settings)
++                self.assertEqual(start, SEVEN - timedelta(minutes=minutes))
+ 
+     def test_when_warm_wake_is_off_the_heating_starts_on_time(self):
+         settings = {**DEFAULTS, "warm_wake": False}

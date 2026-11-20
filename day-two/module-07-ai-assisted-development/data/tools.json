@@ -1,0 +1,650 @@
+{
+  "checked_on": "2026-11-20",
+  "note": "Plans, prices and even ownership of these tools change monthly; recheck every row before teaching.",
+  "kinds": [
+    {
+      "kind": "Build an app from a prompt",
+      "for": "founders, designers and product managers who want a working prototype without writing code",
+      "tools": [
+        {
+          "name": "Lovable",
+          "maker": "Lovable",
+          "url": "https://lovable.dev",
+          "what": "A chat-based app builder that generates a full-stack web app (usually React with a Supabase backend) from a description and hosts it for you.",
+          "known_for": [
+            "fast path from idea to hosted prototype",
+            "built-in Quick and Deep security scans",
+            "persistent Instructions (previously called Knowledge) at workspace, project and personal level"
+          ],
+          "watch_out_for": [
+            "credit-based pricing, and credits are not refundable",
+            "publicly reported data exposure: a Lovable-showcased app leaked 18,697 user records (The Register, Feb 2026), and a Lovable API flaw left other users' project source code readable for 48 days (The Next Web, Apr 2026)",
+            "Lovable says fixing issues the scan flags is up to the app's owner"
+          ],
+          "price": "from $25 a month (Pro, 100 credits)",
+          "sources": [
+            "https://lovable.dev/pricing",
+            "https://docs.lovable.dev/introduction/plans-and-credits.md",
+            "https://docs.lovable.dev/features/security",
+            "https://docs.lovable.dev/features/knowledge",
+            "https://www.theregister.com/2026/02/27/lovable_app_vulnerabilities",
+            "https://thenextweb.com/news/lovable-vibe-coding-security-crisis-exposed"
+          ]
+        },
+        {
+          "name": "v0",
+          "maker": "Vercel",
+          "url": "https://v0.app",
+          "what": "Vercel's prompt-to-app builder that produces Next.js and React interfaces and deploys them to Vercel.",
+          "known_for": [
+            "tight link to Vercel hosting",
+            "good for interface and front-end work",
+            "choice of model tiers (Mini, Pro, Max)"
+          ],
+          "watch_out_for": [
+            "usage-based credits: model tokens are billed per million",
+            "the free plan is limited to 7 messages a day",
+            "output is built around Vercel's stack"
+          ],
+          "price": "from $30 a user a month (Plus, includes $30 of credits)",
+          "sources": [
+            "https://v0.app/pricing"
+          ]
+        },
+        {
+          "name": "Bolt.new",
+          "maker": "StackBlitz",
+          "url": "https://bolt.new",
+          "what": "A browser-based app builder that writes, runs and deploys a full-stack project from a prompt.",
+          "known_for": [
+            "runs the whole project in the browser",
+            "unused tokens roll over for up to two months on paid plans",
+            "free tier to try it"
+          ],
+          "watch_out_for": [
+            "token-based allowance that large projects can use up quickly",
+            "free plan has a 300K daily limit and Bolt branding",
+            "reported fall in traffic since June 2026 (Swedish press, single source)"
+          ],
+          "price": "from $25 a month (Pro, 10M tokens)",
+          "sources": [
+            "https://bolt.new/pricing"
+          ]
+        },
+        {
+          "name": "Replit Agent",
+          "maker": "Replit",
+          "url": "https://replit.com",
+          "what": "An agent inside Replit's online workspace that builds, runs and deploys apps from a prompt, with hosting and a database in the same place.",
+          "known_for": [
+            "build, host and database in one product",
+            "works on mobile as well as desktop",
+            "Core plan includes $20 of usage credits"
+          ],
+          "watch_out_for": [
+            "effort-based, pay-as-you-go pricing makes cost hard to predict",
+            "Replit itself says agent behaviour is probabilistic and can make mistakes",
+            "projects live on Replit's platform"
+          ],
+          "price": "from $20 a month (Core)",
+          "sources": [
+            "https://replit.com/pricing"
+          ]
+        },
+        {
+          "name": "Figma Make",
+          "maker": "Figma",
+          "url": "https://www.figma.com/make/",
+          "what": "Figma's prompt-to-prototype tool, included with a Full seat, that turns a prompt or a design into a working app.",
+          "known_for": [
+            "starts from your Figma designs",
+            "sits next to the design file your team already uses",
+            "no separate subscription for Full seat holders"
+          ],
+          "watch_out_for": [
+            "uses a shared pool of Figma AI credits",
+            "needs a paid Full seat for full access",
+            "Figma also bought the team behind a rival builder (Bud) in July 2026, which shows how fast this market moves"
+          ],
+          "price": "from $16 a month (Professional, Full seat)",
+          "sources": [
+            "https://www.figma.com/pricing/"
+          ]
+        },
+        {
+          "name": "Google AI Studio (Build mode)",
+          "maker": "Google",
+          "url": "https://ai.studio/build",
+          "what": "The Build tab in Google AI Studio generates a working app from a prompt, now full-stack and running on the Antigravity coding agent.",
+          "known_for": [
+            "free to start with no card needed",
+            "export to GitHub or as a ZIP",
+            "Annotation Mode: highlight part of the UI and describe the change"
+          ],
+          "watch_out_for": [
+            "free quota can run out, after which you add your own API key",
+            "described by reviewers as still evolving and inconsistent in places",
+            "tied to Gemini models"
+          ],
+          "price": "free to start",
+          "sources": [
+            "https://blog.google/innovation-and-ai/technology/developers-tools/full-stack-vibe-coding-google-ai-studio/",
+            "https://venturebeat.com/ai/googles-new-vibe-coding-ai-studio-experience-lets-anyone-build-deploy-apps",
+            "https://ai.google.dev/gemini-api/docs/aistudio-build-mode?hl=en"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "AI editors",
+      "for": "developers who want an agent inside the editor they work in every day",
+      "tools": [
+        {
+          "name": "Cursor",
+          "maker": "Anysphere, now part of SpaceX (SpaceXAI)",
+          "url": "https://cursor.com",
+          "what": "A VS Code-style editor built around an AI agent that edits files across your project, with a Plan Mode and support for AGENTS.md and Agent Skills.",
+          "known_for": [
+            "widely used agent-first editor",
+            "Plan Mode (Shift+Tab) to review a plan before code is written",
+            "reads AGENTS.md and SKILL.md skills"
+          ],
+          "watch_out_for": [
+            "SpaceX closed its $60bn purchase on 14 August 2026, so ownership and model supply have changed",
+            "OpenAI announced it would stop supplying its models to Cursor from 12 November 2026",
+            "usage pools reset weekly, and third-party models are billed separately at API rates"
+          ],
+          "price": "from $8 a month (Plus; the pricing page says Plus includes only Grok models), Premium $30",
+          "sources": [
+            "https://cursor.com/pricing",
+            "https://cursor.com/docs/agent/modes",
+            "https://cursor.com/docs/context/rules",
+            "https://thenextweb.com/news/spacex-cursor-acquisition-completed-gpu-fleet",
+            "https://openai.com/index/our-decision-on-cursor-following-its-acquisition-by-spacex/"
+          ]
+        },
+        {
+          "name": "GitHub Copilot in VS Code",
+          "maker": "GitHub (Microsoft)",
+          "url": "https://github.com/features/copilot",
+          "what": "Copilot's chat, agent mode and Plan agent inside VS Code, with agent skills and repository instructions.",
+          "known_for": [
+            "Plan agent that hands the plan to an implementation agent",
+            "works in VS Code, Visual Studio and JetBrains IDEs",
+            "reads AGENTS.md, CLAUDE.md or GEMINI.md instructions"
+          ],
+          "watch_out_for": [
+            "since 1 June 2026 billing is by GitHub AI Credits (token usage), not premium requests",
+            "one user reported using about 15% of a Pro+ allowance in a single session on day one",
+            "code review also uses GitHub Actions minutes"
+          ],
+          "price": "from $10 a month (Pro)",
+          "sources": [
+            "https://github.com/features/copilot/plans",
+            "https://code.visualstudio.com/docs/agents/planning",
+            "https://github.blog/2026-05-01-github-copilot-is-moving-to-usage-based-billing/",
+            "https://docs.github.com/en/copilot/how-tos/configure-custom-instructions/add-repository-instructions"
+          ]
+        },
+        {
+          "name": "Devin Desktop (formerly Windsurf)",
+          "maker": "Cognition",
+          "url": "https://devin.ai",
+          "what": "The Windsurf AI editor, renamed Devin Desktop and sold with Cognition's Devin agent.",
+          "known_for": [
+            "Cascade agent inside an editor",
+            "free tier with unlimited Tab completions",
+            "bundled with the Devin cloud agent"
+          ],
+          "watch_out_for": [
+            "renamed in June 2026 and its plans were reset twice in 2026",
+            "daily and weekly usage quotas; extra usage is billed at API rates",
+            "plan details differ between sources, so check the page"
+          ],
+          "price": "from $20 a month (Pro)",
+          "sources": [
+            "https://devin.ai/pricing",
+            "https://devin.ai/blog/windsurf-pricing-plans"
+          ]
+        },
+        {
+          "name": "Kiro",
+          "maker": "AWS",
+          "url": "https://kiro.dev",
+          "what": "An AWS editor and agent built around specs: a prompt becomes requirements, a design and a task list that the agent then works through.",
+          "known_for": [
+            "spec-driven workflow stored under .kiro/specs",
+            "steering files, plus automatic AGENTS.md support",
+            "Agent Skills"
+          ],
+          "watch_out_for": [
+            "credit metering: complex tasks such as spec execution use more credits",
+            "the launch pricing was criticised in 2025 and AWS called part of it a bug",
+            "monthly credits do not roll over"
+          ],
+          "price": "from $20 a month (Pro, 1,000 credits)",
+          "sources": [
+            "https://kiro.dev/pricing/",
+            "https://kiro.dev/docs/steering/",
+            "https://www.theregister.com/2025/08/18/aws_updated_kiro_pricing/"
+          ]
+        },
+        {
+          "name": "Google Antigravity",
+          "maker": "Google",
+          "url": "https://antigravity.google",
+          "what": "Google's agent-first development platform: a desktop app (Antigravity 2.0) and a terminal CLI that run several agents in parallel.",
+          "known_for": [
+            "free Individuals plan",
+            "agent manager and artifacts for reviewing what agents did",
+            "supports Agent Skills, hooks and subagents"
+          ],
+          "watch_out_for": [
+            "plans and rate limits have changed repeatedly (a March 2026 price rise drew user protest)",
+            "baseline agent quota refreshes weekly",
+            "it replaced Gemini CLI, so tutorials written before mid-2026 may be out of date"
+          ],
+          "price": "free for individuals; Business from $30 a seat a month",
+          "sources": [
+            "https://antigravity.google/pricing",
+            "https://developers.googleblog.com/an-important-update-transitioning-gemini-cli-to-antigravity-cli/",
+            "https://www.theregister.com/2026/03/12/users_protest_as_google_antigravity/"
+          ]
+        },
+        {
+          "name": "JetBrains AI and Junie",
+          "maker": "JetBrains",
+          "url": "https://www.jetbrains.com/ai/",
+          "what": "JetBrains' AI assistant and its Junie coding agent, inside IntelliJ-based IDEs.",
+          "known_for": [
+            "native to the JetBrains IDEs",
+            "Junie draws on the same AI plan quota",
+            "free tier exists"
+          ],
+          "watch_out_for": [
+            "credit quota shared between assistant and agent; reviews report credits running out",
+            "quota figures differ between JetBrains help pages",
+            "less useful if your team does not use JetBrains IDEs"
+          ],
+          "price": "about $10 a month (AI Pro)",
+          "sources": [
+            "https://blog.jetbrains.com/ai/2025/08/a-simpler-more-transparent-model-for-ai-quotas/",
+            "https://www.jetbrains.com/help/ai-assistant/licensing-and-subscriptions.html"
+          ]
+        },
+        {
+          "name": "Zed",
+          "maker": "Zed Industries",
+          "url": "https://zed.dev",
+          "what": "A fast open source code editor with built-in AI, or your own API keys and external agents.",
+          "known_for": [
+            "open source editor",
+            "free Personal plan works with your own API keys",
+            "listed as an AGENTS.md-compatible tool"
+          ],
+          "watch_out_for": [
+            "built-in AI is not on the free plan",
+            "usage beyond the included $5 of tokens is billed",
+            "smaller extension ecosystem than VS Code"
+          ],
+          "price": "from $10 a month (Pro); editor free and open source",
+          "sources": [
+            "https://zed.dev/pricing",
+            "https://agents.md"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "Coding agents",
+      "for": "developers who hand a task to an agent and review the result, in the terminal, an IDE, the cloud or CI",
+      "tools": [
+        {
+          "name": "Claude Code",
+          "maker": "Anthropic",
+          "url": "https://claude.com/product/claude-code",
+          "what": "A coding agent you run in the terminal, an IDE or the cloud, which reads your repository, edits files and runs commands.",
+          "known_for": [
+            "plan mode, skills, hooks, subagents and MCP",
+            "claude -p for scripts and CI, plus an official GitHub Action",
+            "reads CLAUDE.md, and AGENTS.md when no CLAUDE.md exists"
+          ],
+          "watch_out_for": [
+            "AGENTS.md is read only as a fallback; if a CLAUDE.md exists it wins unless you import AGENTS.md",
+            "in non-interactive runs, calls that need approval are denied unless you allow them",
+            "subscription usage limits, or per-token cost on an API key"
+          ],
+          "price": "included with Claude Pro, from $17 a month billed annually ($20 monthly)",
+          "sources": [
+            "https://claude.com/pricing",
+            "https://code.claude.com/docs/en/memory",
+            "https://code.claude.com/docs/en/headless",
+            "https://code.claude.com/docs/en/github-actions"
+          ]
+        },
+        {
+          "name": "OpenAI Codex",
+          "maker": "OpenAI",
+          "url": "https://openai.com/codex/",
+          "what": "OpenAI's coding agent, available as a CLI, an IDE extension, a desktop app and cloud tasks, and included in ChatGPT plans.",
+          "known_for": [
+            "codex exec for non-interactive runs",
+            "reads AGENTS.md, with AGENTS.override.md for local overrides",
+            "supports Agent Skills from .agents/skills"
+          ],
+          "watch_out_for": [
+            "usage limits differ by ChatGPT plan, and are limited on Free and Go",
+            "default sandbox is read-only, so you must opt in to edits",
+            "documentation has moved to learn.chatgpt.com, so older links redirect"
+          ],
+          "price": "included with ChatGPT plans (limited on Free and Go; Plus $20 a month)",
+          "sources": [
+            "https://chatgpt.com/pricing",
+            "https://learn.chatgpt.com/docs/non-interactive-mode",
+            "https://learn.chatgpt.com/docs/agent-configuration/agents-md",
+            "https://learn.chatgpt.com/docs/build-skills",
+            "https://www.cloudzero.com/blog/how-much-does-chatgpt-cost/"
+          ]
+        },
+        {
+          "name": "Antigravity CLI (replaces Gemini CLI)",
+          "maker": "Google",
+          "url": "https://antigravity.google",
+          "what": "Google's terminal coding agent, run as agy. It replaced Gemini CLI for individual users when Gemini CLI stopped serving them on 18 June 2026.",
+          "known_for": [
+            "carries over Agent Skills, hooks, subagents and plugins",
+            "shares its agent harness with the Antigravity desktop app",
+            "importer for old Gemini CLI settings"
+          ],
+          "watch_out_for": [
+            "Google says there is no one-to-one feature parity with Gemini CLI",
+            "Gemini CLI still works with paid API keys and enterprise licences, so two products exist",
+            "built in Go and tied to Google's platform and quotas"
+          ],
+          "price": "free for individuals; Business from $30 a seat a month",
+          "sources": [
+            "https://developers.googleblog.com/an-important-update-transitioning-gemini-cli-to-antigravity-cli/",
+            "https://9to5google.com/2026-06-17/gemini-cli-code-assist-shutting-down/",
+            "https://antigravity.google/pricing"
+          ]
+        },
+        {
+          "name": "GitHub Copilot cloud agent",
+          "maker": "GitHub (Microsoft)",
+          "url": "https://github.com/features/copilot",
+          "what": "A background agent that researches a repository, plans changes, implements them in a cloud environment and opens a pull request.",
+          "known_for": [
+            "starts from issues, the Agents tab, Slack or Teams",
+            "runs inside GitHub with your branch protections",
+            "can fix failed Actions runs"
+          ],
+          "watch_out_for": [
+            "GitHub warns it can produce code with security vulnerabilities, so review everything",
+            "branch rules can block it unless you configure a bypass",
+            "uses a monthly allowance for cloud and Actions compute"
+          ],
+          "price": "paid Copilot plans, from $10 a month (Pro)",
+          "sources": [
+            "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-cloud-agent",
+            "https://github.com/features/copilot/plans"
+          ]
+        },
+        {
+          "name": "Devin",
+          "maker": "Cognition",
+          "url": "https://devin.ai",
+          "what": "An autonomous software engineer you give tasks to in the cloud, in a desktop app or by tagging it in Slack, Teams or Linear, which opens pull requests.",
+          "known_for": [
+            "runs from chat tools and issue trackers",
+            "Devin Review for pull requests",
+            "scheduled and trigger-based automation"
+          ],
+          "watch_out_for": [
+            "usage allowances reset daily and weekly, and extra use is billed at API rates",
+            "team plan adds a base fee plus a seat fee",
+            "autonomous work still needs human review before merging"
+          ],
+          "price": "from $20 a month (Pro); Teams $80 plus $40 a developer seat",
+          "sources": [
+            "https://devin.ai/pricing",
+            "https://devin.ai"
+          ]
+        },
+        {
+          "name": "Jules",
+          "maker": "Google",
+          "url": "https://jules.google",
+          "what": "An asynchronous agent that clones a GitHub repository to a cloud VM, drafts a plan and opens a pull request.",
+          "known_for": [
+            "label a GitHub issue to start a task",
+            "shows a plan and a diff for review",
+            "daily task limits by plan"
+          ],
+          "watch_out_for": [
+            "limited to 15 tasks a day on the base tier",
+            "the page gives no prices and no status, and Google has been moving its coding tools to Antigravity",
+            "GitHub only"
+          ],
+          "price": "free base tier (15 tasks a day); higher limits with Google AI Pro and Ultra",
+          "sources": [
+            "https://jules.google"
+          ]
+        },
+        {
+          "name": "Aider",
+          "maker": "Aider-AI (open source community)",
+          "url": "https://aider.chat",
+          "what": "An open source terminal tool for pair programming with a language model, working with cloud or local models.",
+          "known_for": [
+            "git-centred workflow",
+            "works with many models, including local ones",
+            "listed as an AGENTS.md-compatible tool"
+          ],
+          "watch_out_for": [
+            "you pay your model provider directly",
+            "terminal only",
+            "I could not confirm the current maintenance pace from the pages read"
+          ],
+          "price": "free; you pay your model provider",
+          "sources": [
+            "https://aider.chat",
+            "https://agents.md"
+          ]
+        },
+        {
+          "name": "Cline",
+          "maker": "Cline Bot Inc.",
+          "url": "https://github.com/cline/cline",
+          "what": "An open source coding agent available as a VS Code extension, JetBrains plugin, CLI, desktop app and SDK.",
+          "known_for": [
+            "Plan and Act modes",
+            "asks approval for each edit and command by default",
+            "works with many model providers and MCP servers"
+          ],
+          "watch_out_for": [
+            "you pay your model provider by usage",
+            "auto-approve lowers the safety checks",
+            "the JetBrains plugin's source is not open"
+          ],
+          "price": "free and open source (Apache 2.0); you pay your model provider",
+          "sources": [
+            "https://github.com/cline/cline"
+          ]
+        },
+        {
+          "name": "OpenCode",
+          "maker": "Anomaly",
+          "url": "https://opencode.ai",
+          "what": "An open source coding agent with a terminal interface, desktop app and SDK, supporting more than 200 model providers.",
+          "known_for": [
+            "MIT licence",
+            "log in with an existing ChatGPT or Copilot subscription",
+            "listed as an AGENTS.md-compatible tool"
+          ],
+          "watch_out_for": [
+            "free models vary and may change",
+            "quality depends on the model you pick",
+            "OpenCode Go is a separate paid service"
+          ],
+          "price": "free and open source (MIT); optional OpenCode Go from $10 a month",
+          "sources": [
+            "https://opencode.ai",
+            "https://agents.md"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "For everyone else",
+      "for": "product, marketing and sales people who work with documents, meetings, research and data rather than code",
+      "tools": [
+        {
+          "name": "Claude apps (Projects, artifacts, Cowork)",
+          "maker": "Anthropic",
+          "url": "https://claude.com",
+          "what": "Claude on the web, desktop and mobile, with Projects for shared context, artifacts for documents and small apps, and Cowork, an agent for knowledge work on your files.",
+          "known_for": [
+            "Cowork is generally available on all paid plans",
+            "enterprise controls such as role-based access and usage analytics",
+            "Claude Code included in paid plans"
+          ],
+          "watch_out_for": [
+            "Cowork availability differs by surface (desktop, web, mobile) and plan",
+            "usage limits by plan",
+            "an agent acting on your files needs supervision"
+          ],
+          "price": "from $17 a month billed annually, $20 monthly (Pro)",
+          "sources": [
+            "https://claude.com/pricing",
+            "https://www.eweek.com/news/claude-cowork-general-availability-enterprise-controls/",
+            "https://support.claude.com/en/articles/13345190-get-started-with-cowork"
+          ]
+        },
+        {
+          "name": "ChatGPT (Projects, agent)",
+          "maker": "OpenAI",
+          "url": "https://chatgpt.com",
+          "what": "OpenAI's assistant, with Projects, an agent mode and Codex included in its plans.",
+          "known_for": [
+            "lower-priced Go tier",
+            "Codex included in every plan, with different limits",
+            "an always-on agent called Dot on the Pro plan"
+          ],
+          "watch_out_for": [
+            "Go launched alongside advertising, per press reports",
+            "plan names and limits changed during 2026 (a $100 Pro tier appeared in April)",
+            "the pricing page I read showed no prices, so these come from press"
+          ],
+          "price": "from $8 a month (Go); Plus $20",
+          "sources": [
+            "https://chatgpt.com/pricing",
+            "https://openai.com/index/introducing-chatgpt-go",
+            "https://www.macrumors.com/2026/01/16/chatgpt-go-now-available-worldwide/"
+          ]
+        },
+        {
+          "name": "Gemini and NotebookLM",
+          "maker": "Google",
+          "url": "https://notebooklm.google",
+          "what": "Google's Gemini app, plus NotebookLM, which answers questions and builds summaries from sources you upload.",
+          "known_for": [
+            "answers grounded in your own sources",
+            "bundled with Google AI plans",
+            "cheap entry plan"
+          ],
+          "watch_out_for": [
+            "plans were restructured in May 2026 and price changes followed",
+            "NotebookLM access varies by plan",
+            "check data handling terms before uploading client material"
+          ],
+          "price": "from $4.99 a month (Google AI Plus); AI Pro $19.99",
+          "sources": [
+            "https://9to5google.com/2026/06/08/google-ai-plus-price-drop/",
+            "https://techcabal.com/2026/06/05/google-ai-subscription-plans-explained/"
+          ]
+        },
+        {
+          "name": "Microsoft 365 Copilot",
+          "maker": "Microsoft",
+          "url": "https://www.microsoft.com/en-us/microsoft-365/copilot",
+          "what": "Copilot built into Word, Excel, PowerPoint, Outlook and Teams, working over your organisation's Microsoft 365 data.",
+          "known_for": [
+            "works where office documents already live",
+            "uses your tenant's permissions",
+            "a cheaper Copilot Business tier for small organisations"
+          ],
+          "watch_out_for": [
+            "an extra per-user licence on top of Microsoft 365",
+            "reports disagree on the current Copilot Business price ($18 or $21)",
+            "value depends on how tidy your SharePoint and permissions are"
+          ],
+          "price": "$30 a user a month (enterprise add-on); Copilot Business reported at $21",
+          "sources": [
+            "https://microsoft.com/en-us/microsoft-365-copilot/pricing",
+            "https://techcommunity.microsoft.com/t5/microsoft-365-copilot-blog/act-now-lock-in-current-pricing-on-microsoft-365-copilot/ba-p/4502628"
+          ]
+        },
+        {
+          "name": "Notion AI",
+          "maker": "Notion",
+          "url": "https://www.notion.com",
+          "what": "AI inside Notion workspaces: an agent, meeting notes and search across your pages and connected tools.",
+          "known_for": [
+            "works on the docs your team already keeps in Notion",
+            "AI meeting notes",
+            "enterprise search (beta)"
+          ],
+          "watch_out_for": [
+            "full AI features need the Business plan; Plus and Free have only a trial",
+            "enterprise search is still in beta",
+            "price shown in pounds on the page I read"
+          ],
+          "price": "from GBP 16.50 a member a month (Business, includes AI)",
+          "sources": [
+            "https://www.notion.com/pricing"
+          ]
+        },
+        {
+          "name": "Glean",
+          "maker": "Glean",
+          "url": "https://www.glean.com",
+          "what": "Enterprise search and an assistant that works across a company's connected apps and documents.",
+          "known_for": [
+            "searches across many workplace tools",
+            "per-user subscription plus pooled FlexCredits",
+            "sold to large organisations"
+          ],
+          "watch_out_for": [
+            "no public price list: pricing is by sales quote",
+            "advanced AI use draws on FlexCredits, and billing for learned memories began on 7 November 2026",
+            "third-party estimates of seat cost vary widely"
+          ],
+          "price": "quote only, no public price",
+          "sources": [
+            "https://docs.glean.com/glean-enterprise-flex-pricing"
+          ]
+        },
+        {
+          "name": "Granola",
+          "maker": "Granola",
+          "url": "https://www.granola.ai",
+          "what": "A meeting notes app that listens to your calls and combines your own notes with a transcript to write a summary.",
+          "known_for": [
+            "audio deleted after transcription",
+            "configurable transcript retention",
+            "SOC 2 certified"
+          ],
+          "watch_out_for": [
+            "Granola trains on anonymised data unless you opt out (off by default on Enterprise)",
+            "recording other people needs their consent where the law requires it",
+            "HIPAA compliance applies to Enterprise only"
+          ],
+          "price": "from $14 a user a month (Business)",
+          "sources": [
+            "https://www.granola.ai/pricing"
+          ]
+        }
+      ]
+    }
+  ]
+}
