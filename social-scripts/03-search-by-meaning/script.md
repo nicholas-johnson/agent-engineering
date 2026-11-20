@@ -2,7 +2,6 @@
 
 > A promise to explain embeddings in sixty seconds. Search *Alice in Wonderland* for "the angry queen", and keyword search finds a cat talking about a dog: "angry" is in the book five times, never about the Queen. Cut the book into passages and turn each into 1,536 numbers, and passages that mean similar things land close together. The question lands among the Queen's passages, next to "The Queen turned crimson with fury". Keywords match words; embeddings match meaning. That's how an AI finds the right page of your documents.
 
-- **Promotes:** Module 5, Embeddings and Vector Search
 - **Length:** about 140 spoken words to explain it, then about 25 for the sign-off. `pnpm social:check` estimates about 65 seconds in all, so time your first take.
 - **Ending:** the sign-off, full-face: "Follow if you'd like to know more." Cut straight after it.
 - **Recording:** [`index.html`](index.html), with the map drawn by `clip-deck`'s `space.js` from [`scene.js`](scene.js) and [`map.js`](map.js). Run `pnpm social`, open <http://127.0.0.1:8765/03-search-by-meaning/> in Chrome and press R.

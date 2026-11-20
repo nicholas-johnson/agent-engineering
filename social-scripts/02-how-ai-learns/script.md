@@ -2,7 +2,6 @@
 
 > A promise to show how an AI learns in sixty seconds. One neuron gets a question wrong, and we nudge its weights until it's nearly right. Then layers of neurons, with the error flowing backwards through them: backpropagation. Train one on a book and it predicts the next word. Then zoom out: this little one has 48 weights to nudge, and the big ones have billions.
 
-- **Promotes:** Module 1, Intro to Language Models
 - **Length:** about 140 spoken words to explain it, then about 25 for the sign-off. `pnpm social:check` estimates about 65 seconds in all, so time your first take.
 - **Ending:** the sign-off, full-face: "Follow if you'd like to know more." Cut straight after it.
 - **Recording:** [`index.html`](index.html), with the network drawn by `clip-deck`'s `network.js` from [`scene.js`](scene.js). Run `pnpm social`, open <http://127.0.0.1:8765/02-how-ai-learns/> in Chrome and press R.

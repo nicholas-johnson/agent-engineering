@@ -2,7 +2,6 @@
 
 > One paragraph: the promise, the odd thing, the reveal and the payoff.
 
-- **Promotes:** Module N, Title
 - **Length:** about N spoken words. The hook promises sixty seconds, so the explanation must fit in it.
 - **Ending:** the sign-off, full-face: "Follow if you'd like to know more." Cut straight after it.
 - **Recording:** [`index.html`](index.html). Run `pnpm social`, open <http://127.0.0.1:8765/{{clip}}/> in Chrome and press R.

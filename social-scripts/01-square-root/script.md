@@ -2,7 +2,6 @@
 
 > A promise to explain MCP in ninety seconds. Then an AI gives three different, confident, wrong answers to the same maths question, a tool call fixes it, and four extra lines turn that tool into an MCP server. We look at what the wrapper gives us and at the JSON the AI actually sees, then at Google's real servers for Gmail and Calendar. Then a sign-off.
 
-- **Promotes:** Module 4, Tools
 - **Length:** about 230 spoken words to explain MCP and show the real servers, then about 25 for the sign-off. The check estimates about 92 seconds before the sign-off, against a hook that promises ninety, so time your first take: see the notes if it runs over.
 - **Ending:** the sign-off, full-face: "Follow if you'd like to know more." Cut straight after it.
 - **Recording:** [`index.html`](index.html) in this folder. It puts you, the animation and the captions on one stage. Run `pnpm social`, open <http://127.0.0.1:8765/01-square-root/> in Chrome and press R. Each press of space brings up the next caption: say it, then press again.
