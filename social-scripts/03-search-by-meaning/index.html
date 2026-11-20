@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <title>Clip 3 — Search by meaning</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/clip-deck/style.css" />
+    <script src="/clip-deck/backdrop.js" defer></script>
+    <script src="/clip-deck/space.js" defer></script>
+    <script src="map.js" defer></script>
+    <script src="scene.js" defer></script>
+    <script src="/clip-deck/player.js" defer></script>
+  </head>
+  <body data-clip="03-search-by-meaning">
+    <main class="stage">
+      <svg class="space" id="map"></svg>
+
+      <header class="byline">
+        <p class="name">Nicholas Johnson</p>
+        <p class="brand">Agent Engineering · Embeddings</p>
+      </header>
+
+      <!-- 1. The promise, full-face -->
+      <section class="frame" data-camera="full">
+        <p class="cue">I'm going to explain <em>embeddings</em> to you in sixty seconds.</p>
+      </section>
+
+      <!-- 2. Keyword search for "the angry queen" (search.py) -->
+      <section class="frame">
+        <p class="cue">I searched <em>Alice in Wonderland</em> for “the angry queen”.</p>
+        <p class="cue">“Angry” is in there five times. Never about the Queen.</p>
+        <p class="cue">So the best keyword match is a cat, talking about a dog.</p>
+        <h1>Search the book</h1>
+        <div class="search" data-in="0"><span class="type">the angry queen</span></div>
+        <div class="swap">
+          <div class="hits" data-in="1" data-out="2">
+            <p class="count">“angry”: 5 matches</p>
+            <p class="hit"><span>“don't be <mark>angry</mark> about it”</span> <span class="where">Alice, to the Mouse</span></p>
+            <p class="hit"><span>“in an <mark>angry</mark> tone”</span> <span class="where">the White Rabbit</span></p>
+            <p class="hit"><span>“Next came an <mark>angry</mark> voice”</span> <span class="where">the White Rabbit</span></p>
+            <p class="hit"><span>“a dog growls when it's <mark>angry</mark>”</span> <span class="where">the Cheshire Cat</span></p>
+            <p class="hit"><span>“wag my tail when I'm <mark>angry</mark>”</span> <span class="where">the Cheshire Cat</span></p>
+          </div>
+          <div class="card wrong" data-in="2">
+            <p class="who no">Best keyword match</p>
+            <p class="says">“You see, a dog growls when it's <mark>angry</mark>, and wags its tail when it's pleased.”</p>
+            <p class="note">The Cheshire Cat</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Search by meaning: every passage on a map (search.py, map.js, scene.js) -->
+      <section class="frame top">
+        <p class="cue">Now cut the book into passages, and turn each one into numbers.</p>
+        <p class="cue">Passages that mean similar things get similar numbers.</p>
+        <p class="cue">Turn the question into numbers too, and find the closest passage.</p>
+        <p class="cue">“The Queen turned crimson with fury.” She's never called angry.</p>
+        <h1>Search by meaning</h1>
+        <div class="swap bottom">
+          <div class="card" data-out="2">
+            <p class="who">One passage, as 1,536 numbers</p>
+            <p class="says mono">[0.024, -0.008, 0.027, 0.027, …]</p>
+          </div>
+          <div class="card right" data-in="3">
+            <p class="who yes">Closest by meaning</p>
+            <p class="says">“The Queen turned crimson with <mark>fury</mark>, and… screamed ‘Off with her head!’”</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. A second question: "pipe" isn't in the book at all (search.py) -->
+      <section class="frame">
+        <p class="cue">Try “the creature with a pipe”. There's no “pipe” in the book.</p>
+        <p class="cue">Keywords find a baby that turns into a pig.</p>
+        <p class="cue">Meaning finds the Caterpillar, smoking its hookah.</p>
+        <div class="search" data-in="0"><span class="type">the creature with a pipe</span></div>
+        <p class="note" data-in="0" style="--delay: 1.4s">“pipe”: <strong>0 matches</strong></p>
+        <div class="compare">
+          <div class="card wrong" data-in="1">
+            <h2 class="no">Keywords</h2>
+            <p class="says">“What am I to do with this <mark>creature</mark> when I get it home?”</p>
+            <p class="note">It's a pig.</p>
+          </div>
+          <div class="card right" data-in="2">
+            <h2 class="yes">Meaning</h2>
+            <p class="says">“…it put the hookah into its mouth and began smoking again.”</p>
+            <p class="note">The Caterpillar</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. The name for it -->
+      <section class="frame">
+        <p class="cue">That list of numbers is called an <em>embedding</em>.</p>
+        <p class="cue">Keywords match words. Embeddings match <em>meaning</em>.</p>
+        <h1>Embeddings</h1>
+        <div class="card">
+          <p class="who">An embedding</p>
+          <p class="says mono">[0.024, -0.008, 0.027, 0.027, …]</p>
+        </div>
+        <div class="card python" data-in="1">
+          <p class="who">Remember</p>
+          <p class="says">Keywords match words. Embeddings match meaning.</p>
+        </div>
+      </section>
+
+      <!-- 6. The payoff: your own documents (illustrative: see script.md) -->
+      <section class="frame">
+        <p class="cue">It's how an AI finds the right page in your documents before it answers.</p>
+        <h1>Your documents</h1>
+        <div class="bubble you">Can I bring my dog to work?</div>
+        <div class="card right" data-in="0" style="--delay: 0.8s">
+          <p class="who yes">Staff handbook, closest page</p>
+          <p class="says">“<mark>Pets</mark> aren't allowed in the office, apart from assistance animals.”</p>
+        </div>
+      </section>
+
+      <!-- 7. The sign-off, full-face -->
+      <section class="frame" data-camera="full">
+        <p class="cue">I'm Nicholas Johnson. I'm a principal dev working with AI.</p>
+        <p class="cue">I'm doing a series on <em>AI fundamentals</em>.</p>
+        <p class="cue">Follow if you'd like to know more.</p>
+      </section>
+    </main>
+  </body>
+</html>

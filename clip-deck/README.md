@@ -29,6 +29,7 @@ pnpm social:check 02-embeddings
 | `src/player.js` | Steps through the frames, shows the captions, runs the camera, and records the stage |
 | `src/backdrop.js` | The slow WebGL horizon behind everything |
 | `src/network.js` | An SVG engine for neural network diagrams: see [Networks](#networks) |
+| `src/space.js` | An SVG engine for maps of embeddings: see [Maps of meaning](#maps-of-meaning) |
 | `src/style.css` | The stage layout and every component below |
 | `template/` | The starting point for a new clip |
 | `cli.mjs` | The `serve`, `new` and `check` commands |
@@ -83,15 +84,19 @@ pnpm social:check 02-embeddings
 | `<h1>` | A big white heading. Two short lines at most. |
 | `<div class="bubble you">` | Your question: a blue chat bubble on the right |
 | `<div class="bubble ai">` | The AI's reply: an outlined bubble on the left |
-| `<div class="card ai\|python\|gmail\|calendar">` with `<p class="who">` and `<p class="says">` | A labelled card with a coloured top edge |
+| `<div class="card ai\|python\|gmail\|calendar\|wrong\|right">` with `<p class="who">` and `<p class="says">` | A labelled card with a coloured top edge. Add `yes` or `no` to the `who` for a tick or a cross. |
 | `<div class="servers">` holding `.card`s with `<h2>` and `<p>` | A stack of named cards |
-| `<div class="compare">` holding two `.card`s with `<h2>` and `<ul>` of `<li class="yes\|no">` | Two cards side by side, with ticks and crosses |
+| `<div class="compare">` holding two `.card`s with `<h2>` and `<ul>` of `<li class="yes\|no">` | Two cards side by side, with ticks and crosses. An `<h2 class="yes\|no">` puts the tick or cross on the heading. |
 | `<div class="answers">` holding `.answer` rows of `<span>label</span><span class="number type">` | Numbers stacked to compare. Mark one row `.right`. With `data-at`, the digits where the others leave the right one turn red. |
 | `<pre class="code">` | Python, coloured automatically |
 | `<pre class="code grow" data-at="n">` | Lines starting `+ ` (or a lone `+`) stay folded away, then open up in green at step n |
 | `<p class="result">`, `<p class="note">` | A line of output, or a muted sentence |
 | `<div class="arrow">↓</div>` | A down arrow between cards |
-| `<section class="frame top">` | A frame whose content sits at the top, leaving the space below for a graphic such as a network |
+| `<div class="search" data-in="0"><span class="type">…</span></div>` | A search box that types out what was searched for |
+| `<div class="hits">` holding `<p class="count">` and `<p class="hit"><span>…</span><span class="where">…</span></p>` rows | Find-in-page matches: how many, then each match with where it is |
+| `<mark>` | A found word, highlighted in yellow, as a search would |
+| `<section class="frame top">` | A frame whose content sits at the top, leaving the space below for a graphic such as a network or a map |
+| `class="bottom"` in a `frame top` | Pushed to the bottom of the frame, under the graphic |
 
 ## Networks
 
@@ -156,6 +161,43 @@ net.destroy(); // when done
 | `listen: false` | Don't follow the clip's `clip:step` events |
 
 The engine follows the player through `window.clip.steps`, which lists every step's key in order. It also listens for the `clip:step` event, which fires on `document` with `{ key, index, forward }`. Any other script can follow along the same way.
+
+## Maps of meaning
+
+`src/space.js` draws a map of embeddings: one dot for each thing embedded (a passage, a sentence), squashed from its many numbers down to two, and coloured by group. Questions drop onto the map, and a line joins each to the dot it's closest to. [Clip 3](../social-scripts/03-search-by-meaning/) uses it, with the dots from its `search.py`.
+
+It goes on the page like a network: `<script src="/clip-deck/space.js" defer>`, a `scene.js` before `player.js`, and `<svg class="space" id="map"></svg>` first in the stage. The points come in as options, and the steps say what the map shows:
+
+```js
+new Space("#map", {
+  points: [[-0.16, -0.26, "royals"], [0.2, 0.13, "caterpillar"], …],
+  groups: { royals: { colour: "#f87171", label: "the Queen and King" } },
+}).script({
+  "3.0": { show: true, note: "Each dot is a passage" },
+  "3.1": { tint: true, labels: true },
+  "3.2": { questions: { angry: { at: [-0.14, -0.17], label: "the angry queen" } } },
+  "3.3": { links: { angry: 105 } },
+});
+```
+
+As with networks, a step's state is every entry up to it, and stepping back or reloading lands in the right place.
+
+| Option | Does |
+|--------|------|
+| `points: [[x, y, group], …]` | One dot each, in any units: the map is scaled to fill its box, keeping its shape |
+| `groups: { name: { colour, label, at } }` | Each group's colour and name. The name sits over the middle of the group, or at `at: [x, y]` if that's clearer. |
+| `box: { x, y, w, h }` | Where the map sits on the stage. Default: `{ x: 56, y: 400, w: 968, h: 560 }` |
+| `stage`, `steps`, `listen` | As for networks |
+
+| Field | Does |
+|-------|------|
+| `show: true` | The dots scatter onto the map |
+| `tint: true` | The dots take their group's colour. Dots with no group stay grey. |
+| `labels: true`, or a list of groups | Name the groups |
+| `questions: { name: { at: [x, y], label, side } }` | A yellow dot drops onto the map at `at`, in the points' units, with its label on the `side` given (`"right"` by default) |
+| `links: { name: 105 }` | A line from that question to that point, which grows and gets a ring |
+| `note: "…"` | A small note under the map's bottom right corner |
+| `hide: true` | Hide the map |
 
 ## The stage
 

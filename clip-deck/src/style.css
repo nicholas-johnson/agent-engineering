@@ -120,10 +120,16 @@ body {
   justify-content: flex-start;
 }
 
+/* In a .top frame, pushed down to the bottom, under the graphic */
+.frame .bottom {
+  margin-top: auto;
+}
+
 /* A network diagram from network.js: it covers the stage, between the backdrop and the frames.
    The vast network it extends into is a canvas just behind it, the same size. */
 .network,
-.network-extension {
+.network-extension,
+.space {
   position: absolute;
   inset: 0;
   width: 1080px;
@@ -132,7 +138,8 @@ body {
   pointer-events: none;
 }
 
-.network text {
+.network text,
+.space text {
   font-family: var(--sans);
   font-size: 32px;
   font-weight: 600;
@@ -142,9 +149,17 @@ body {
   stroke-linejoin: round;
 }
 
-.network .mono {
+.network .mono,
+.space .mono {
   font-family: var(--mono);
   font-weight: 400;
+}
+
+/* A map of meaning from space.js: the note under it */
+.space .map-note {
+  font-size: 24px;
+  font-weight: 500;
+  stroke-width: 6px;
 }
 
 .network .weight {
@@ -445,6 +460,73 @@ h1 {
 
 .card.calendar {
   border-top-color: var(--primary);
+}
+
+.card.wrong {
+  border-top-color: var(--wrong);
+}
+
+.card.right {
+  border-top-color: var(--python);
+}
+
+/* A found word, highlighted as a search would */
+mark {
+  color: #fde047;
+  background: rgba(253, 224, 71, 0.18);
+  border-radius: 6px;
+  padding: 0 4px;
+}
+
+/* A search box, with what was typed in it */
+.search {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 22px 36px;
+  border-radius: 999px;
+  background: var(--panel);
+  border: 3px solid var(--border);
+  font-family: var(--mono);
+  font-size: 40px;
+}
+
+.search::before {
+  content: "";
+  flex: none;
+  width: 44px;
+  height: 44px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5' stroke-linecap='round'%3E%3Ccircle cx='10' cy='10' r='7'/%3E%3Cpath d='m15.5 15.5 6 6'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+}
+
+/* Find-in-page matches: a count, then one row per match with where it is */
+.hits {
+  padding: 28px 36px;
+  border-radius: 28px;
+  background: var(--panel);
+  border: 2px solid #1e293b;
+}
+
+.hits .count {
+  font-size: 34px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.hit {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 14px 0;
+  border-top: 2px solid #1e293b;
+  font-size: 32px;
+  line-height: 1.25;
+}
+
+.hit .where {
+  flex: none;
+  color: var(--muted);
 }
 
 /* Side-by-side comparison */
