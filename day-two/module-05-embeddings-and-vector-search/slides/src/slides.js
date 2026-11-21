@@ -94,6 +94,27 @@ before a schedule period. ...`,
     },
   },
   {
+    type: 'equation',
+    content: {
+      title: 'BM25: the idea',
+      mathml: `<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+  <mtext>score</mtext>
+  <mo>=</mo>
+  <munder><mo>∑</mo><mtext>question words</mtext></munder>
+  <mtext>rarity</mtext>
+  <mo>×</mo>
+  <mtext>matches</mtext>
+</math>`,
+      points: [
+        '**Rarity**: "the", in all 275 documents, 0.002; "geofencing", in 37, 2.00',
+        '**Matches**: one mention scores 1.00, two 1.43, ten 2.17, never more than **2.5**',
+        '**Length**: one mention scores 1.29 at half the average length, 0.69 at double',
+      ],
+      credit:
+        'Robertson & Zaragoza (2009). "The Probabilistic Relevance Framework: BM25 and Beyond." Foundations and Trends in Information Retrieval 3(4)',
+    },
+  },
+  {
     type: 'code',
     content: {
       title: 'BM25',
@@ -106,9 +127,9 @@ before a schedule period. ...`,
     score += rarity * count * (K1 + 1) / (
         count + K1 * (1 - B + B * len(text) / average_length))`,
       highlights: [
-        '**Rare words count for more**: "the" adds almost nothing',
-        'Repeats help, but less and less (`K1`)',
-        "Long documents don't win just by being long (`B`)",
+        '`rarity`: large when `appears_in[word]`, the number of documents with the word, is small',
+        '`K1` (1.5): how fast repeats level off. The most a word can add is `K1 + 1` times its rarity',
+        "`B` (0.75): how much a document's length counts against it",
         'Used by Elasticsearch, OpenSearch and SQLite',
       ],
     },
