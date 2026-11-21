@@ -4,7 +4,7 @@
 
 ## Learning goals
 
-- Explain **keyword search** and how **BM25** scores a document: matching words, with rare words counting for more.
+- Explain how **keyword search** works: splitting text into words, an **inverted index**, and how **BM25** scores a document, with rare words counting for more.
 - Explain what an **embedding** is, by training a small one, **word2vec**, in plain Python.
 - Turn a whole document into a vector, by **averaging** word vectors and with an **embeddings model**.
 - Compare vectors with **cosine similarity**, and use it to **search by meaning**.
@@ -75,7 +75,31 @@ Every demo gives the same results each time. Demo 2 starts from random numbers, 
 
 **Demo:** `demo/01_keyword_search.py`
 
-The oldest way to search: score each document by the words it shares with the question. **BM25** ("Best Match 25") is the standard scoring, used by Elasticsearch, OpenSearch and SQLite's full-text search. For each word in the question that a document contains, it adds:
+**Keyword search** finds the documents that contain the words you typed. It's the oldest way to search with a computer, and still the most common: the search box on many websites, the search in your email, and search engines such as Elasticsearch, OpenSearch and SQLite's full-text search all start here. It needs no model and no API, and it's fast.
+
+It works in three steps.
+
+1. **Split the text into words.** Lower-case everything, and cut wherever there's a character that isn't a letter or a digit. Our question becomes eleven words:
+
+   ```text
+   why, is, the, heating, already, on, before, my, alarm, goes, off
+   ```
+
+   Real search engines usually do more here. They cut words down to a common root (**stemming**, so *heating* and *heated* both become *heat*), and some drop very common words (**stop words**). Demo 1 does neither.
+
+2. **Build an index.** For every word, list the documents that contain it, and how many times. This is an **inverted index**, like the index at the back of a book: look up a word, get the pages. The Dormouse documentation has 2,491 different words. Here is the start of one entry:
+
+   ```text
+   geofencing → away-mode-and-geofencing-qa-report (18), set-up-geofencing (16),
+                phone-location-privacy-policy (15), away-mode-turns-on-unexpectedly (14),
+                ... 37 documents in all
+   ```
+
+3. **Score and sort.** Look up each word of the question, give every document that contains any of them a score, and return the highest first.
+
+The index is what makes keyword search fast: a search only looks at documents that contain a word of the question, however many documents there are. Demo 1 skips it and scores all 275 documents, which takes no time at this size. It does count how many documents each word appears in (`appears_in`), because the score needs that.
+
+Everything interesting is in the score. Counting matching words doesn't work: "the" is in all 275 documents. Count matches for our question, and four of the five longest documents come first, led by the user guide with 257 matches, 171 of them "the". **BM25** ("Best Match 25") is the standard way to score, used by Elasticsearch, OpenSearch and SQLite's full-text search. For each word in the question that a document contains, it adds:
 
 ```python
 rarity = math.log(1 + (len(texts) - appears_in[word] + 0.5) / (appears_in[word] + 0.5))

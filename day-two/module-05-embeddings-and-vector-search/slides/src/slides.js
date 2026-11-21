@@ -45,7 +45,6 @@ before a schedule period. ...`,
         '**Dormouse**: a smart thermostat, invented for this course',
         'The **user guide**, written by hand: 26 sections, 1,794 words',
         '275 documents in all: **234 for customers, 41 internal**',
-        'The same documents Module 6 answers questions from',
       ],
     },
   },
@@ -57,6 +56,41 @@ before a schedule period. ...`,
       title: '1. Keyword search',
       subtitle: 'Score the words in common',
       icon: 'search',
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'What is keyword search?',
+      icon: 'search',
+      points: [
+        'Find the documents that **contain the words** you typed',
+        'The oldest way to search, and still everywhere: websites, email, Elasticsearch, SQLite',
+        'No model, no API, and **fast**',
+        'The question: which documents come **first**?',
+      ],
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'How it works',
+      code: `1. Split into words
+   "Why is the heating already on before my alarm goes off?"
+   → why, is, the, heating, already, on, before, my, alarm, goes, off
+
+2. Build an index: each word → the documents that contain it
+   geofencing → away-mode-and-geofencing-qa-report (18)
+                set-up-geofencing (16)
+                phone-location-privacy-policy (15)
+                ... 37 documents in all
+
+3. Score every document with a question word, and sort`,
+      highlights: [
+        '**Lower case**, letters and digits only. Real engines also cut words to their root',
+        'An **inverted index**: like the index of a book, look up a word, get the pages',
+        'Counting matches isn\'t enough: **"the" is in all 275 documents**',
+      ],
     },
   },
   {
