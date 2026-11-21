@@ -345,6 +345,13 @@ SCRIPTS: tuple[ScriptCase, ...] = (
         outputs=("06_keep_it_current.json",),
         keys=("OPENAI_API_KEY",),
     ),
+    # Starts demo/07_docs_server.py itself, and asks the agent 25 questions.
+    ScriptCase(
+        f"{RAG}/demo/07_agent.py",
+        outputs=("07_agent.json",),
+        keys=("OPENAI_API_KEY",),
+        timeout=600,
+    ),
     # --- AI-Assisted Development ---
     ScriptCase(
         f"{AI_DEV}/demo/01_just_build_it.py",

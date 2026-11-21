@@ -21,7 +21,7 @@ export const slides = [
       title: 'The question',
       icon: 'question',
       description:
-        "A customer writes in: *why does my Dormouse turn the heating on before the time I set?* The answer is in our documentation. The model has never read our documentation. **How do we get it to answer from our documents, and only from them?**",
+        'A customer writes in: *why does my Dormouse turn the heating on before the time I set?* The answer is in our documentation. The model has never read our documentation. **How do we get it to answer from our documents, and only from them?**',
     },
   },
   {
@@ -46,7 +46,7 @@ updated: 2026-08-17
 Warm Wake makes sure the home has already reached the target
 temperature when a schedule period starts ...`,
       highlights: [
-        '**Dormouse**: the thermostat from Module 5, now with its documentation',
+        '**Dormouse**: the thermostat whose documents Module 5 searched',
         'A user guide written by hand, plus **274 documents** written by `gpt-6-luna`',
         'Support, installation, apps, specs, policies, release notes, and **41 internal** documents',
         '**30 questions**, each with the facts a right answer must contain',
@@ -193,7 +193,7 @@ A: That's likely Warm Wake ... You can turn it off in
       icon: 'route',
       points: [
         '**Split** each document into **chunks**: one per section',
-        "**Embed** every chunk and store it: Module 5's vector database",
+        '**Embed** every chunk and store it in a vector database: **sqlite-vec** this time',
         '**Retrieve** the 5 chunks nearest the question',
         '**Generate** the answer from those chunks alone',
         'Retrieve, then generate: **RAG**',
@@ -237,7 +237,7 @@ response = client.responses.create(
     input=question,
 )`,
       highlights: [
-        'The same search as Module 5',
+        "Module 5's nearest-neighbour search, in SQL",
         'Each chunk keeps its id, so we can tell where an answer came from',
       ],
     },
@@ -256,7 +256,12 @@ response = client.responses.create(
       title: 'Results',
       left: {
         label: 'The whole knowledge base in the prompt',
-        items: ['191,548 tokens per question', '$0.0192 per question', '24.4 seconds', 'The right answer'],
+        items: [
+          '191,548 tokens per question',
+          '$0.0192 per question',
+          '24.4 seconds',
+          'The right answer',
+        ],
       },
       right: {
         label: 'The top 5 chunks',
@@ -287,6 +292,186 @@ A: Dormouse may turn the heating on early so the room reaches the
         'The customer says *before the time I set*; the guide says *starts the heating early*',
         'In 1,823 chunks, lots are about heating and schedules',
         'The vague first sentence is in none of the chunks: **a guess again**',
+      ],
+    },
+  },
+
+  // ---- Sections 4 to 6 (FAQs, citations, keeping it current) go here ----
+
+  // ---- Section 7: Share it ----
+  {
+    type: 'title',
+    content: {
+      title: '7. Share it: an MCP server',
+      subtitle: 'One search for every assistant',
+      icon: 'share',
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'One search, many copies',
+      icon: 'layers',
+      points: [
+        'Demos 3 to 6 each carry **their own copy** of the search: 89 lines in demo 3',
+        'The support chat, the website, staff tools and Claude would all need one',
+        'Copies drift apart, and **answers start to disagree**',
+        'Module 3: an **MCP server** offers tools to any client',
+        'So put the search behind **one server**, and let every application ask it',
+      ],
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'The server',
+      code: `server = MCPServer("dormouse-docs")
+
+@server.tool()
+def search_docs(query: str) -> str:
+    """Search Dormouse's documentation by meaning ...
+    Describe what to look for in \`query\`, in the words the
+    documentation would use. Returns the five closest sections
+    as JSON, closest first, each with an id to cite and its text."""
+    db = open_database()
+    update(db, [chunk for document in load_documents(DATA / "docs")
+                for chunk in split_into_chunks(document)])
+    [vector] = embed([query])
+    ...  # demo 3's search`,
+      highlights: [
+        "Demo 3's search, behind **one tool**",
+        "The docstring is the tool's **description**: all a client's model knows about it",
+        'Checks the documents on every search, so an edit can be found at once',
+      ],
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'The model writes the search',
+      code: `INSTRUCTIONS = """You are the support assistant for Dormouse ...
+Search the documentation first, and answer only from what you
+find. If the results don't answer the question, search again
+with different words.
+End each sentence that relies on the documentation with the id
+of the section it came from, in square brackets."""
+
+async with Client(DOCS_SERVER) as docs:
+    tools = [... for tool in (await docs.list_tools()).tools]`,
+      highlights: [
+        "Demo 3 embedded the customer's words, once",
+        'Now the model **chooses the words**, and can **search again**',
+        "The agent asks the server for its tools, then runs Module 3's tool loop",
+      ],
+    },
+  },
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Share it',
+      subtitle: 'Switch to terminal: python demo/07_agent.py',
+      icon: 'rocket',
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'The model found Warm Wake',
+      code: `Q: Why does my Dormouse turn the heating on before the time I set?
+   search_docs("thermostat heating starts before scheduled time
+     set; early start, preheat, learns how long home takes to
+     warm to target temperature")
+      0.684  user-guide.md#warm-wake
+      0.623  set-a-heating-schedule.md#before-you-start
+      0.622  understand-warm-wake.md#what-warm-wake-does
+A: Dormouse’s Warm Wake feature starts heating early so your
+   home reaches the scheduled target temperature ... may start
+   up to 90 minutes early ... [user-guide.md#warm-wake]
+   1,063 tokens in, $0.0002, 5.6 seconds`,
+      highlights: [
+        "The model wrote **the documentation's words**: *early start, preheat*",
+        'Warm Wake came **first**; demo 3 had it sixth',
+        'The right answer: 90 minutes, the sunrise symbol, where to turn it off',
+      ],
+    },
+  },
+  {
+    type: 'comparison',
+    content: {
+      title: 'We search, or the model searches',
+      left: {
+        label: 'Demo 3: we search',
+        items: [
+          "The customer's words, as they are",
+          'Answer found for **22 of 24** questions',
+          'Warm Wake 6th',
+          '906 tokens, 2.1 seconds',
+        ],
+      },
+      right: {
+        label: 'Demo 7: the model searches',
+        items: [
+          'Words the model chooses: **1.2 searches** a question',
+          'Answer found for **24 of 24** questions',
+          'Warm Wake 1st',
+          '1,063 tokens, 5.6 seconds: **two model calls**',
+        ],
+      },
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'The same server in Claude',
+      code: `claude mcp add dormouse-docs -- \\
+    uv run --directory "$PWD" python demo/07_docs_server.py
+
+{
+  "mcpServers": {
+    "dormouse-docs": {
+      "command": "uv",
+      "args": ["run", "--directory", "/full/path/to/module-06-...",
+               "python", "demo/07_docs_server.py"]
+    }
+  }
+}`,
+      highlights: [
+        '**Claude Code**: one command, from this folder',
+        '**Claude Desktop**: the same command as JSON, in Settings > Developer',
+        'Cursor, VS Code and others: the same command in their own settings',
+        "**The server doesn't change**",
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'What MCP gives us',
+      icon: 'plug',
+      points: [
+        '**One search, many applications**: improve it once, and every one gets it',
+        "**The model writes the search**: the customer's words become the documentation's",
+        '**The description is the contract**: a name, a description and arguments',
+        "**A thin layer over what exists**: demo 3's code with a decorator on it",
+      ],
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'Why this breaks',
+      code: `Q: What's the coldest I can set the thermostat to?
+A: The coldest target temperature you can set is 5°C. The
+   thermostat’s frost protection is always on and will turn
+   the heating on if the room drops below 5°C.
+   [thermostat-physical-and-environmental-limits.md#indoor-...]
+   [thermostat-electrical-safety-policy.md#limits-and-safety-...]`,
+      highlights: [
+        'The first source is an **internal** specification',
+        '5 internal sections reached the model, across 24 customer questions',
+        "No sign-in: the server **can't tell who is asking**",
+        'Nothing checks the quotes now: the client writes the answer',
+        'Who may see what, enforced in code: **Module 8**',
       ],
     },
   },

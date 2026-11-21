@@ -1,7 +1,7 @@
 # Run from the module folder: uv run python data/build_docs.py
 #
 # Builds data/docs/, the knowledge base for Dormouse, the smart thermostat invented for
-# Module 5. The user guide and the internal note on the relay click were written by hand;
+# this course. The user guide and the internal note on the relay click were written by hand;
 # a model writes everything else, using the user guide as its source of truth.
 # Rerunning gives a different knowledge base.
 

@@ -136,7 +136,7 @@ Three changes, all in code.
 SESSION = {"customer": "C-1001", "audience": "customer"}
 ```
 
-**The search only reaches what this customer may read.** It is Module 5's metadata filter: the database only compares the question with chunks for the right audience, so internal documents never reach the model at all.
+**The search only reaches what this customer may read.** It is Module 5's metadata filter, in SQL this time: the database only compares the question with chunks for the right audience, so internal documents never reach the model at all.
 
 ```python
 rows = db.execute(
@@ -406,7 +406,7 @@ Everything we did kept data away from people: internal documents from customers,
 
 One assistant for customers, one for staff. Most of the code is the same: the tool loop, the search, the confirmations. What differs is who signs in, which documents they can search, which tools they get, and who confirms. If that lived in each assistant's prompt, we'd be back to section 1. So it lives in one place, the server in front of Dormouse's API, and depends only on whose token it is given.
 
-The server is an MCP server, as in Module 5. The assistant starts it with the signed-in person's token. A local MCP server takes its credentials from the environment like this; a remote one uses OAuth, as the MCP specification's authorisation section describes.
+The server is an MCP server, as in Module 6. The assistant starts it with the signed-in person's token. A local MCP server takes its credentials from the environment like this; a remote one uses OAuth, as the MCP specification's authorisation section describes.
 
 ```python
 # In the assistant: the server runs with this person's own token, so it can only do what they could.

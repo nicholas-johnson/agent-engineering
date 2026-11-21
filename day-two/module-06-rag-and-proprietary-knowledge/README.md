@@ -1,6 +1,6 @@
 # Module 6 — RAG and Proprietary Knowledge
 
-> **Draft.** Sections 1 to 3 below are written from real runs. Sections 4 to 6 (FAQs, citations, keeping it current), the summary and their slides are still to come. The demos for them are in `demo/`, and the data they use is built.
+> **Draft.** Sections 1 to 3 and 7 below are written from real runs. Sections 4 to 6 (FAQs, citations, keeping it current), the summary and their slides are still to come. The demos for them are in `demo/`, and the data they use is built.
 
 ## Learning goals
 
@@ -10,6 +10,7 @@
 - Turn documentation into the questions customers ask (an **FAQ**), search those too, and **measure** whether it helps.
 - Make a model **cite its sources**, check each quote in code, and let it say when the documentation doesn't answer.
 - Update what a model knows by changing documents, not by **retraining**, and re-embed only what changed.
+- Offer the search to any AI application as an **MCP server**, and let the model write its own searches.
 
 ---
 
@@ -40,7 +41,7 @@ From this folder:
 uv run python demo/01_just_ask.py
 ```
 
-The first run of demo 3 embeds all 1,823 chunks, and the first run of demo 4 embeds all 6,358 questions. Both are stored in `demo/output/knowledge.db`, and later runs only embed what has changed. On a slow connection those first runs take several minutes each, so run demos 3 and 4 once before a session. Model output is random, so your answers will differ from the ones quoted here.
+The first run of demo 3 embeds all 1,823 chunks, and the first run of demo 4 embeds all 6,358 questions. Both are stored in `demo/output/knowledge.db`, and later runs only embed what has changed. On a slow connection those first runs take several minutes each, so run demos 3 and 4 once before a session. Demo 7 starts its MCP server, `demo/07_docs_server.py`, itself. Model output is random, so your answers will differ from the ones quoted here.
 
 ## 1. Just ask
 
@@ -136,7 +137,7 @@ Demo 2's model needed one section of one document, and read 275 documents to fin
    Warm Wake makes sure the home has already reached the target temperature when a schedule period starts, ...
    ```
 
-2. **Embed** every chunk and store it in sqlite-vec, exactly as in Module 5: one row per chunk with its vector, its document (to filter on) and its text. A checksum on each chunk means a rerun only embeds what has changed.
+2. **Embed** every chunk and store it in a vector database. Module 5 used ChromaDB; here we use **sqlite-vec**, which adds vector search to SQLite, so a search is one SQL query. The idea is the same: one row per chunk with its vector, its document (to filter on) and its text. A checksum on each chunk means a rerun only embeds what has changed.
 
 3. **Retrieve and answer.** Embed the question, take the 5 nearest chunks, and paste just those into the instructions:
 
@@ -183,3 +184,118 @@ The two misses on the whole knowledge base are our running question and Q11, "Th
 The customer and the documentation describe the same thing in different words. The customer says the heating comes on *before the time I set*. The user guide says Warm Wake *starts the heating early*, and never mentions a time the customer set. A question about "heating" and "the time I set" looks most like other sections about heating and schedules. With 26 chunks that doesn't matter much; with 1,823, plenty of chunks are about heating and schedules. The more documents you add, the more near misses there are to beat the right one.
 
 What if the documentation came with the questions customers actually ask?
+
+<!-- Sections 4 to 6 (FAQs, citations, keeping it current) go here. -->
+
+## 7. Share it: an MCP server
+
+**Demo:** `demo/07_agent.py`, which starts `demo/07_docs_server.py`
+
+Our search lives inside our scripts. Demos 3 to 6 each carry their own copy of the code that reads the documents, splits them into chunks, embeds them and searches the database: 89 lines in demo 3. That's fine for teaching. In a company, the support chat, the help website, the staff's own tools and the AI assistants people already use would all need that search. A copy in each, every one a little different, is how answers start to disagree.
+
+Module 3 had the fix: an **MCP server**, a small program that offers tools to any MCP client. So we put the search behind one server, and every application asks it. This is what *exposing existing company functionality to an LLM* means in practice. The search already exists; the server is a thin layer that lets any model use it.
+
+### The server
+
+`demo/07_docs_server.py` has one tool, and its body is demo 3's search. The docstring becomes the tool's **description**, which is all a client's model knows about the tool, so it says what is searched and how to ask:
+
+```python
+@server.tool()
+def search_docs(query: str) -> str:
+    """Search Dormouse's documentation by meaning: the user guide, and support, troubleshooting,
+    installation, specification, policy, error-code and release-note articles. Describe what to
+    look for in `query`, in the words the documentation would use. Returns the five closest
+    sections as JSON, closest first, each with an id to cite and its text."""
+    db = open_database()
+    # Always the documents as they are now: only new or changed chunks are embedded.
+    update(db, [chunk for document in load_documents(DATA / "docs") for chunk in split_into_chunks(document)])
+    [vector] = embed([query])
+    ...
+```
+
+It uses the same database as demos 3 to 6, `demo/output/knowledge.db`, and checks it against the documents on every search. So an edited document can be found straight away, as in section 6, without restarting the server.
+
+### The agent
+
+`demo/07_agent.py` starts the server, asks it for its tools, and runs Module 3's tool loop. One thing has changed since demo 3. **We no longer search for the customer: the model does.** It chooses the words, and whether to search again:
+
+```python
+INSTRUCTIONS = """You are the support assistant for Dormouse, a smart thermostat. Answer the customer in a short paragraph.
+Search the documentation first, and answer only from what you find. If the results don't answer the question, search again with different words.
+End each sentence that relies on the documentation with the id of the section it came from, in square brackets."""
+```
+
+```text
+The server offers: search_docs
+
+Q: Why does my Dormouse turn the heating on before the time I set?
+   search_docs("thermostat heating starts before scheduled time set; early start, preheat, learns how long home takes to warm to target temperature")
+      0.684  user-guide.md#warm-wake
+      0.623  set-a-heating-schedule.md#before-you-start
+      0.622  understand-warm-wake.md#what-warm-wake-does
+      0.621  set-a-heating-schedule.md#how-schedule-periods-work
+      0.610  heating-starts-below-five-degrees.md#if-the-room-is-not-below-five-degrees
+A: Dormouse’s Warm Wake feature starts heating early so your home reaches the scheduled target temperature by the time the period begins. It learns how long your home takes to warm up and may start up to 90 minutes early; you’ll see a sunrise symbol while it’s doing this. Warm Wake is on by default, but you can turn it off in Settings > Heating > Warm Wake. [user-guide.md#warm-wake]
+   1,063 tokens in, $0.0002, 5.6 seconds
+
+The answer was in the chunks the agent found, for 24 questions: 24 (1.2 searches a question)
+```
+
+Look at what it searched for. The customer wrote "before the time I set". The model wrote "early start, preheat, learns how long home takes to warm to target temperature": the words a manual uses. That is the gap demo 3 fell into, and the model stepped over it. Warm Wake came **first**, where demo 3 had it sixth, and the answer has the 90 minutes, the sunrise symbol and the place to turn it off. It cites the section it used, once at the end, although we asked for a citation after every sentence.
+
+| | Demo 3: we search | Demo 7: the model searches |
+|---|---|---|
+| What is searched for | The customer's words, as they are | Words the model chooses |
+| Searches per question | 1 | 1.2: four of the 24 searched twice |
+| Answer in what was found | 22 of 24 | 24 of 24 (23 from the first search alone) |
+| Warm Wake, for our question | 6th | 1st |
+| Our question: tokens in | 906 | 1,063 |
+| Our question: cost | $0.0001 | $0.0002 |
+| Our question: time | 2.1 seconds | 5.6 seconds |
+
+Both of demo 3's misses were found: our question, and Q11, *"The heating turns down every time I nip out to the shops"*, where the model searched for "stop away mode geofencing presence detection". Three of the four second searches were for error codes: the first search found what the code means, and the second went back for the fix. The fourth was Q11 going back for how to turn geofencing off. (Every question's searches and answer are in `demo/output/07_agent.json`.)
+
+The price is a second model call. The model reads the question to write a search, then reads the results to answer, so every question takes at least two calls instead of one. It is still a fraction of a cent, but it is more than twice as slow.
+
+### The same server, another client
+
+The server isn't tied to our agent. To give it to Claude Code, run this from this folder:
+
+```bash
+claude mcp add dormouse-docs -- uv run --directory "$PWD" python demo/07_docs_server.py
+```
+
+Claude Desktop takes the same command as JSON, in `claude_desktop_config.json` (Settings > Developer > Edit Config):
+
+```json
+{
+  "mcpServers": {
+    "dormouse-docs": {
+      "command": "uv",
+      "args": ["run", "--directory", "/full/path/to/module-06-rag-and-proprietary-knowledge", "python", "demo/07_docs_server.py"]
+    }
+  }
+}
+```
+
+If Claude Desktop can't find `uv`, give its full path, which `which uv` prints. Cursor, VS Code and other MCP clients take the same command in their own settings, and the server doesn't change. We haven't quoted a Claude session here: try it, and ask Claude why your Dormouse heats early.
+
+In practical terms, this is what MCP gives us:
+
+- **One search, many applications.** The chunking, the embeddings and the database are written once and run in one place. Improve the search, and every application gets the improvement.
+- **The model writes the search.** Given a tool instead of a fixed search, a model rewrites the customer's words into the documentation's, and goes back for more when the first results aren't enough.
+- **The description is the contract.** A client knows nothing about our tool but its name, its description and its arguments. Writing the description is part of building the tool.
+- **A thin layer over what already exists.** The server is demo 3's code with a decorator on it. A company's own search, ticket system or product API can be put behind a server the same way.
+
+### Why this breaks
+
+The server searches every document it has, for whoever runs it. That includes the 41 internal ones: engineering notes, support playbooks and QA reports. Across the 24 customer questions, the server handed the model 5 sections from internal documents, and one answer cited one:
+
+```text
+Q: What's the coldest I can set the thermostat to?
+A: The coldest target temperature you can set is 5°C. The thermostat’s frost protection is always on and will turn the heating on if the room drops below 5°C. [thermostat-physical-and-environmental-limits.md#indoor-operating-range] [thermostat-electrical-safety-policy.md#limits-and-safety-features]
+```
+
+The first source is an internal specification. This time the fact was harmless. Next time it could be a supplier's name, a known fault or another customer's details.
+
+The server can't do better, because it has no idea who is asking. There is no sign-in: a customer's chat, a member of staff and anyone else given the command all get the same search. And section 5's check, that every quote really is in the chunk it cites, has gone: the client writes the answer now, and nothing checks it. Sharing the search with every application shared it with everyone. Deciding who may see what, and enforcing it in code rather than in a prompt, is Module 8.

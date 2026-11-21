@@ -14,6 +14,7 @@ from mcp.client.stdio import StdioServerParameters
 from tests.conftest import REPO_ROOT, check_requirements, find_module
 
 TOOLS = find_module("tools")
+RAG = find_module("rag-and-proprietary-knowledge")
 SECURITY = find_module("security-and-deployment")
 DORMOUSE_SERVER = f"{SECURITY}/demo/06_dormouse_server.py"
 
@@ -29,6 +30,7 @@ SERVER_TOOLS: dict[str, set[str]] = {
         "square_root",
     },
     f"{TOOLS}/playground/weather-server/server.py": {"find_place", "get_weather"},
+    f"{RAG}/demo/07_docs_server.py": {"search_docs"},
 }
 
 # Module 8's server needs the signed-in person's token, so it has its own test below.

@@ -79,7 +79,7 @@ A research agent
 2. **Argue with a label.** Is `contact_support` really harmless, if support staff can be talked into things? Is a ticket a customer wrote untrusted when Priya's assistant reads it? Change the labels and see what changes.
 3. **Add Meta's third property.** The Agents Rule of Two counts "can change state" as well as "can communicate outside". Add a `changes` leg (writing files, sending a replacement) and a rule-of-two check: no more than two of untrusted, private and changes-or-outbound.
 4. **Suggest a split.** When an agent is at risk, print a design that splits it into two agents, one with the untrusted leg and one with the private leg. Does the split still do the job?
-5. **Check real tool lists.** Read the tools from an MCP server (Module 5's search server, or demo 6's), label them, and check them. Could a server describe its own legs?
+5. **Check real tool lists.** Read the tools from an MCP server (Module 6's docs server, or demo 6's), label them, and check them. Could a server describe its own legs?
 
 ## Questions
 
