@@ -189,9 +189,43 @@ before a schedule period. ...`,
     },
   },
   {
+    type: 'standard',
+    content: {
+      title: 'How to build one',
+      icon: 'wrench',
+      points: [
+        'The game: **are these two words near each other?**',
+        '1. Keep the words that appear at least twice: **235**',
+        '2. Give each word **20 random numbers**: its vector',
+        '3. Make examples: real neighbours (1) and random words (0)',
+        '4. Guess, compare with the answer, and **nudge the numbers**',
+        '5. Repeat: 30 passes through the user guide',
+      ],
+    },
+  },
+  {
     type: 'code',
     content: {
-      title: 'Skip-gram with negative sampling',
+      title: 'Step 3: examples from the text',
+      code: `"... for your postcode. While Warm Wake is heating early,
+ the display shows the sunrise symbol."
+
+Real neighbours of "wake", up to 3 words either side:
+  wake → your, while, warm, is, heating, early          answer 1
+
+5 random words for each real pair (wake + warm, first pass):
+  wake → connected, guide, current, frost, not          answer 0`,
+      highlights: [
+        'One pass through the guide: **9,498 real pairs**, 47,490 random ones',
+        'Random words are almost never real neighbours',
+        'The window ignores full stops: *your* comes from the sentence before',
+      ],
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'Step 4: guess, and nudge',
       code: `samples = [(tokens[j], 1)] + [(random.choice(noise), 0)
                               for _ in range(NEGATIVES)]
 for other, is_neighbour in samples:
@@ -202,10 +236,10 @@ for other, is_neighbour in samples:
         change[k] += rate * error * neighbour[k]
         neighbour[k] += rate * error * vector[k]`,
       highlights: [
-        'Every word starts with **20 random numbers**',
-        'Guess: is this word a **neighbour**, up to 3 words away? And 5 random words?',
-        'Each wrong guess **pulls neighbours closer** and pushes random words away',
-        '30 passes through the user guide: **about 11 seconds**',
+        'Multiply and add: the bigger the total, the more it thinks **neighbours**',
+        '`sigmoid` turns that into a guess from 0 to 1. At the start, every guess is **0.5**',
+        '`error` = answer − guess: **nudge both** words, more when the guess was further off',
+        'Skip-gram with negative sampling: 30 passes, **1.7 million guesses**, about 11 seconds',
       ],
     },
   },

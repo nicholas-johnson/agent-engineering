@@ -151,20 +151,40 @@ In all 275 documents it fails. "Understand Warm Wake" comes **142nd**. The winne
 
 We need numbers that capture what a word *means*, not how it's spelt. **word2vec** (Mikolov and others, 2013) learns them from one idea: **words used in the same places mean similar things**. "Warm" and "sunrise" keep turning up near "wake" in the user guide, so they should get similar numbers.
 
-We train it live, in plain Python, on the user guide. Every word starts with 20 random numbers. Then, for every word in the guide and each neighbour up to `WINDOW` (3) words away, the model makes a guess: is this word a real neighbour? It also makes the same guess for 5 random words, which almost never are. Each wrong guess nudges the numbers:
+### How to build one
 
-```python
-samples = [(tokens[j], 1)] + [(random.choice(noise), 0) for _ in range(NEGATIVES)]
-for other, is_neighbour in samples:
-    neighbour = neighbours[other]
-    guess = sigmoid(sum(a * b for a, b in zip(vector, neighbour)))
-    error = is_neighbour - guess
-    for k in range(SIZE):
-        change[k] += rate * error * neighbour[k]
-        neighbour[k] += rate * error * vector[k]
-```
+Nobody writes down what words mean. Instead you set the model a guessing game that it can only win by giving similar words similar numbers, and let the numbers learn. word2vec's game is: **given two words, guess whether they appear near each other.** Two words that keep the same company have to make the same guesses, so they end up with similar numbers.
 
-Multiply two words' numbers together and add them up, and `sigmoid` turns the total into a guess between 0 and 1. A real neighbour should score near 1, so the error pulls the two closer. A random word should score near 0, so the error pushes it away. This is **skip-gram with negative sampling**. After 30 passes through the guide (about 11 seconds), words used in the same places have similar numbers. Module 1's network learned its embeddings as a side effect of predicting the next token. This model has no other job.
+We build one live, in plain Python, from the user guide, in five steps.
+
+1. **Choose the words.** Split the guide into words, as in section 1, and keep every word that appears at least twice (`MIN_COUNT`). That's 235 different words, which make up 1,585 of the guide's 1,794 words. A word seen only once can't teach the model anything.
+
+2. **Start with random numbers.** Give every word a list of 20 random numbers (`SIZE`). This is its **vector**: the embedding we're building. Each word also gets a second list, used when it's another word's neighbour, which starts at zero.
+
+3. **Make examples from the text.** Go through the guide word by word. Every word up to 3 places away (`WINDOW`) is a real neighbour, and the right answer for that pair is 1. Here are the real neighbours of *wake* in "...for your postcode. While Warm Wake is heating early, the display shows the sunrise symbol":
+
+   ```text
+   wake: your, while, warm, is, heating, early
+   ```
+
+   The window doesn't stop at full stops, so *your* from the sentence before counts. For every real pair, also pick 5 words at random (`NEGATIVES`). They're almost never real neighbours, so the right answer is 0. In the first pass, the random words for *wake* and *warm* were *connected, guide, current, frost* and *not*. One pass through the guide makes 9,498 real pairs and 47,490 random ones.
+
+4. **Guess, and nudge.** For each pair, multiply the two words' numbers together and add them up: the bigger the total, the more the model thinks they're neighbours. `sigmoid` squashes the total into a guess between 0 and 1. At the very start, every guess is 0.5, because the second lists are all zero: the model knows nothing. The **error** is the right answer minus the guess. Both lists of numbers move a little in the direction that would have shrunk the error, more when the guess was further off:
+
+   ```python
+   samples = [(tokens[j], 1)] + [(random.choice(noise), 0) for _ in range(NEGATIVES)]
+   for other, is_neighbour in samples:
+       neighbour = neighbours[other]
+       guess = sigmoid(sum(a * b for a, b in zip(vector, neighbour)))
+       error = is_neighbour - guess
+       for k in range(SIZE):
+           change[k] += rate * error * neighbour[k]
+           neighbour[k] += rate * error * vector[k]
+   ```
+
+5. **Repeat.** 30 passes through the guide (`EPOCHS`), about 1.7 million guesses, take about 11 seconds. Afterwards the model guesses 0.92 that *warm* appears near *wake*, and 0.00 that it appears near *password*.
+
+The lists from step 2 are now the embeddings. This recipe is **skip-gram with negative sampling**: "skip-gram" for guessing a word's neighbours, "negative sampling" for the random words. Module 1's network learned its embeddings as a side effect of predicting the next token. This model has no other job.
 
 The demo prints the five closest words to a few others. ("Closest" is measured by cosine similarity, which section 4 explains.)
 
