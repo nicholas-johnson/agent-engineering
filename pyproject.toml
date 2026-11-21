@@ -5,6 +5,7 @@ description = "Agent Engineering: building AI agents from scratch in Python — 
 requires-python = ">=3.12"
 dependencies = [
     "anthropic>=2.8.0",
+    "chromadb>=1.5.9",
     "google-genai>=3.1.0",
     "mcp>=2.3.0",
     "openai>=3.48.0",

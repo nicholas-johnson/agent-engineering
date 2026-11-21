@@ -11,7 +11,7 @@ export const slides = [
     type: 'title',
     content: {
       title: 'Module 5 — Embeddings and Vector Search',
-      subtitle: 'Finding the right test by meaning',
+      subtitle: 'Finding the right information by meaning',
       icon: 'search',
     },
   },
@@ -21,28 +21,31 @@ export const slides = [
       title: 'The question',
       icon: 'question',
       description:
-        "A library of **1,000 manual test scripts**. A bug report: *customers can't sign in after resetting their password*. The fix ships in ten minutes, on Android. **Which test do we run?**",
+        'Dormouse has **275 documents**: a user guide, support and troubleshooting articles, policies, and internal notes for staff. A customer asks: *"Why is the heating already on before my alarm goes off?"* The answer is in there somewhere. **How do we find it?**',
     },
   },
   {
     type: 'code',
     content: {
       title: 'The data',
-      code: `{
-  "id": "TS-1042",
-  "title": "Log in with the new password after a password reset",
-  "platform": "android",
-  "component": "accounts",
-  "priority": "high",
-  "minutes": 5,
-  "preconditions": "A Dormouse account whose password has just been ...",
-  "steps": ["Open the Dormouse app.", "Enter the account's email ...", ...],
-  "expected": "The new password opens the home screen ..."
-}`,
+      code: `---
+title: Understand Warm Wake
+product: thermostat
+type: support
+audience: customer
+---
+
+# Understand Warm Wake
+
+## What Warm Wake does
+
+Warm Wake is a heating feature that starts the heating
+before a schedule period. ...`,
       highlights: [
         '**Dormouse**: a smart thermostat, invented for this course',
-        '20 scripts written by hand, 980 more written by `gpt-6-luna`',
-        'Platforms: `android`, `ios`, `web` and `device`',
+        'The **user guide**, written by hand: 26 sections, 1,794 words',
+        '275 documents in all: **234 for customers, 41 internal**',
+        'The same documents Module 6 answers questions from',
       ],
     },
   },
@@ -60,18 +63,18 @@ export const slides = [
     type: 'code',
     content: {
       title: 'BM25',
-      code: `for word in set(words(request)):
+      code: `for word in set(words(question)):
     if word not in counts:
         continue
-    rarity = math.log(1 + (len(documents) - appears_in[word] + 0.5)
+    rarity = math.log(1 + (len(texts) - appears_in[word] + 0.5)
                           / (appears_in[word] + 0.5))
     count = counts[word]
     score += rarity * count * (K1 + 1) / (
-        count + K1 * (1 - B + B * len(document) / average_length))`,
+        count + K1 * (1 - B + B * len(text) / average_length))`,
       highlights: [
-        '**Rare words count for more**: "resetting" beats "password"',
+        '**Rare words count for more**: "the" adds almost nothing',
         'Repeats help, but less and less (`K1`)',
-        "Long scripts don't win just by being long (`B`)",
+        "Long documents don't win just by being long (`B`)",
         'Used by Elasticsearch, OpenSearch and SQLite',
       ],
     },
@@ -88,31 +91,31 @@ export const slides = [
     type: 'code',
     content: {
       title: 'Why this breaks',
-      code: `=== 20 test scripts ===
-   7.72  TS-1076  android  Sign-in screen layout
-   4.33  TS-1311  android  Account recovery regression: every way ...
-   4.03  TS-1042  android  Log in with the new password after a password reset
+      code: `=== The user guide: 26 sections ===
+   7.64  Warm Wake
+   6.98  Frost protection
+   4.62  Energy reports
 
-=== 1,000 test scripts ===
-  11.04  TS-1879  android  Handle an expired password during sign-in
-  10.25  TS-1047  ios      Preserve sign-in email after a password error
-  10.06  TS-1955  web      Prevent password disclosure in browser history`,
+=== All the documentation: 275 documents ===
+   7.02  Enter your boiler size for energy reports
+   6.82  Web dashboard: Household screen guide
+   6.56  Web dashboard: Energy screen guide`,
       highlights: [
-        'First: a 3-minute check of the screen layout. It says "sign in" twice',
-        'The right script says **log in**, not sign in',
-        'In 1,000 scripts it falls out of the top three',
+        'User guide: Warm Wake is the only section that says **"already"**',
+        'All 275 documents: Warm Wake comes **142nd**',
+        '"why" is in 7 documents, "goes" in 1, **"alarm" in none**',
         'Keyword search matches **words, not meaning**',
       ],
     },
   },
 
-  // ---- Section 2: Embeddings ----
+  // ---- Section 2: Build an embeddings model ----
   {
     type: 'title',
     content: {
-      title: '2. Embeddings',
-      subtitle: 'Meaning as numbers',
-      icon: 'layers',
+      title: '2. Build an embeddings model',
+      subtitle: 'Words used in the same places',
+      icon: 'brain',
     },
   },
   {
@@ -122,27 +125,162 @@ export const slides = [
       icon: 'layers',
       points: [
         'A **vector**: a list of numbers that stands for a piece of text',
-        'Trained so that texts that **mean** similar things point in similar directions',
-        'Module 1: 16 numbers per token, and *mouse* ended up near *queen*',
-        '`text-embedding-3-small`: **1,536 numbers** for a whole passage',
-        'Search by meaning = find the nearest vectors',
+        'Texts that **mean** similar things get vectors that point the same way',
+        'Module 1: 16 numbers per token, learned as a **side effect**',
+        '**word2vec**: learn them on purpose, from the words around each word',
       ],
+      credit:
+        'Mikolov et al. (2013). "Efficient Estimation of Word Representations in Vector Space." arXiv:1301.3781',
     },
   },
   {
     type: 'code',
     content: {
-      title: 'Embedding text',
-      code: `response = client.embeddings.create(
+      title: 'Skip-gram with negative sampling',
+      code: `samples = [(tokens[j], 1)] + [(random.choice(noise), 0)
+                              for _ in range(NEGATIVES)]
+for other, is_neighbour in samples:
+    neighbour = neighbours[other]
+    guess = sigmoid(sum(a * b for a, b in zip(vector, neighbour)))
+    error = is_neighbour - guess
+    for k in range(SIZE):
+        change[k] += rate * error * neighbour[k]
+        neighbour[k] += rate * error * vector[k]`,
+      highlights: [
+        'Every word starts with **20 random numbers**',
+        'Guess: is this word a **neighbour**, up to 3 words away? And 5 random words?',
+        'Each wrong guess **pulls neighbours closer** and pushes random words away',
+        '30 passes through the user guide: **about 11 seconds**',
+      ],
+    },
+  },
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Build an embeddings model',
+      subtitle: 'Switch to terminal: python demo/02_word_vectors.py',
+      icon: 'rocket',
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'The closest words',
+      code: `=== Trained on the user guide: 1,794 words, 235 different words ===
+  warm       wake, sunrise, heat, early, power
+  password   sign, network, link, account, cleaning
+  heating    hours, switch, early, protection, for
+  alarm      never seen`,
+      highlights: [
+        'Nobody told it what any word means',
+        '*warm* → *wake*, *sunrise*, *early*: words the guide **uses together**',
+        'Every word and its 20 numbers: `demo/output/02_word_vectors.txt`',
+      ],
+    },
+  },
+  {
+    type: 'description',
+    content: {
+      title: 'Why this breaks',
+      icon: 'warning',
+      description:
+        '*Heating* is closest to *hours*, *switch* and *for*: **1,794 words is far too little text**. The model only knows the **235 words** that appear twice, and **"alarm" isn\'t one of them**. And it gives one vector **per word**: our question is 11 words, and a document is hundreds.',
+    },
+  },
+
+  // ---- Section 3: Turn a document into numbers ----
+  {
+    type: 'title',
+    content: {
+      title: '3. Turn a document into numbers',
+      subtitle: 'One vector for a whole text',
+      icon: 'hash',
+    },
+  },
+  {
+    type: 'comparison',
+    content: {
+      title: 'Two ways',
+      left: {
+        label: 'Average our word vectors',
+        code: `known = [word_vectors[w]
+         for w in words(text)
+         if w in word_vectors]
+vector = [sum(column) / len(known)
+          for column in zip(*known)]`,
+      },
+      right: {
+        label: 'An embeddings model',
+        code: `response = client.embeddings.create(
     model="text-embedding-3-small",
     input=texts,
 )
-vectors = [item.embedding for item in response.data]`,
-      highlights: [
-        'Not the Responses API: a separate **embeddings** endpoint',
-        'Many texts per call: we send 100 at a time',
-        'All 1,000 scripts: 32,025 tokens, **less than a tenth of a cent**',
+vectors = [item.embedding
+           for item in response.data]`,
+      },
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'text-embedding-3-small',
+      icon: 'layers',
+      points: [
+        'Trained to embed **whole passages**, word order included',
+        'Up to 8,191 tokens in, **1,536 numbers** out',
+        'A separate **embeddings** endpoint, not the Responses API',
+        'All 275 documents: 179,993 tokens, **under half a cent**',
       ],
+    },
+  },
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Turn a document into numbers',
+      subtitle: 'Switch to terminal: python demo/03_document_vectors.py',
+      icon: 'rocket',
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'The numbers',
+      code: `=== Our model: the average of the word vectors ===
+  Q: Why is the heating already on before my alarm goes off?
+    20 numbers: [-0.61, -0.77, 0.33, 0.24, -0.31, 0.08, ...]
+    left out 5 words it has never seen: alarm, already, goes, my, why
+  Understand Warm Wake
+    20 numbers: [-0.55, -0.97, 0.08, 0.21, -0.22, -0.23, ...]
+
+=== text-embedding-3-small ===
+  Q: Why is the heating already on before my alarm goes off?
+    1,536 numbers: [-0.0109, 0.0147, -0.0659, -0.0318, ...]
+  Understand Warm Wake
+    1,536 numbers: [-0.0090, 0.0321, -0.0258, 0.0117, ...]`,
+      highlights: [
+        'Our model kept 6 of 11 words: **is, the, heating, on, before, off**',
+        'Averaging also **loses the word order**',
+        'No single number means anything you could name',
+      ],
+    },
+  },
+  {
+    type: 'description',
+    content: {
+      title: 'Why this breaks',
+      icon: 'warning',
+      description:
+        "Which document is closer to the question: **Warm Wake**, or keyword search's winner, **boiler size**? Look at the numbers: **you can't tell**. A list of numbers doesn't find anything on its own. We need a way to **measure** how close two vectors are.",
+    },
+  },
+
+  // ---- Section 4: Find by similarity ----
+  {
+    type: 'title',
+    content: {
+      title: '4. Find by similarity',
+      subtitle: 'The angle between two vectors',
+      icon: 'compass',
     },
   },
   {
@@ -159,29 +297,37 @@ vectors = [item.embedding for item in response.data]`,
 </math>`,
       points: [
         'How closely two vectors **point the same way**',
-        '1 means the same direction, 0 means unrelated',
-        'Only meaningful compared with other similarities',
+        '1 means the same direction, 0 unrelated, −1 opposite',
+        "Divide by the lengths: a long document **doesn't win by being long**",
       ],
     },
   },
   {
     type: 'code',
     content: {
-      title: 'What to embed',
-      code: `def what_it_tests(script):
-    return f"{script['title']}. {script['expected']}"`,
+      title: 'Search by similarity',
+      code: `def cosine_similarity(a, b):
+    dot = sum(x * y for x, y in zip(a, b))
+    length_a = math.sqrt(sum(x * x for x in a))
+    length_b = math.sqrt(sum(y * y for y in b))
+    return dot / (length_a * length_b)
+
+results = sorted(
+    ((cosine_similarity(question_vector, v), d)
+     for v, d in zip(vectors, library)),
+    key=lambda r: r[0], reverse=True)`,
       highlights: [
-        'The title and expected result say **what the test checks**',
-        'Our request: embed the whole script, and the right one drops from 1st to 4th',
-        "All 20 requests, on each one's platform: **a draw**, 18 each. Measure it",
+        '`dot`: multiply number by number, and add up',
+        'Embed every document and the question, then **sort**',
+        "OpenAI's vectors have length 1, near enough: `dot` alone gives **almost** the same order",
       ],
     },
   },
   {
     type: 'title',
     content: {
-      title: 'Demo — Embeddings',
-      subtitle: 'Switch to terminal: python demo/02_embeddings.py',
+      title: 'Demo — Find by similarity',
+      subtitle: 'Switch to terminal: python demo/04_similarity_search.py',
       icon: 'rocket',
     },
   },
@@ -189,17 +335,34 @@ vectors = [item.embedding for item in response.data]`,
     type: 'code',
     content: {
       title: 'By meaning',
-      code: `Request: Customers can't sign in after resetting their password
-As 1,536 numbers: [0.0235, -0.0048, 0.0286, -0.0008, ...]
+      code: `=== The user guide: 26 sections ===
+  0.618  customer  Warm Wake
+  0.420  customer  Boost
+  0.408  customer  The boost button
 
-=== 1,000 test scripts ===
-  0.511  TS-1042  android  Log in with the new password after a password reset
-  0.511  TS-1187  ios      Log in with the new password after a password reset
-  0.485  TS-1047  ios      Preserve sign-in email after a password error`,
+=== All the documentation: 275 documents ===
+  0.488  customer  Understand Warm Wake
+  0.455  customer  Heating Starts Below Five Degrees
+  0.427  customer  Set a heating schedule`,
       highlights: [
-        'The right script is **first**, in both libraries',
-        'It shares only "after" and "password" with the request',
+        'Warm Wake is **first**, in both libraries',
+        'It shares only "heating" and "before": so do **100 other documents**',
+        '0.488 sounds low: similarities only mean something **next to each other**',
       ],
+    },
+  },
+  {
+    type: 'comparison',
+    content: {
+      title: 'Where Warm Wake came',
+      left: {
+        label: 'Keyword search',
+        items: ['User guide, 26 sections: **1st**', 'All 275 documents: **142nd**'],
+      },
+      right: {
+        label: 'Cosine similarity',
+        items: ['User guide, 26 sections: **1st**', 'All 275 documents: **1st**'],
+      },
     },
   },
   {
@@ -208,228 +371,103 @@ As 1,536 numbers: [0.0235, -0.0048, 0.0286, -0.0008, ...]
       title: 'Why this breaks',
       icon: 'warning',
       description:
-        'TS-1042 is **tied with TS-1187**, the same test on iOS. In the small library, third place is a **40-minute** regression suite. The bug is on Android and the fix ships in ten minutes: **it ignores the criteria**. And every run embeds the whole library again.',
+        "Every run sends **all 275 documents** to the API again, and the vectors vanish when the script ends. Every search **compares with every document**: fine for 275, not for millions. And there's **no filter**: 41 documents are internal, and nothing stops a customer seeing them.",
     },
   },
 
-  // ---- Section 3: A vector database ----
+  // ---- Section 5: A vector database ----
   {
     type: 'title',
     content: {
-      title: '3. A vector database',
-      subtitle: 'Store once, filter, search',
+      title: '5. A vector database',
+      subtitle: 'Store once, search fast, filter',
       icon: 'database',
     },
   },
   {
     type: 'code',
     content: {
-      title: 'A table of vectors',
-      code: `db.execute(
-    "create virtual table if not exists scripts using vec0("
-    "id text primary key, embedding float[1536] distance_metric=cosine,"
-    "platform text, minutes integer, +title text, +checksum text)"
+      title: 'ChromaDB',
+      code: `database = chromadb.PersistentClient(
+    path=str(DATABASE),
+    settings=Settings(anonymized_telemetry=False),
+)
+collection = database.get_or_create_collection(
+    "dormouse-docs",
+    configuration={"hnsw": {"space": "cosine"}},
+    embedding_function=None,
 )`,
       highlights: [
-        '**sqlite-vec**: vector search inside SQLite, in one file',
-        'One row per script: its vector, and columns to **filter on**',
-        '`+` columns are just carried along',
+        'Runs inside our script: one folder, **9.7 MB** for 275 documents',
+        'A **collection** is like a table. Compare by **cosine**',
+        "`embedding_function=None`: **our** vectors, not Chroma's own model",
+        'Telemetry off: no usage statistics sent',
       ],
     },
   },
   {
     type: 'code',
     content: {
-      title: 'Searching is SQL',
-      code: `select id, 1 - distance, platform, minutes, title from scripts
-where embedding match ? and k = 3
-  and platform = ? and minutes <= ?
-order by distance`,
-      highlights: [
-        '`k = 3`: the three nearest vectors',
-        'The criteria are ordinary `where` clauses',
-        'Filters apply **during** the search, so you still get three',
-      ],
-    },
-  },
-  {
-    type: 'code',
-    content: {
-      title: 'Embed once',
-      code: `stored = dict(db.execute("select id, checksum from scripts"))
-changed = [s for s in scripts if stored.get(s["id"]) != checksums[s["id"]]]
+      title: 'Store once, search with a filter',
+      code: `collection.upsert(
+    ids=[d["id"] for d in changed],
+    embeddings=embed([d["text"] for d in changed]),
+    documents=[d["text"] for d in changed],
+    metadatas=[{"title": ..., "audience": ..., "checksum": ...}],
+)
 
-# First run:   Embedded 1,000 new or changed scripts into test-scripts.db
-# Second run:  Embedded 0 new or changed scripts into test-scripts.db`,
+collection.query(query_embeddings=[vector], n_results=3,
+                 where={"audience": "customer"})`,
       highlights: [
-        'A checksum of the embedded text, stored in each row',
-        'Only new or changed scripts are embedded',
-        'Nothing is retrained: the rows change, the model never does',
+        '**Metadata**: facts about each document, to filter by',
+        'A **checksum** of the text: embed only what has changed',
+        '`where`: search only documents whose metadata matches',
       ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Not every vector is compared',
+      icon: 'route',
+      points: [
+        '**HNSW**: each vector is linked to its near neighbours',
+        'A search **hops** from vector to vector towards the question',
+        'Millions of vectors in milliseconds',
+        '**Approximate**: very occasionally it misses a slightly closer one',
+      ],
+      credit:
+        'Malkov & Yashunin (2018). "Efficient and Robust Approximate Nearest Neighbor Search Using Hierarchical Navigable Small World Graphs." arXiv:1603.09320',
     },
   },
   {
     type: 'title',
     content: {
       title: 'Demo — A vector database',
-      subtitle: 'Switch to terminal: python demo/03_vector_database.py',
+      subtitle: 'Switch to terminal: python demo/05_vector_database.py',
       icon: 'rocket',
     },
   },
   {
     type: 'code',
     content: {
-      title: 'With criteria',
-      code: `Request: Customers can't sign in after resetting their password
-Criteria: android, at most 10 minutes
-  0.511  TS-1042  android   5 min  Log in with the new password after ...
-  0.473  TS-1879  android   5 min  Handle an expired password during sign-in
-  0.443  TS-1887  android   3 min  Reject an incorrect password`,
-      highlights: [
-        'The iOS twin and the 40-minute suite are gone',
-        'Everything shown runs on Android in ten minutes',
-      ],
-    },
-  },
-  {
-    type: 'standard',
-    content: {
-      title: 'Every vector, or an index?',
-      icon: 'database',
-      points: [
-        'sqlite-vec compares the request with **every** vector',
-        '1,000 vectors: about **3 milliseconds**, and a 6.5 MB file',
-        'Millions of vectors: build an **index** (usually **HNSW**)',
-        'An index checks a small fraction, and very occasionally misses',
-        'pgvector, Qdrant, Chroma, Pinecone, OpenSearch…',
-      ],
-    },
-  },
-  {
-    type: 'code',
-    content: {
-      title: 'Why this breaks',
-      code: `Request: The thermostat's display shows E-104
-  0.699  TS-1474  device   5 min  Check missed Wi-Fi network error
-  0.692  TS-1370  device   5 min  Check low backup battery warning
-  0.688  TS-1845  device   5 min  Check E-217 sensor error on the display`,
-      highlights: [
-        'E-104 is the pairing timeout. **None of these is about E-104**',
-        'The vector says "an error code on the display", not which one',
-        'Embeddings **blur exact identifiers**: codes, part numbers, IDs, names',
-      ],
-    },
-  },
+      title: 'Stored once, and filtered',
+      code: `Stored 0 new or changed documents in chroma/
 
-  // ---- Section 4: Hybrid search ----
-  {
-    type: 'title',
-    content: {
-      title: '4. Hybrid search',
-      subtitle: 'Words and meaning together',
-      icon: 'blocks',
-    },
-  },
-  {
-    type: 'comparison',
-    content: {
-      title: 'Two kinds of search',
-      left: {
-        label: 'Keywords (BM25)',
-        items: [
-          'Exact words, codes and names',
-          'Blind to meaning',
-          'Built into SQLite: **FTS5**',
-        ],
-      },
-      right: {
-        label: 'Vectors',
-        items: ['Meaning, in any words', 'Blurs exact identifiers', 'sqlite-vec'],
-      },
-    },
-  },
-  {
-    type: 'code',
-    content: {
-      title: 'Reciprocal rank fusion',
-      code: `def hybrid(*rankings):
-    scores = Counter()
-    for ranking in rankings:
-        for rank, id in enumerate(ranking, 1):
-            scores[id] += 1 / (60 + rank)
-    return [id for id, _ in scores.most_common()]`,
-      highlights: [
-        'Each search returns its top 20',
-        'A script scores `1 / (60 + rank)` in every list it appears in',
-        'Ranks only, so the two kinds of score never need comparing',
-      ],
-    },
-  },
-  {
-    type: 'title',
-    content: {
-      title: 'Demo — Hybrid search',
-      subtitle: 'Switch to terminal: python demo/04_hybrid_search.py',
-      icon: 'rocket',
-    },
-  },
-  {
-    type: 'code',
-    content: {
-      title: 'Two requests',
-      code: `Request: Customers can't sign in after resetting their password (android)
-  TS-1879  Handle an expired password during sign-in
-  TS-1887  Reject an incorrect password
-  TS-1076  Sign-in screen layout
-  TS-1073  Sign out and return to the signed-in account
-  TS-1042  Log in with the new password after a password reset
+Q: Why is the heating already on before my alarm goes off?  (customers only)
+  0.487  customer  Understand Warm Wake
 
-Request: The thermostat's display shows E-104 (device)
-  TS-1026  Check sensor readings during pairing timeout
-  TS-1845  Check E-217 sensor error on the display
-  ...`,
-      highlights: [
-        'E-104 is now first: TS-1026 covers the pairing timeout',
-        'But the password test has slipped from **first to fifth**',
-      ],
-    },
-  },
-  {
-    type: 'code',
-    content: {
-      title: 'Measure it',
-      code: `A right script in the top 5, for 20 requests:
-  keyword 12, vector 18, hybrid 15
+Q: My thermostat makes a clicking noise  (every document)
+  0.520  internal  Relay click on hardware revision C
+  0.440  customer  Thermostat Does Not Respond to Dial Changes
 
-Requests                  Keyword   Vector   Hybrid
-14 in everyday words            6       12        9
-6 quoting an error code         6        6        6`,
+Q: My thermostat makes a clicking noise  (customers only)
+  0.440  customer  Thermostat Does Not Respond to Dial Changes
+  0.424  customer  Thermostat Shows the Wrong Room Temperature`,
       highlights: [
-        '`data/requests.json`: 20 requests with known right answers',
-        '**Hybrid search did worse than vectors alone**',
-      ],
-    },
-  },
-  {
-    type: 'description',
-    content: {
-      title: 'Why hybrid lost',
-      icon: 'scale',
-      description:
-        '*"What happens when someone tries to add more rooms than allowed?"* Vectors ranked the right script **3rd**; keywords never found it. Hybrid put *"Reject a seventh daily schedule period"* first: 11th for keywords **and** 14th for vectors. Two lukewarm votes (1/71 + 1/74 = 0.0276) beat one strong one (1/63 = 0.0159).',
-    },
-  },
-  {
-    type: 'standard',
-    content: {
-      title: 'Measure, with your own requests',
-      icon: 'ruler',
-      points: [
-        'Hybrid helps when people search with **exact terms**: part numbers, ticket IDs, names',
-        'It hurts when the keyword side is **noise**',
-        'Keep a set of real requests with known answers',
-        'Check every change against it',
-        "Don't tune on the same requests you measure with",
+        'Second run: **0** documents embedded',
+        'Every document: an **internal engineering note** comes first',
+        "Customers only: the note **can't come back**",
       ],
     },
   },
@@ -439,103 +477,7 @@ Requests                  Keyword   Vector   Hybrid
       title: 'Why this breaks',
       icon: 'warning',
       description:
-        "Every search here ranks by **similarity**: shared words, or nearby vectors. None of them can judge **fit**. Does this script test what broke? Can it run before the hotfix ships? And people don't type search queries: **they paste bug reports**.",
-    },
-  },
-
-  // ---- Section 5: A search tool ----
-  {
-    type: 'title',
-    content: {
-      title: '5. A search tool',
-      subtitle: 'Let the agent search',
-      icon: 'robot',
-    },
-  },
-  {
-    type: 'code',
-    content: {
-      title: 'The search, as an MCP tool',
-      code: `@server.tool()
-def find_test_scripts(
-    request: str,
-    platform: Literal["android", "ios", "web", "device"],
-    max_minutes: int,
-) -> str:
-    """Search Dormouse's library of 1,000 manual test scripts by meaning.
-    In \`request\`, describe the behaviour to test in a few plain words,
-    like a test's title ... Returns the five closest scripts as JSON."""`,
-      highlights: [
-        'Vectors and filters: **the best we measured**',
-        '`Literal`: the model can only ask for a real platform',
-        "The agent is Module 3's tool loop, unchanged",
-      ],
-    },
-  },
-  {
-    type: 'title',
-    content: {
-      title: 'Demo — A search tool',
-      subtitle: 'Switch to terminal: python demo/05_agent.py',
-      icon: 'rocket',
-    },
-  },
-  {
-    type: 'code',
-    content: {
-      title: 'From bug report to test',
-      code: `You: Support say that since this morning's release, customers on Android
-     who reset their password can't get back into the app. The hotfix
-     ships in ten minutes. Which test should we run?
-  [tool] find_test_scripts({"request":"Android user logs in after resetting
-         password","platform":"android","max_minutes":10})
-         -> TS-1042 Log in with the new password after a password reset
-         -> TS-1548 Check password entry with Android autofill
-         -> ...
-Agent: Run TS-1042, "Log in with the new password after a password reset."
-       It's the closest match to the reported Android failure, takes five
-       minutes, and verifies that the new password works while the old one
-       is rejected.`,
-      highlights: [
-        '**Criteria** from the bug report: Android, ten minutes',
-        'Its **own search**, short and to the point',
-        'It **judged** five scripts and picked one',
-      ],
-    },
-  },
-  {
-    type: 'standard',
-    content: {
-      title: 'The words matter',
-      icon: 'file',
-      points: [
-        'An earlier tool description said "describe what needs testing in plain words"',
-        'The agent searched for *"Verify Android password reset flow and confirm users can sign back into the app afterward, focusing on regression after a release/hotfix"*',
-        "Five near misses, and a recommendation it admitted didn't fit",
-        'Now: "a few plain words, like a test\'s title", and **search again if nothing fits**',
-      ],
-    },
-  },
-  {
-    type: 'standard',
-    content: {
-      title: 'What MCP gives you in practice',
-      icon: 'plug',
-      points: [
-        '**One search, many front ends**: our agent, Claude, Claude Code, Cursor, VS Code',
-        'A tester asks for the right test without leaving their editor',
-        "**Wrap your system, don't rebuild it**: call your test management API, not a JSON file",
-        '**Criteria stay exact**: the model fills in arguments, the database applies them',
-      ],
-    },
-  },
-  {
-    type: 'description',
-    content: {
-      title: 'Why this breaks',
-      icon: 'warning',
-      description:
-        'The agent finds the right **test**. But many questions need an **answer**: *"What does E-104 mean, and what should support tell the customer?"* That is written in the product\'s **documentation**, and the model has never read it. Next: **Module 6, RAG**.',
+        'The customer asked **why** the heating comes on early. We found the right document, and the answer is inside it. **Reading it and answering is Module 6: RAG.** And the search **always returns something**: no customer document is about the click, but we still got three.',
     },
   },
 
@@ -554,11 +496,11 @@ Agent: Run TS-1042, "Log in with the new password after a password reset."
       title: 'What we built',
       icon: 'blocks',
       points: [
-        '**Keyword search** — shared words, not meaning',
-        '**Embeddings** — the right script, on the wrong platform too',
-        '**A vector database** — stored once and filtered, but blurs error codes',
-        '**Hybrid search** — measured, and worse than vectors alone here',
-        '**A search tool** — the agent searches, reads and judges',
+        '**Keyword search**: shared words, not meaning',
+        '**An embeddings model**: words used together, but too little text',
+        '**A document as numbers**: an average, or a model trained on passages',
+        '**Similarity search**: the right document first, by meaning',
+        '**A vector database**: stored once and filtered, but no answers',
       ],
     },
   },
@@ -568,11 +510,11 @@ Agent: Run TS-1042, "Log in with the new password after a password reset."
       title: 'What we learned',
       icon: 'award',
       points: [
-        'An **embedding** turns text into a vector; close vectors, similar meaning',
-        '**What you embed** changes what you find: measure it',
-        'A **vector database** stores vectors with columns to filter on',
-        "**Measure** search with real requests: the usual advice isn't always right",
-        'A model can turn a messy request into a search, and **judge** the results',
+        'An **embedding** turns text into a vector: close vectors, similar meaning',
+        'Embeddings are learned from **where words are used**',
+        '**Cosine similarity** compares directions, not lengths',
+        'A **vector database** stores vectors with metadata to filter on',
+        "Similarity **ranks**: it can't say that nothing fits",
       ],
     },
   },
@@ -582,9 +524,9 @@ Agent: Run TS-1042, "Log in with the new password after a password reset."
       title: 'Final exercise: further reading',
       icon: 'book',
       points: [
-        '**Spärck Jones (1972)** — why rare words count for more',
-        '**Reimers & Gurevych (2019)** — one vector for a whole sentence',
-        '**Bruch et al. (2023)** — why our hybrid search lost',
+        '**Spärck Jones (1972)**: why rare words count for more',
+        '**Mikolov et al. (2013)**: word2vec, the model we built',
+        '**Reimers & Gurevych (2019)**: one vector for a whole sentence',
         'Pick a paper, connect it to a demo, then start an extension',
         'Everything is in `further-reading/`',
       ],

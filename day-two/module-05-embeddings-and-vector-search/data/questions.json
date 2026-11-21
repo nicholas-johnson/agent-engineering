@@ -1,0 +1,102 @@
+[
+  {
+    "question": "Why is the heating already on before my alarm goes off?",
+    "expected": ["understand-warm-wake", "thermostat-shows-the-sunrise-symbol"]
+  },
+  {
+    "question": "The heating came on while we were away in winter, even though I'd turned it off",
+    "expected": ["understand-frost-protection", "heating-starts-below-five-degrees"]
+  },
+  {
+    "question": "I got a new broadband router and now the thermostat is offline",
+    "expected": ["thermostat-does-not-connect-after-a-wi-fi-password-change", "thermostat-won-t-join-wi-fi"]
+  },
+  {
+    "question": "There's a little sun on the screen",
+    "expected": ["thermostat-shows-the-sunrise-symbol", "understand-the-thermostat-display-symbols"]
+  },
+  {
+    "question": "The radiator in the spare room stays cold",
+    "expected": ["radiator-valve-does-not-heat-to-its-own-temperature"]
+  },
+  {
+    "question": "Can my partner control the heating from their phone too?",
+    "expected": [
+      "invite-someone-to-your-home",
+      "manage-household-member-permissions",
+      "manage-household-access-for-connected-controls",
+      "understand-who-can-manage-a-dormouse-home"
+    ]
+  },
+  {
+    "question": "I forgot my password and can't get into the app",
+    "expected": [
+      "reset-your-dormouse-account-password",
+      "use-a-password-reset-link",
+      "sign-in-to-the-dormouse-app-and-web-dashboard",
+      "android-app-sign-in-screen-guide",
+      "ios-app-sign-in-screen-guide",
+      "web-dashboard-sign-in-screen-guide"
+    ]
+  },
+  {
+    "question": "The screen on the thermostat is completely blank",
+    "expected": ["thermostat-has-no-display"]
+  },
+  {
+    "question": "What happens to my heating if there's a power cut?",
+    "expected": [
+      "understand-heating-behaviour-during-a-power-cut",
+      "thermostat-cannot-heat-during-a-power-cut",
+      "understand-power-cuts-and-backup-battery-operation"
+    ]
+  },
+  {
+    "question": "I pressed the button for an hour of extra heat but nothing happened",
+    "expected": ["boost-does-not-start", "start-or-cancel-a-boost"]
+  },
+  {
+    "question": "The extra hour of heat stopped after twenty minutes",
+    "expected": ["boost-stops-before-the-hour-ends"]
+  },
+  {
+    "question": "I turned it up to 22 but later it went back down by itself",
+    "expected": ["target-temperature-change-does-not-last", "understand-how-manual-temperature-changes-interact-with-schedules"]
+  },
+  {
+    "question": "It thinks we're out when we're sitting at home",
+    "expected": ["away-mode-turns-on-unexpectedly", "understand-when-away-mode-changes-through-geofencing"]
+  },
+  {
+    "question": "How do I make it heat less while we're on holiday?",
+    "expected": ["change-the-away-temperature", "turn-away-mode-on-or-off"]
+  },
+  {
+    "question": "Can I send it back if I don't like it?",
+    "expected": ["returns-policy", "return-a-dormouse-product-within-the-returns-period"]
+  },
+  {
+    "question": "How long is it guaranteed for?",
+    "expected": ["thermostat-warranty-policy", "understand-the-dormouse-product-warranty"]
+  },
+  {
+    "question": "It says 21 degrees but the room feels freezing",
+    "expected": [
+      "thermostat-shows-the-wrong-room-temperature",
+      "understand-thermostat-temperature-accuracy",
+      "thermostat-placement-and-room-temperature-sensing"
+    ]
+  },
+  {
+    "question": "Can I ask Alexa to turn the heating up?",
+    "expected": ["connect-dormouse-to-a-voice-assistant"]
+  },
+  {
+    "question": "The thermostat restarted itself in the middle of the night",
+    "expected": ["thermostat-restarts-during-an-update", "understand-automatic-firmware-updates"]
+  },
+  {
+    "question": "How do I wipe it before I sell the house?",
+    "expected": ["factory-reset-the-thermostat", "understand-what-a-factory-reset-removes", "moving-or-recommissioning-dormouse-heating-devices"]
+  }
+]

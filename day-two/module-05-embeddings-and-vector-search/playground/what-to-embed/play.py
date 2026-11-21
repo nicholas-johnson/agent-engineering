@@ -1,12 +1,13 @@
-# What to embed — embed the library three ways and see where the right script lands.
+# What to embed — embed the library four ways and see where the right document lands.
 # Run from the module folder: uv run python playground/what-to-embed/play.py
 #                         or: source ../../.venv/bin/activate && python playground/what-to-embed/play.py
 #
-# To play: add a way of your own to WAYS (the steps alone, or the component plus the title),
-# or set FILTER_BY_PLATFORM = True. Vectors are cached in output/, so reruns are quick.
+# To play: add a way of your own to WAYS (the opening paragraph alone, or the text without its headings),
+# or set CUSTOMERS_ONLY = True. Vectors are cached in output/, so reruns are quick.
 
 import json
 import math
+import re
 import sqlite3
 import struct
 from pathlib import Path
@@ -23,29 +24,49 @@ OUTPUT.mkdir(exist_ok=True)
 
 EMBEDDING_MODEL = "text-embedding-3-small"
 BATCH = 100
-TOP = 5  # a request is a hit if a right script is in the top 5
-FILTER_BY_PLATFORM = False  # True searches only the request's platform, as demo 4 does
-FIRST = {
-    "request": "Customers can't sign in after resetting their password",
-    "platform": "android",
-    "expected": ["TS-1042"],
+TOP = 5  # a question is a hit if a right document is in the top 5
+CUSTOMERS_ONLY = False  # True searches only the customer documents, as demo 5's filter does
+
+
+def read_documents():
+    documents = []
+    for path in sorted((DATA / "docs").glob("*.md")):
+        _, header, text = path.read_text().split("---", 2)
+        fields = dict(re.findall(r"^(\w+): (.+)$", header, re.MULTILINE))
+        documents.append({"id": path.stem, "text": text.strip(), **fields})
+    return documents
+
+
+def opening_paragraph(document):
+    # The first block of text that isn't a heading.
+    blocks = re.split(r"\n\s*\n", document["text"])
+    return next(b.strip() for b in blocks if not b.strip().startswith("#"))
+
+
+def whole_document(document):
+    return document["text"]
+
+
+def title(document):
+    return document["title"]
+
+
+def title_and_headings(document):
+    headings = re.findall(r"^#{2,3} (.+)$", document["text"], re.MULTILINE)
+    return "\n".join([document["title"], *headings])
+
+
+def title_and_opening(document):
+    return f"{document['title']}\n{opening_paragraph(document)}"
+
+
+# Four ways to turn a document into the text we embed.
+WAYS = {
+    "whole document": whole_document,
+    "title": title,
+    "title + headings": title_and_headings,
+    "title + opening": title_and_opening,
 }
-
-
-def full_text(script):
-    return " ".join([script["title"], script["preconditions"], *script["steps"], script["expected"]])
-
-
-def title(script):
-    return script["title"]
-
-
-def title_and_expected(script):
-    return f"{script['title']}. {script['expected']}"
-
-
-# Three ways to turn a script into the text we embed.
-WAYS = {"full text": full_text, "title": title, "title + expected": title_and_expected}
 
 client = OpenAI()
 
@@ -72,14 +93,14 @@ def cosine_similarity(a, b):
     return math.sumprod(a, b) / (math.sqrt(math.sumprod(a, a)) * math.sqrt(math.sumprod(b, b)))
 
 
-def rank_of_right_script(request, request_vector, vectors):
+def rank_of_right_document(question, question_vector, vectors):
     similarities = {
-        s["id"]: cosine_similarity(request_vector, v)
-        for s, v in zip(scripts, vectors)
-        if s["platform"] == request["platform"] or not FILTER_BY_PLATFORM
+        d["id"]: cosine_similarity(question_vector, v)
+        for d, v in zip(documents, vectors)
+        if d["audience"] == "customer" or not CUSTOMERS_ONLY
     }
-    # 1 + how many scripts are closer than the best right one, so an exact tie counts as a draw.
-    best = max(similarities[id] for id in request["expected"])
+    # 1 + how many documents are closer than the best right one, so an exact tie counts as a draw.
+    best = max(similarities[id] for id in question["expected"])
     rank = 1 + sum(similarity > best for similarity in similarities.values())
     return rank, sorted(similarities, key=similarities.get, reverse=True)[:TOP]
 
@@ -89,32 +110,34 @@ def row(label, values):
     return f"  {label:<52}" + "".join(f"{value:>18}" for value in values)
 
 
-scripts = json.loads((DATA / "test-scripts.json").read_text())
-requests = json.loads((DATA / "requests.json").read_text())
-all_requests = [FIRST, *requests]
+documents = read_documents()
+questions = json.loads((DATA / "questions.json").read_text())
 
-request_vectors = embed([r["request"] for r in all_requests])
+question_vectors = embed([q["question"] for q in questions])
 library = {}
+words = {}
 for way, make_text in WAYS.items():
-    library[way] = embed([make_text(s) for s in scripts])
+    texts = [make_text(d) for d in documents]
+    library[way] = embed(texts)
+    words[way] = sum(len(t.split()) for t in texts)
 
 results = []
-for r, request_vector in zip(all_requests, request_vectors):
+for q, question_vector in zip(questions, question_vectors):
     ways = {}
     for way, vectors in library.items():
-        rank, top = rank_of_right_script(r, request_vector, vectors)
+        rank, top = rank_of_right_document(q, question_vector, vectors)
         ways[way] = {"rank": rank, "top": top}
-    results.append({**r, "ways": ways})
+    results.append({**q, "ways": ways})
 
-
-hits = {way: sum(r["ways"][way]["rank"] <= TOP for r in results[1:]) for way in WAYS}
-searched = "the request's platform" if FILTER_BY_PLATFORM else f"all {len(scripts):,} scripts"
-print(f"\nWhere the right script lands (1 = first), searching {searched}:\n")
-print(row("Request", WAYS))
+hits = {way: sum(r["ways"][way]["rank"] <= TOP for r in results) for way in WAYS}
+searched = "the customer documents" if CUSTOMERS_ONLY else f"all {len(documents):,} documents"
+print(f"\nWhere the right document lands (1 = first), searching {searched}:\n")
+print(row("Question", WAYS))
 for r in results:
-    print(row(r["request"], [r["ways"][way]["rank"] for way in WAYS]))
-    if r["request"] == FIRST["request"]:
-        print()  # the module's request first, then the twenty
-print(f"\n{row(f'A right script in the top {TOP}, of {len(requests)}', hits.values())}")
+    print(row(r["question"], [r["ways"][way]["rank"] for way in WAYS]))
+    if r is results[0]:
+        print()  # the module's question first, then the other nineteen
+print(f"\n{row(f'A right document in the top {TOP}, of {len(questions)}', hits.values())}")
+print(row("Words embedded", [f"{n:,}" for n in words.values()]))
 
-(OUTPUT / "ranks.json").write_text(json.dumps({"hits": hits, "requests": results}, indent=2))
+(OUTPUT / "ranks.json").write_text(json.dumps({"hits": hits, "words": words, "questions": results}, indent=2))

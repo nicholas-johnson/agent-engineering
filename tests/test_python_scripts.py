@@ -270,24 +270,20 @@ SCRIPTS: tuple[ScriptCase, ...] = (
         outputs=("01_keyword_search.json",),
     ),
     ScriptCase(
-        f"{EMBEDDINGS}/demo/02_embeddings.py",
-        outputs=("02_embeddings.json",),
+        f"{EMBEDDINGS}/demo/04_similarity_search.py",
+        outputs=("04_similarity_search.json",),
         keys=("OPENAI_API_KEY",),
     ),
     ScriptCase(
-        f"{EMBEDDINGS}/demo/03_vector_database.py",
-        outputs=("03_vector_database.json",),
+        f"{EMBEDDINGS}/demo/05_vector_database.py",
+        outputs=("05_vector_database.json",),
         keys=("OPENAI_API_KEY",),
     ),
     ScriptCase(
-        f"{EMBEDDINGS}/demo/04_hybrid_search.py",
-        outputs=("04_hybrid_search.json",),
-        keys=("OPENAI_API_KEY",),
-    ),
-    ScriptCase(
-        f"{EMBEDDINGS}/demo/05_agent.py",
-        outputs=("05_agent.json",),
-        keys=("OPENAI_API_KEY",),
+        f"{EMBEDDINGS}/playground/word-vectors/play.py",
+        stdin="boost\n\n",
+        outputs=("closest.json", "vectors.txt"),
+        slow=True,
     ),
     ScriptCase(
         f"{EMBEDDINGS}/playground/similarity-explorer/play.py",
@@ -296,13 +292,13 @@ SCRIPTS: tuple[ScriptCase, ...] = (
         keys=("OPENAI_API_KEY",),
     ),
     ScriptCase(
-        f"{EMBEDDINGS}/playground/what-to-embed/play.py",
-        outputs=("ranks.json",),
+        f"{EMBEDDINGS}/playground/distance-measures/play.py",
+        outputs=("results.json",),
         keys=("OPENAI_API_KEY",),
     ),
     ScriptCase(
-        f"{EMBEDDINGS}/playground/duplicate-finder/play.py",
-        outputs=("duplicates.json",),
+        f"{EMBEDDINGS}/playground/what-to-embed/play.py",
+        outputs=("ranks.json",),
         keys=("OPENAI_API_KEY",),
     ),
     ScriptCase(
@@ -312,11 +308,6 @@ SCRIPTS: tuple[ScriptCase, ...] = (
     ),
     ScriptCase(
         f"{EMBEDDINGS}/playground/shrink-the-vectors/play.py",
-        outputs=("results.json",),
-        keys=("OPENAI_API_KEY",),
-    ),
-    ScriptCase(
-        f"{EMBEDDINGS}/playground/fusion-knobs/play.py",
         outputs=("results.json",),
         keys=("OPENAI_API_KEY",),
     ),
@@ -498,8 +489,11 @@ DEDICATED_SCRIPTS: frozenset[str] = frozenset(
         f"{INTRO}/playground/neural-knobs/complete.py",
         f"{PROVIDERS}/data/build_prices.py",
         f"{PROVIDERS}/demo/01_big_labs.py",
-        # Writes the committed library with a model: rerunning it changes the data. Checked below instead.
-        f"{EMBEDDINGS}/data/build_test_scripts.py",
+        # Demo 3 reads the word vectors demo 2 writes, so they run in order below.
+        f"{EMBEDDINGS}/demo/02_word_vectors.py",
+        f"{EMBEDDINGS}/demo/03_document_vectors.py",
+        # Copies documents from Module 6: checked against them below instead.
+        f"{EMBEDDINGS}/data/copy_docs.py",
         # Write the committed knowledge base and its FAQ with a model, so the same applies.
         f"{RAG}/data/build_docs.py",
         f"{RAG}/data/build_faq.py",
@@ -582,30 +576,34 @@ def test_build_tokens_matches_committed_data(tmp_path: Path) -> None:
 
 
 @pytest.mark.offline
-def test_test_script_library_is_consistent() -> None:
-    """The committed library, the hand-written scripts inside it, and the requests' answers agree."""
-    data_dir = REPO_ROOT / EMBEDDINGS / "data"
-    library = json.loads((data_dir / "test-scripts.json").read_text(encoding="utf-8"))
-    small = json.loads((data_dir / "test-scripts-small.json").read_text(encoding="utf-8"))
-    requests = json.loads((data_dir / "requests.json").read_text(encoding="utf-8"))
+def test_embeddings_data_is_consistent() -> None:
+    """Module 5's documents are an exact copy of Module 6's, and every question's answers exist."""
+    data = REPO_ROOT / EMBEDDINGS / "data"
+    source = REPO_ROOT / RAG / "data" / "docs"
+    docs = sorted((data / "docs").glob("*.md"))
+    assert [p.name for p in docs] == sorted(p.name for p in source.glob("*.md"))
+    for path in docs:
+        assert path.read_text() == (source / path.name).read_text(), f"{path.name} differs from Module 6"
+    audiences = [re.search(r"^audience: (\w+)$", p.read_text(), re.MULTILINE)[1] for p in docs]
+    assert (audiences.count("customer"), audiences.count("internal")) == (234, 41)
 
-    by_id = {script["id"]: script for script in library}
-    assert len(library) == 1000
-    assert sorted(by_id) == [f"TS-{n}" for n in range(1000, 2000)]
-    fields = {"id", "title", "platform", "component", "priority", "minutes", "preconditions", "steps", "expected"}
-    for script in library:
-        assert set(script) == fields, script["id"]
-        assert script["platform"] in {"android", "ios", "web", "device"}, script["id"]
-        assert script["priority"] in {"high", "medium", "low"}, script["id"]
-        assert script["steps"], script["id"]
-    for script in small:
-        assert by_id[script["id"]] == script, f"{script['id']} differs between the small and large libraries"
+    questions = json.loads((data / "questions.json").read_text(encoding="utf-8"))
+    ids = {p.stem for p in docs}
+    assert len(questions) == 20
+    for question in questions:
+        assert question["expected"], question["question"]
+        assert set(question["expected"]) <= ids, question["question"]
 
-    assert len(requests) == 20
-    for request in requests:
-        assert request["expected"], request["request"]
-        for script_id in request["expected"]:
-            assert by_id[script_id]["platform"] == request["platform"], (request["request"], script_id)
+
+@pytest.mark.api
+@pytest.mark.slow
+def test_word_vectors_then_document_vectors(pytestconfig: pytest.Config) -> None:
+    """Demo 3 averages the word vectors demo 2 trains, so run them in order."""
+    check_requirements(pytestconfig, keys=("OPENAI_API_KEY",))
+    demo = REPO_ROOT / EMBEDDINGS / "demo"
+    trained = execute_python_script(demo / "02_word_vectors.py", outputs=("02_word_vectors.txt",))
+    assert "warm" in trained.stdout
+    execute_python_script(demo / "03_document_vectors.py", outputs=("03_document_vectors.json",))
 
 
 @pytest.mark.network

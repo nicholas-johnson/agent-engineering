@@ -2,11 +2,12 @@
 # Run from the module folder: uv run python playground/shrink-the-vectors/play.py
 #                         or: source ../../.venv/bin/activate && python playground/shrink-the-vectors/play.py
 #
-# To play: add sizes to DIMENSIONS (try 32, 16 or 8), or change TOP.
+# To play: add sizes to DIMENSIONS (try 128, 32 or 16), or change TOP.
 # Vectors are cached in output/, so a rerun only embeds what it hasn't seen.
 
 import json
 import math
+import re
 import sqlite3
 import struct
 from pathlib import Path
@@ -25,13 +26,18 @@ EMBEDDING_MODEL = "text-embedding-3-small"
 BATCH = 100
 DIMENSIONS = [1536, 512, 256, 64]  # 1536 is the full length; the API cuts it down for us
 TOP = 5
-BYTES_PER_NUMBER = 4  # each number is stored as a 32-bit float, as sqlite-vec does
+BYTES_PER_NUMBER = 4  # each number is stored as a 32-bit float, as ChromaDB does
 
 client = OpenAI()
 
 
-def what_it_tests(script):
-    return f"{script['title']}. {script['expected']}"
+def read_documents():
+    documents = []
+    for path in sorted((DATA / "docs").glob("*.md")):
+        _, header, text = path.read_text().split("---", 2)
+        fields = dict(re.findall(r"^(\w+): (.+)$", header, re.MULTILINE))
+        documents.append({"id": path.stem, "text": text.strip(), **fields})
+    return documents
 
 
 def embed(texts, dimensions):
@@ -59,42 +65,38 @@ def cosine_similarity(a, b):
     return math.sumprod(a, b) / (math.sqrt(math.sumprod(a, a)) * math.sqrt(math.sumprod(b, b)))
 
 
-def rank_of_right_script(request, request_vector, vectors):
-    # Search the request's platform, as demo 4 does. 1 + how many scripts beat the best right one.
-    similarities = {
-        s["id"]: cosine_similarity(request_vector, v)
-        for s, v in zip(scripts, vectors)
-        if s["platform"] == request["platform"]
-    }
-    best = max(similarities[id] for id in request["expected"])
+def rank_of_right_document(question, question_vector, vectors):
+    # Search every document, as demo 4 does. 1 + how many documents beat the best right one.
+    similarities = {d["id"]: cosine_similarity(question_vector, v) for d, v in zip(documents, vectors)}
+    best = max(similarities[id] for id in question["expected"])
     return 1 + sum(similarity > best for similarity in similarities.values())
 
 
-scripts = json.loads((DATA / "test-scripts.json").read_text())
-requests = json.loads((DATA / "requests.json").read_text())
+documents = read_documents()
+questions = json.loads((DATA / "questions.json").read_text())
 
 results = []
 for dimensions in DIMENSIONS:
-    vectors = embed([what_it_tests(s) for s in scripts], dimensions)
-    request_vectors = embed([r["request"] for r in requests], dimensions)
-    ranks = [rank_of_right_script(r, v, vectors) for r, v in zip(requests, request_vectors)]
+    vectors = embed([d["text"] for d in documents], dimensions)
+    question_vectors = embed([q["question"] for q in questions], dimensions)
+    ranks = [rank_of_right_document(q, v, vectors) for q, v in zip(questions, question_vectors)]
     results.append(
         {
             "dimensions": dimensions,
             "bytes_per_vector": dimensions * BYTES_PER_NUMBER,
             "first": sum(rank == 1 for rank in ranks),
             "top": sum(rank <= TOP for rank in ranks),
-            "ranks": {r["request"]: rank for r, rank in zip(requests, ranks)},
+            "ranks": {q["question"]: rank for q, rank in zip(questions, ranks)},
         }
     )
 
-print(f"\nThe {len(requests)} requests, searched at each size:\n")
-print(f"  Dimensions  Bytes per vector  A million vectors  Right script first  In the top {TOP}")
+print(f"\nThe {len(questions)} questions, searched at each size:\n")
+print(f"  Dimensions  Bytes per vector  A million vectors  Right document first  In the top {TOP}")
 for r in results:
     # A million vectors of n bytes each take n megabytes.
     print(
         f"  {r['dimensions']:>10,}  {r['bytes_per_vector']:>16,}  {r['bytes_per_vector']:>14,} MB"
-        f"  {r['first']:>18}  {r['top']:>12}"
+        f"  {r['first']:>20}  {r['top']:>12}"
     )
 
 (OUTPUT / "results.json").write_text(json.dumps(results, indent=2))
