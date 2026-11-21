@@ -15,6 +15,7 @@
     "slides:05": "pnpm --filter @agent-engineering/module-05-slides dev",
     "slides:06": "pnpm --filter @agent-engineering/module-06-slides dev",
     "slides:07": "pnpm --filter @agent-engineering/module-07-slides dev",
+    "slides:08": "pnpm --filter @agent-engineering/module-08-slides dev",
     "slides:day-one-closing": "pnpm --filter @agent-engineering/day-one-closing-slides dev",
     "slides:pdf": "node scripts/export-slides-pdf.mjs",
     "social": "pnpm --filter @agent-engineering/social-scripts dev",

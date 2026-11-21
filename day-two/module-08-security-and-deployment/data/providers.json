@@ -1,0 +1,130 @@
+{
+  "checked_on": "2026-11-21",
+  "note": "What each provider keeps from API calls, checked against its own documentation on 21 November 2026. This is not legal advice, and these pages change often: recheck every row before teaching or relying on it. The short fields summarise the details; the details and sources are what was checked. At all three providers, the abuse-monitoring logs are separate from what features store: turning a feature's storage off does not take a request out of the abuse logs.",
+  "providers": [
+    {
+      "name": "OpenAI API",
+      "trains_on_your_data": "No, unless an organisation owner opts in.",
+      "abuse_monitoring": "OpenAI keeps every request in its abuse-monitoring logs for up to 30 days.",
+      "feature_storage": "The Responses API stores each response for 30 days unless you set store=False. Conversations, files and vector stores are kept until you delete them.",
+      "zero_data_retention": "Yes, with OpenAI's approval, through sales.",
+      "uk_or_eu_region": "EU: storage and processing. UK: storage only. Eligible organisations, through sales.",
+      "details": {
+        "trains_on_api_data_by_default": "No. OpenAI says it has not used API data to train or improve its models since 1 March 2023 unless you opt in. Sharing is off by default. Only an organisation owner can turn it on, on the data sharing settings page, for all projects or for selected ones. Sharing can earn free daily tokens. Enterprise organisations and organisations with zero data retention cannot opt in.",
+        "default_retention": "Abuse-monitoring logs are kept for up to 30 days for all API features. They are kept longer if the law requires it or if that is reasonably necessary to protect the services or others from harm. Image and file inputs are scanned for child sexual abuse material. Flagged content is kept for manual review even under zero data retention. A few endpoints keep no abuse logs (audio transcription and translation, moderations). Some features also keep 'application state', listed under stored_by_features.",
+        "zero_data_retention": "Yes, but only with prior approval from OpenAI and acceptance of extra requirements. You ask through sales. Approved customers choose Modified Abuse Monitoring (content left out of abuse logs) or Zero Data Retention, per organisation or per project. Under ZDR, the store parameter on /v1/responses and /v1/chat/completions is always treated as false. Stateful endpoints are not ZDR-eligible and still keep data: Conversations, Assistants, threads, vector stores, files, batches, fine-tuning and evals. On 19 August 2026 OpenAI announced 'Zero Data Retention with Private Safety Processing', which allows automated safety checks while keeping ZDR. A phased roll-out to API customers began on 22 September 2026.",
+        "stored_by_features": [
+          "Responses API store parameter: defaults to true when omitted. The response is kept so you can retrieve it through the API, and it appears in the dashboard logs. The API reference says stored responses are kept for at least 30 days; the conversation-state guide says 30 days by default. Setting store=false stops this application state being kept.",
+          "store=false does not remove a request from the 30-day abuse-monitoring logs. The docs list abuse-monitoring retention separately from application state. Only Modified Abuse Monitoring or ZDR keep content out of the abuse logs.",
+          "Background mode: response data is written to disk for about 10 minutes so you can poll for it. Under Modified Abuse Monitoring, a background response is kept for the normal period only if store=true is set explicitly. Otherwise it is deleted after the polling period.",
+          "Conversations API: conversation objects and their items have no 30-day limit. They are kept until you delete them. Any response attached to a conversation is also kept with no 30-day limit. Not ZDR-eligible.",
+          "Files (/v1/files) and vector stores (/v1/vector_stores): kept until you delete them. Files can be set to expire automatically with expires_after. Not ZDR-eligible. Assistants, threads and vector stores are kept until deleted, and objects you never delete are kept indefinitely.",
+          "Prompt caching: encrypted key/value tensors may be held in GPU-local storage. They are not kept beyond a 24-hour expiry."
+        ],
+        "data_residency": "Available to eligible organisations; you contact sales to become eligible. You create a new project and choose its region, and the region cannot be changed later. Europe (EEA and Switzerland, eu.api.openai.com) offers regional storage and regional processing. The United Kingdom (gb.api.openai.com) offers regional storage only, not regional processing. System data such as account, usage and billing data may still be stored and processed outside the region. Models released on or after 5 March 2026 cost 10% more in residency regions."
+      },
+      "sources": [
+        "https://developers.openai.com/api/docs/guides/your-data",
+        "https://developers.openai.com/api/reference/python/resources/responses/methods/create",
+        "https://developers.openai.com/api/docs/guides/conversation-state",
+        "https://developers.openai.com/api/docs/guides/data-residency",
+        "https://help.openai.com/en/articles/10306912-sharing-feedback-evaluation-and-fine-tuning-data-and-api-inputs-and-outputs-with-openai",
+        "https://openai.com/enterprise-privacy/",
+        "https://openai.com/index/offering-zero-data-retention-for-frontier-models/"
+      ]
+    },
+    {
+      "name": "Anthropic Claude API",
+      "trains_on_your_data": "No, unless you send feedback or join the Development Partner Program (Claude Code only).",
+      "abuse_monitoring": "Anthropic deletes inputs and outputs within 30 days; flagged requests are kept for up to 2 years.",
+      "feature_storage": "Files are kept until you delete them or they expire; batches for 29 days; prompt caches for 5 minutes or 1 hour.",
+      "zero_data_retention": "Yes, by arrangement with sales, per organisation. From 9 June 2026, Mythos and Fable models require 30-day retention even then.",
+      "uk_or_eu_region": "No. Inference can be limited to the US; storage is in the US.",
+      "details": {
+        "trains_on_api_data_by_default": "No. Anthropic's Commercial Terms say Anthropic 'may not train models on Customer Content from Services'. The Privacy Center says commercial data, including the API, is not used for training unless you send feedback (such as a thumbs up or down) or join the Development Partner Program. That programme only covers Claude Code traffic on the first-party API. An authorised admin opts in for the whole organisation. Organisations with zero data retention cannot join. Shared data is kept for up to two years.",
+        "default_retention": "API inputs and outputs are deleted from Anthropic's back end within 30 days of receipt or generation. The exceptions are a different agreement (such as zero data retention), longer retention to enforce the Usage Policy, legal requirements, and services you control that keep data longer, such as the Files API. If trust and safety classifiers flag a request, inputs and outputs may be kept for up to 2 years and classification scores for up to 7 years. Feedback submissions are kept for 5 years. From 9 June 2026, 'Covered Models' (the Claude Mythos and Claude Fable families) require 30-day retention, even for organisations that otherwise have zero data retention. Anthropic says no staff can read that retained data by default.",
+        "zero_data_retention": "Yes, by arrangement. You contact Anthropic sales, and the account team enables it for each organisation; it is not self-serve. Under ZDR, prompts and responses are not stored at rest after the response is returned. Flagged content and data under legal hold can still be kept for up to 2 years. ZDR covers the Messages and Token Counting APIs and Claude Code used with API keys. It does not cover the Console and its playground, Managed Agents (except self-hosted), consumer plans, or Covered Models unless Anthropic expressly authorises it. Features marked not eligible (such as the Files API, batches and code execution) are not blocked; using one steps outside ZDR for that data. ZDR organisations cannot call the API straight from a browser, because cross-origin requests are rejected.",
+        "stored_by_features": [
+          "Files API: files are kept until you delete them, or until an optional expiry set at upload (expires_in_seconds, from 1 hour to 90 days). Not ZDR-eligible. Files belong to the workspace, not to an end user: any API key for that workspace can read any file in it. The docs warn never to accept file IDs from end users, and suggest one workspace per tenant.",
+          "Prompt caching: the cache lasts 5 minutes by default and is refreshed each time it is used. A 1-hour cache costs extra. Prompts and outputs are not stored; key/value cache representations and hashes are held in memory for the cache lifetime. ZDR-eligible. Caches are never shared between organisations, and on the Claude API they are also kept separate per workspace.",
+          "Message Batches: kept for 29 days. Not ZDR-eligible.",
+          "Code execution tool (and programmatic tool calling): container data kept for up to 30 days. Not ZDR-eligible.",
+          "Structured outputs and strict tool use: only the JSON schema is cached, for up to 24 hours after last use. The docs warn not to put protected health information in schemas.",
+          "Managed Agents: session transcripts are kept until you delete them. Not ZDR-eligible, except self-hosted Managed Agents.",
+          "Agent Skills and the MCP connector: data kept under the standard retention policy. Not ZDR-eligible."
+        ],
+        "data_residency": "No EU or UK region is documented. The inference_geo setting can be 'global' (the default) or 'us'. US-only inference costs 1.1 times the standard price and needs Claude 4.6 or a later model. Workspace geo, which controls where data is stored at rest, currently only offers 'us'. On Amazon Bedrock and Google Cloud (Google managed), the region comes from the endpoint you choose, and the cloud provider's own controls apply."
+      },
+      "sources": [
+        "https://www.anthropic.com/legal/commercial-terms",
+        "https://privacy.claude.com/en/articles/7996885",
+        "https://support.claude.com/en/articles/11174108-about-the-development-partner-program",
+        "https://privacy.claude.com/en/articles/7996866-how-long-do-you-store-my-organization-s-data",
+        "https://privacy.claude.com/en/articles/15425996",
+        "https://platform.claude.com/docs/en/manage-claude/api-and-data-retention",
+        "https://platform.claude.com/docs/en/build-with-claude/files",
+        "https://platform.claude.com/docs/en/build-with-claude/prompt-caching",
+        "https://platform.claude.com/docs/en/manage-claude/data-residency"
+      ]
+    },
+    {
+      "name": "Google Gemini API (free tier)",
+      "trains_on_your_data": "Yes, and people may read it, except for users in the UK, EEA and Switzerland, who get the paid-tier terms.",
+      "abuse_monitoring": "Google keeps prompts and output for 55 days.",
+      "feature_storage": "The Interactions API stores each interaction for 1 day unless store=false. Uploaded files last 48 hours. Grounding with Google Search stores data for 30 days, and can't be turned off.",
+      "zero_data_retention": "No.",
+      "uk_or_eu_region": "No.",
+      "details": {
+        "trains_on_api_data_by_default": "Yes. Under the Gemini API Additional Terms (effective 23 March 2026), Google uses what you send to unpaid services, and the responses, to provide, improve and develop its products and machine learning technologies. Human reviewers may read, annotate and process inputs and outputs. Google says it first disconnects them from your Google account, API key and Cloud project. The terms say not to submit sensitive, confidential or personal information. Exception: for users in the EEA, Switzerland and the UK, the paid-service data terms apply to all use, including the free tier. The only documented way out elsewhere is to use a Cloud project with an active billing account, which makes the use 'paid'.",
+        "default_retention": "Google keeps prompts, contextual information and output for 55 days to detect and prevent breaches of its Prohibited Use Policy and to meet legal disclosure duties. Authorised staff may review flagged content. The abuse-monitoring page does not say this differs between free and paid use. On the free tier, the Interactions API keeps interactions for 1 day. AI Studio request logs are only available for billing-enabled projects.",
+        "zero_data_retention": "No. Free-tier data may be used to improve Google's products, and Google's zero data retention page only describes paid services.",
+        "stored_by_features": [
+          "Interactions API: stores every interaction by default (store=true). On the free tier, interactions are kept for 1 day. Setting store=false turns storage off.",
+          "Files API: uploaded files are kept for 48 hours and then deleted automatically. The same rule appears to apply to both tiers; the docs do not separate them.",
+          "Grounding with Google Search: prompts, context and output are stored for 30 days. This storage cannot be turned off."
+        ],
+        "data_residency": "None. The terms say data may be stored transiently or cached in any country where Google or its agents have facilities."
+      },
+      "sources": [
+        "https://aistudio.google.com/docs/terms",
+        "https://aistudio.google.com/docs/usage-policies",
+        "https://aistudio.google.com/docs/interactions-overview",
+        "https://aistudio.google.com/docs/logs-policy",
+        "https://aistudio.google.com/docs/files",
+        "https://aistudio.google.com/docs/zdr"
+      ]
+    },
+    {
+      "name": "Google Gemini API (paid tier)",
+      "trains_on_your_data": "No.",
+      "abuse_monitoring": "Google keeps prompts and output for 55 days.",
+      "feature_storage": "The Interactions API stores each interaction for 55 days unless store=false. Uploaded files last 48 hours. Grounding with Google Search stores data for 30 days, and can't be turned off.",
+      "zero_data_retention": "Not on the Developer API: Google points you to Vertex AI.",
+      "uk_or_eu_region": "Not on the Developer API. Vertex AI has an EU region (without the UK) and a London region for some models.",
+      "details": {
+        "trains_on_api_data_by_default": "No. Google says it does not use prompts (including system instructions, cached content and files) or responses from paid services to improve its products. Use counts as paid when it goes through a Cloud project linked to an active billing account. You can choose to share logs with Google by adding them to datasets; shared datasets may be used to improve products and train models. An invite-only 'Contributor Tier' offers cheaper tokens in exchange for permission to use the data.",
+        "default_retention": "Prompts, contextual information and output are kept for 55 days for abuse monitoring, safety and legal disclosures. This data is not used to train models other than those used for policy enforcement. Authorised staff may review flagged content. The terms themselves only say 'a limited period of time'. AI Studio request logs are a separate store. They are on by default for Interactions API calls, and for generateContent calls in projects created on or after 26 October 2026. They are kept for up to 55 days by default, and you can shorten this to 7, 14 or 28 days. Logs saved into datasets have no set expiry.",
+        "zero_data_retention": "No self-serve zero data retention for the Gemini Developer API. Google's page 'Zero data retention in the Gemini Developer API' lists steps that reduce retention: set store=false, do not use explicit caching, delete uploaded files, do not use Live API session resumption, and avoid grounding with Google Search or Google Maps. Abuse-monitoring logging still happens. For guaranteed zero data retention, Google recommends Vertex AI (the Gemini Enterprise Agent Platform). I could not find a documented way to request project-level ZDR on the Developer API.",
+        "stored_by_features": [
+          "Interactions API: stores every interaction by default (store=true). Paid-tier interactions are kept for 55 days; you can shorten this to 7, 14 or 28 days in AI Studio. With store=false, background execution and previous_interaction_id stop working.",
+          "Files API: uploaded files are kept for 48 hours and then deleted automatically. Each file can be up to 2 GB, with 20 GB per project. Files you upload cannot be downloaded again.",
+          "Explicit context caching (beta, generateContent only, not available for Gemini 4 models): cached content is kept for the time to live you set. The default is 1 hour.",
+          "Implicit caching: on by default for Gemini 2.5 and newer models. Data is held in memory, kept separate per project, for up to 24 hours. Google says this does not break zero data retention.",
+          "Grounding with Google Search: prompts, context and output are stored for 30 days and may be used for debugging and testing. This storage cannot be turned off. Grounding with Google Maps also stores data for 30 days.",
+          "Live API session resumption: if a session handle is created, conversation state (text, audio and video) is kept for up to 24 hours."
+        ],
+        "data_residency": "The Gemini Developer API makes no residency commitment: the terms say data may be stored transiently or cached in any country where Google or its agents have facilities. For residency, Google Cloud's Vertex AI (Gemini Enterprise Agent Platform) offers an EU multi-region endpoint covering EU member states only; the UK and Switzerland are excluded. It also offers single-region endpoints, including London (europe-west2) for some models. Global endpoints give no residency guarantee."
+      },
+      "sources": [
+        "https://aistudio.google.com/docs/terms",
+        "https://aistudio.google.com/docs/usage-policies",
+        "https://aistudio.google.com/docs/logs-policy",
+        "https://aistudio.google.com/docs/zdr",
+        "https://aistudio.google.com/docs/interactions-overview",
+        "https://aistudio.google.com/docs/files",
+        "https://aistudio.google.com/docs/caching?generate-content=true",
+        "https://docs.cloud.google.com/gemini-enterprise-agent-platform/resources/data-residency"
+      ]
+    }
+  ]
+}

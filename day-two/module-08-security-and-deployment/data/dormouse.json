@@ -1,0 +1,117 @@
+{
+  "note": "A stand-in for Dormouse's customer database, behind its API. Every person, address, email and phone number is made up: emails use example domains and phone numbers come from Ofcom's range for drama.",
+  "customers": [
+    {
+      "id": "C-1001",
+      "name": "Sam Taylor",
+      "email": "sam.taylor@example.com",
+      "phone": "07700 900123",
+      "home": "H-1042"
+    },
+    {
+      "id": "C-1002",
+      "name": "Jo Taylor",
+      "email": "jo.taylor@example.com",
+      "phone": "07700 900124",
+      "home": "H-1042"
+    },
+    {
+      "id": "C-1003",
+      "name": "Alex Morgan",
+      "email": "alex.morgan@example.net",
+      "phone": "07700 900456",
+      "home": "H-1043"
+    },
+    {
+      "id": "C-1004",
+      "name": "Chris Webb",
+      "email": "chris.webb@example.org",
+      "phone": "07700 900789",
+      "home": null
+    }
+  ],
+  "homes": [
+    {
+      "id": "H-1042",
+      "address": "14 Elm Grove, Leeds LS6 2AB",
+      "owner": "C-1001",
+      "members": ["C-1002"],
+      "former_members": [{ "customer": "C-1004", "removed": "2026-10-01" }],
+      "away": false,
+      "geofencing": true,
+      "devices": [
+        {
+          "id": "D-5531",
+          "kind": "thermostat",
+          "name": "Hall",
+          "serial": "DMC-260417",
+          "firmware": "4.2",
+          "target_temperature": 20
+        },
+        {
+          "id": "D-5532",
+          "kind": "radiator valve",
+          "name": "Bedroom",
+          "serial": "RVB-118230",
+          "firmware": "4.2",
+          "target_temperature": 18
+        }
+      ],
+      "schedule": "Weekdays: 20 degrees from 06:30, 16 degrees from 08:30, 20 degrees from 17:30, 16 degrees from 22:30. Weekends: 20 degrees from 08:00, 16 degrees from 23:00."
+    },
+    {
+      "id": "H-1043",
+      "address": "3 Mill Lane, Leeds LS6 2AD",
+      "owner": "C-1003",
+      "members": [],
+      "former_members": [],
+      "away": true,
+      "away_until": "2026-11-30",
+      "geofencing": false,
+      "devices": [
+        {
+          "id": "D-5547",
+          "kind": "thermostat",
+          "name": "Living room",
+          "serial": "DMB-251093",
+          "firmware": "4.2",
+          "target_temperature": 12
+        }
+      ],
+      "schedule": "Away until 30 November: 12 degrees all day."
+    }
+  ],
+  "orders": [
+    {
+      "id": "O-77120",
+      "customer": "C-1001",
+      "product": "Dormouse Thermostat",
+      "date": "2026-03-14",
+      "price": "£149"
+    },
+    {
+      "id": "O-77121",
+      "customer": "C-1001",
+      "product": "Dormouse Radiator Valve",
+      "date": "2026-03-14",
+      "price": "£49"
+    },
+    {
+      "id": "O-76012",
+      "customer": "C-1003",
+      "product": "Dormouse Thermostat",
+      "date": "2025-08-22",
+      "price": "£149"
+    }
+  ],
+  "contacts": [
+    {
+      "id": "T-3308",
+      "customer": "C-1001",
+      "date": "2026-10-28",
+      "about": "The hall thermostat clicks loudly when the heating comes on.",
+      "outcome": "Told the customer the click is the normal sound of the thermostat switching the boiler."
+    }
+  ],
+  "staff": [{ "id": "S-07", "name": "Priya Patel", "role": "support agent" }]
+}

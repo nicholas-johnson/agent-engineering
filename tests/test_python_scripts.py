@@ -44,6 +44,7 @@ PROVIDERS = find_module("choosing-a-provider")
 EMBEDDINGS = find_module("embeddings-and-vector-search")
 RAG = find_module("rag-and-proprietary-knowledge")
 AI_DEV = find_module("ai-assisted-development")
+SECURITY = find_module("security-and-deployment")
 
 SCRIPTS: tuple[ScriptCase, ...] = (
     # --- Intro to Language Models (all offline) ---
@@ -429,6 +430,62 @@ SCRIPTS: tuple[ScriptCase, ...] = (
         outputs=("check.json",),
         keys=("OPENAI_API_KEY",),
     ),
+    # --- Security and Commercial Deployment ---
+    ScriptCase(
+        f"{SECURITY}/demo/01_ship_it.py",
+        outputs=("01_ship_it.json",),
+        keys=("OPENAI_API_KEY",),
+    ),
+    ScriptCase(
+        f"{SECURITY}/demo/02_access_control.py",
+        outputs=("02_access_control.json",),
+        keys=("OPENAI_API_KEY",),
+    ),
+    ScriptCase(
+        f"{SECURITY}/demo/03_prompt_injection.py",
+        outputs=("03_prompt_injection.json",),
+        keys=("OPENAI_API_KEY",),
+        timeout=600,
+    ),
+    # Declines the injected invitation, then allows the real one.
+    ScriptCase(
+        f"{SECURITY}/demo/04_guardrails.py",
+        stdin="n\ny\n",
+        outputs=("04_audit.jsonl",),
+        keys=("OPENAI_API_KEY",),
+    ),
+    ScriptCase(
+        f"{SECURITY}/demo/05_privacy.py",
+        outputs=("05_log.jsonl",),
+        keys=("OPENAI_API_KEY",),
+    ),
+    # Starts demo/06_dormouse_server.py twice, with Sam's token and Priya's.
+    ScriptCase(
+        f"{SECURITY}/demo/06_two_assistants.py",
+        stdin="y\n",
+        outputs=("06_two_assistants.json", "06_dormouse.json"),
+        keys=("OPENAI_API_KEY",),
+    ),
+    ScriptCase(
+        f"{SECURITY}/playground/secret-keeper/play.py",
+        stdin="\n",
+        outputs=("attacks.json",),
+        keys=("OPENAI_API_KEY",),
+    ),
+    ScriptCase(
+        f"{SECURITY}/playground/injection-lab/play.py",
+        stdin="\n",
+        outputs=("runs.json",),
+        keys=("OPENAI_API_KEY",),
+    ),
+    ScriptCase(f"{SECURITY}/playground/who-sees-what/play.py", outputs=("results.json",)),
+    ScriptCase(f"{SECURITY}/playground/redact/play.py", outputs=("redacted.json",)),
+    ScriptCase(f"{SECURITY}/playground/lethal-trifecta/play.py", outputs=("report.json",)),
+    ScriptCase(
+        f"{SECURITY}/playground/spend-limits/play.py",
+        outputs=("messages.json",),
+        keys=("OPENAI_API_KEY",),
+    ),
     # --- Social clip companion script ---
     ScriptCase("social-scripts/02-how-ai-learns/neuron.py"),
 )
@@ -446,6 +503,8 @@ DEDICATED_SCRIPTS: frozenset[str] = frozenset(
         # Write the committed knowledge base and its FAQ with a model, so the same applies.
         f"{RAG}/data/build_docs.py",
         f"{RAG}/data/build_faq.py",
+        # Copies documents from Module 6: checked against them below instead.
+        f"{SECURITY}/data/build_kb.py",
         # The small codebase the coding agents change: its own unit tests run below.
         *(
             str(path.relative_to(REPO_ROOT))
@@ -705,3 +764,22 @@ def test_ai_dev_data_is_consistent() -> None:
     assert len(feedback) == 30
     assert "14 of 30" in (module / "tickets" / "DOR-231.md").read_text()
 
+
+@pytest.mark.offline
+def test_security_data_is_consistent() -> None:
+    """Module 8's knowledge base is an exact copy of part of Module 6's, and its attacks fit its data."""
+    data = REPO_ROOT / SECURITY / "data"
+    docs = REPO_ROOT / RAG / "data" / "docs"
+    kb = sorted((data / "kb").glob("*.md"))
+    for path in kb:
+        assert path.read_text() == (docs / path.name).read_text(), f"{path.name} differs from Module 6"
+    audiences = [re.search(r"^audience: (\w+)$", p.read_text(), re.MULTILINE)[1] for p in kb]
+    assert (audiences.count("customer"), audiences.count("internal")) == (30, 12)
+    dormouse = json.loads((data / "dormouse.json").read_text())
+    attacks = json.loads((data / "attacks.json").read_text())
+    devices = {d["id"] for home in dormouse["homes"] for d in home["devices"]}
+    assert attacks["injection"]["device"] in devices
+    for name in ("obvious", "helpful", "record"):
+        assert attacks["injection"]["attacker_email"] in attacks["injection"][name]
+    providers = json.loads((data / "providers.json").read_text())
+    assert providers["checked_on"] and all(p["sources"] for p in providers["providers"])

@@ -1,0 +1,47 @@
+{
+  "note": "Earlier conversations in Ask Dormouse's log, already redacted. age_days is how long ago each one happened, so the demo's retention step gives the same result whenever it runs. Everything here is made up.",
+  "records": [
+    {
+      "age_days": 240,
+      "customer": "C-1003",
+      "message": "My heating comes on before the time I set. Why?",
+      "reply": "That's Warm Wake: it starts the heating early so your home reaches the target temperature at the start of each period."
+    },
+    {
+      "age_days": 180,
+      "customer": "C-1001",
+      "message": "How do I invite [NAME] to my home?",
+      "reply": "Open Settings > Household > Invite and enter their email address. The invitation works for seven days."
+    },
+    {
+      "age_days": 120,
+      "customer": "C-1002",
+      "message": "The display shows E-401. What does that mean?",
+      "reply": "E-401 means the backup batteries are low. Replace them with two new AA batteries."
+    },
+    {
+      "age_days": 95,
+      "customer": "C-1003",
+      "message": "Can I turn off geofencing for just my phone?",
+      "reply": "Yes. Each member can stop sharing their location in Settings > Household > Location sharing."
+    },
+    {
+      "age_days": 60,
+      "customer": "C-1001",
+      "message": "Does Dormouse keep my heating history forever?",
+      "reply": "No. Your heating history is kept for two years, and then deleted."
+    },
+    {
+      "age_days": 24,
+      "customer": "C-1001",
+      "message": "The hall thermostat clicks loudly when the heating comes on.",
+      "reply": "The click is the normal sound of the thermostat switching the boiler on and off."
+    },
+    {
+      "age_days": 10,
+      "customer": "C-1003",
+      "message": "How long does a boost last?",
+      "reply": "A boost lasts one hour, unless you cancel it."
+    }
+  ]
+}

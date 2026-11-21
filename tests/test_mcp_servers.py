@@ -15,6 +15,8 @@ from tests.conftest import REPO_ROOT, check_requirements, find_module
 
 TOOLS = find_module("tools")
 EMBEDDINGS = find_module("embeddings-and-vector-search")
+SECURITY = find_module("security-and-deployment")
+DORMOUSE_SERVER = f"{SECURITY}/demo/06_dormouse_server.py"
 
 SERVER_TOOLS: dict[str, set[str]] = {
     f"{TOOLS}/demo/03_maths_server.py": {"square_root"},
@@ -31,7 +33,8 @@ SERVER_TOOLS: dict[str, set[str]] = {
     f"{EMBEDDINGS}/demo/05_search_server.py": {"find_test_scripts"},
 }
 
-COVERED_SERVERS: frozenset[str] = frozenset(SERVER_TOOLS)
+# Module 8's server needs the signed-in person's token, so it has its own test below.
+COVERED_SERVERS: frozenset[str] = frozenset(SERVER_TOOLS) | {DORMOUSE_SERVER}
 
 
 def _server_params(rel_path: str) -> StdioServerParameters:
@@ -112,5 +115,29 @@ def test_weather_server_live_lookup(pytestconfig: pytest.Config) -> None:
             )
             weather = json.loads(weather_result.content[0].text)
             assert "current" in weather and "daily" in weather
+
+    asyncio.run(check())
+
+
+@pytest.mark.offline
+def test_dormouse_server_gives_each_role_its_own_tools() -> None:
+    """Sam's token gets the customer's tools and only Sam's home; Priya's gets the staff tools."""
+
+    def params(token: str) -> StdioServerParameters:
+        return StdioServerParameters(
+            command=sys.executable, args=[str(REPO_ROOT / DORMOUSE_SERVER)], env={"DORMOUSE_TOKEN": token}
+        )
+
+    async def check() -> None:
+        async with Client(params("sam-7f3a")) as sam:
+            names = {tool.name for tool in (await sam.list_tools()).tools}
+            assert names == {"search_docs", "get_my_home", "contact_support"}
+            home = json.loads((await sam.call_tool("get_my_home", {})).content[0].text)
+            assert home["id"] == "H-1042"
+        async with Client(params("priya-91c2")) as priya:
+            names = {tool.name for tool in (await priya.list_tools()).tools}
+            assert names == {"search_docs", "get_customer", "offer_replacement"}
+            customer = json.loads((await priya.call_tool("get_customer", {"customer_id": "C-1001"})).content[0].text)
+            assert customer["home"]["id"] == "H-1042"
 
     asyncio.run(check())
