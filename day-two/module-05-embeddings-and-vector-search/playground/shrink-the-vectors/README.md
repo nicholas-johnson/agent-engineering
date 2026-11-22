@@ -25,7 +25,7 @@ The embeddings API takes a `dimensions` argument:
 client.embeddings.create(model=EMBEDDING_MODEL, input=batch, dimensions=256)
 ```
 
-`text-embedding-3-small` is made so that a vector can be cut short and still work: the first numbers carry the most meaning, and later ones add detail. So the API can keep the first 256, rescale them so the vector has length 1 again, and hand those back. For each size, the script embeds all 275 documents whole, as demos 5 and 6 do, and searches the whole library for each of the 20 questions in `data/questions.json`. It counts how often a right document comes first and how often one is in the top five. Storage assumes 4 bytes per number, the 32-bit floats that ChromaDB stores.
+`text-embedding-3-small` is made so that a vector can be cut short and still work: the first numbers carry the most meaning, and later ones add detail. So the API can keep the first 256, rescale them so the vector has length 1 again, and hand those back. For each size, the script embeds all 275 documents whole, as demo 6 does, and searches the whole library for each of the 20 questions in `data/questions.json`. It counts how often a right document comes first and how often one is in the top five. Storage assumes 4 bytes per number, the 32-bit floats that ChromaDB stores.
 
 ```text
 The 20 questions, searched at each size:
@@ -39,7 +39,7 @@ The 20 questions, searched at each size:
 
 ## Things to notice
 
-- **A third of the size, the same search.** At 512 numbers the counts don't change at all: 15 first and 19 in the top five, as at full length. The full-length row is demo 5's search over all the documentation, run for twenty questions instead of one.
+- **A third of the size, the same search.** At 512 numbers the counts don't change at all: 15 first and 19 in the top five, as at full length. The full-length row is demo 6's search over all the documentation, run for twenty questions instead of one.
 - **Even 64 numbers do better than you might expect.** A right document is still in the top five for 15 of 20 questions. The documents are about quite different things (boost, returns, Wi-Fi, warranties), so even a rough vector can probably tell many of them apart.
 - **Shrinking reshuffles; it doesn't only lose.** In `output/results.json`, the module's question goes 1st, 2nd, 3rd and back to 1st at 64 numbers. "Can I ask Alexa to turn the heating up?" goes 8th, 3rd, 4th, then 1st: better at 64 numbers than at full length. Meanwhile "It thinks we're out when we're sitting at home" falls from 1st to 46th, and the new broadband router question from 1st to 20th. Twenty questions is a small test, and a single question moving is as much luck as signal.
 - **Size only matters at scale.** For this library the full vectors take under 2 MB (275 × 6,144 bytes). A million would take 6 GB, and ChromaDB needs its whole index in memory. That's when 1 GB starts to look attractive.
@@ -71,5 +71,5 @@ For discussion. There are no right answers.
 
 Optional extensions and interesting things to look at.
 
-1. **How much memory a vector database wants.** ChromaDB's [Single-Node Performance](https://docs.trychroma.com/guides/deploy/performance) guide says the index must sit in RAM, and gives a rule of thumb for how many 1,024-number vectors fit in a given amount of memory. Work out what it means for 1,536 numbers and for 256. Then build demo 6's database a second time with `dimensions=256` vectors, and see which of the files in its folder shrink.
+1. **How much memory a vector database wants.** ChromaDB's [Single-Node Performance](https://docs.trychroma.com/guides/deploy/performance) guide says the index must sit in RAM, and gives a rule of thumb for how many 1,024-number vectors fit in a given amount of memory. Work out what it means for 1,536 numbers and for 256. Then store the 275 documents in ChromaDB, as Module 6 stores its chunks, once at full length and once with `dimensions=256` vectors, and see which of the files in its folder shrink.
 2. **Eight bits instead of thirty-two.** Hugging Face's post [Binary and Scalar Embedding Quantization for Significantly Faster & Cheaper Retrieval](https://huggingface.co/blog/embedding-quantization) (Shakir, Aarsen and Lee, 2024) turns each number into a whole number from -128 to 127, using that number's smallest and largest values in a sample of vectors. That is a quarter of the size, without cutting any numbers off. Try it on the 275 documents, with the post's trick of fetching a few more results than you need and re-scoring them with the full-precision question vector, and compare it with 512 numbers at full precision.

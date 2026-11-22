@@ -3,15 +3,15 @@
 #                         or: source ../../.venv/bin/activate && python playground/chunk-headings/play.py
 #
 # To play: add a way of your own to WAYS (the title alone, or the document's type and audience too).
-# Vectors are kept in output/chunks.db, one table per way, so reruns are quick.
+# Vectors are kept in a ChromaDB store in output/chroma, one collection per way, so reruns are quick.
 
 import hashlib
 import json
 import re
-import sqlite3
 from pathlib import Path
 
-import sqlite_vec
+import chromadb
+from chromadb.config import Settings
 from dotenv import load_dotenv
 from openai import OpenAI
 
@@ -22,7 +22,7 @@ DATA = HERE.parent.parent / "data"
 OUTPUT = HERE / "output"
 OUTPUT.mkdir(exist_ok=True)
 
-DATABASE = OUTPUT / "chunks.db"
+DATABASE = OUTPUT / "chroma"
 EMBEDDING_MODEL = "text-embedding-3-small"
 BATCH = 100
 TOP = 5  # a question is a hit if a chunk with its facts is in the top 5
@@ -87,45 +87,36 @@ def embed(texts):
     return vectors
 
 
-def open_database():
-    db = sqlite3.connect(DATABASE)
-    db.enable_load_extension(True)
-    sqlite_vec.load(db)
-    db.enable_load_extension(False)
-    return db
+def open_collection(database, way):
+    # One collection per way, compared by cosine similarity, with our own embeddings.
+    name = "chunks_" + slug(way).replace("-", "_")
+    return database.get_or_create_collection(name, configuration={"hnsw": {"space": "cosine"}}, embedding_function=None)
 
 
-def table_for(way):
-    return "chunks_" + slug(way).replace("-", "_")
-
-
-def update(db, table, chunks, make_text):
+def update(collection, chunks, make_text):
     # Embed make_text(chunk), but store the whole chunk, since that is what the model would read.
-    db.execute(
-        f"create virtual table if not exists {table} using vec0("
-        "id text primary key, embedding float[1536] distance_metric=cosine, +text text, +checksum text)"
-    )
-    stored = dict(db.execute(f"select id, checksum from {table}"))
-    current = {c["id"]: hashlib.sha256(make_text(c).encode()).hexdigest() for c in chunks}
-    changed = [c for c in chunks if stored.get(c["id"]) != current[c["id"]]]
-    for id in (set(stored) - set(current)) | {c["id"] for c in changed}:
-        db.execute(f"delete from {table} where id = ?", (id,))
-    for chunk, vector in zip(changed, embed([make_text(c) for c in changed])):
-        db.execute(
-            f"insert into {table} (id, embedding, text, checksum) values (?, ?, ?, ?)",
-            (chunk["id"], sqlite_vec.serialize_float32(vector), chunk["text"], current[chunk["id"]]),
+    stored = collection.get(include=["metadatas"])
+    stored = dict(zip(stored["ids"], (m["checksum"] for m in stored["metadatas"])))
+    checksums = {c["id"]: hashlib.sha256(make_text(c).encode()).hexdigest() for c in chunks}
+    changed = [c for c in chunks if stored.get(c["id"]) != checksums[c["id"]]]
+    removed = set(stored) - set(checksums)
+
+    if removed:
+        collection.delete(ids=list(removed))
+    if changed:
+        collection.upsert(
+            ids=[c["id"] for c in changed],
+            embeddings=embed([make_text(c) for c in changed]),
+            documents=[c["text"] for c in changed],
+            metadatas=[{"checksum": checksums[c["id"]]} for c in changed],
         )
-    db.commit()
 
 
-def rank_of_right_chunk(db, table, vector, facts):
+def rank_of_right_chunk(collection, vector, facts):
     # 1 + how many chunks come before the first one that holds the facts.
-    rows = db.execute(
-        f"select id, text from {table} where embedding match ? and k = ? order by distance",
-        (sqlite_vec.serialize_float32(vector), DEPTH),
-    )
+    results = collection.query(query_embeddings=[vector], n_results=DEPTH, include=["documents"])
     ids = []
-    for rank, (id, text) in enumerate(rows, 1):
+    for rank, (id, text) in enumerate(zip(results["ids"][0], results["documents"][0]), 1):
         ids.append(id)
         if contains_facts(text, facts):
             return rank, ids[:TOP]
@@ -148,9 +139,10 @@ def row(label, values):
 
 documents = load_documents(DATA / "docs")
 chunks = [chunk for document in documents for chunk in split_into_chunks(document)]
-db = open_database()
+database = chromadb.PersistentClient(path=str(DATABASE), settings=Settings(anonymized_telemetry=False))
+collections = {way: open_collection(database, way) for way in WAYS}
 for way, make_text in WAYS.items():
-    update(db, table_for(way), chunks, make_text)
+    update(collections[way], chunks, make_text)
 
 questions = [q for q in json.loads((DATA / "questions.json").read_text()) if q["kind"] in ("everyday", "error code")]
 vectors = embed([q["question"] for q in questions])
@@ -159,7 +151,7 @@ results = []
 for q, vector in zip(questions, vectors):
     ways = {}
     for way in WAYS:
-        rank, top = rank_of_right_chunk(db, table_for(way), vector, q["facts"])
+        rank, top = rank_of_right_chunk(collections[way], vector, q["facts"])
         ways[way] = {"rank": rank, "top": top}
     results.append({"id": q["id"], "question": q["question"], "facts": q["facts"], "ways": ways})
 

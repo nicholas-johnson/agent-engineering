@@ -15,7 +15,7 @@ source ../../.venv/bin/activate
 python playground/chunk-sizes/play.py
 ```
 
-Needs `OPENAI_API_KEY` in `.env`. The first run embeds the knowledge base four times, about 6,500 chunks, and keeps each way in its own table in `playground/chunk-sizes/output/chunks.db`. That took a long time on the day I ran it (13 minutes, with the embeddings API slow), so start it and go and do something else. After that, a run only embeds the 24 questions and counts tokens. The top five for each question and each way are written to `playground/chunk-sizes/output/results.json`.
+Needs `OPENAI_API_KEY` in `.env`. The first run embeds the knowledge base four times, about 6,500 chunks, and keeps each way in its own ChromaDB collection in `playground/chunk-sizes/output/chroma`. That took a long time on the day I ran it (13 minutes, with the embeddings API slow), so start it and go and do something else. After that, a run only embeds the 24 questions and counts tokens. The top five for each question and each way are written to `playground/chunk-sizes/output/results.json`.
 
 ---
 

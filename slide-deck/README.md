@@ -107,6 +107,70 @@ nudge…): see the Networks section of the [clip-deck README](../clip-deck/READM
 step carries on from the one before. The drawing is 1300×700 by default; `stage` and `box` change
 that.
 
+### Word Line Slide (words on a line, one number each)
+
+Puts words on a line by their numbers, the lowest at the left, and steps through them like the
+network slide: the right arrow plays the next step, the dots jump to one, and the PDF export shows
+the last step. Until a step says `placed: true`, the words sit in alphabetical order, evenly spaced;
+then they glide to their numbers. `highlight` lights up some words and fades the rest. Each step
+carries on from the one before. Labels go above and below the line so they don't overlap.
+
+```js
+{
+  type: 'word-line',
+  content: {
+    title: 'The counts on a line',
+    words: { sunrise: -0.43, warm: -0.35, heat: -0.12, password: 0.25 },
+    steps: [
+      { caption: 'In alphabetical order' },
+      { caption: '**One number each**', placed: true },
+      { caption: 'Together', highlight: ['sunrise', 'warm'] },
+    ],
+    note: 'Optional small print',
+  },
+}
+```
+
+### Word Map Slide (words on a map, two numbers each)
+
+Draws words as dots around a middle point, at their two numbers, and steps through them like the
+network slide. Each step carries on from the one before:
+
+- `arrows: true` draws a line from the middle to every word.
+- `circle: true` draws a circle and pushes every word out to it, along its own direction.
+- `grouped: true` colours the words by `groups` (1, 2, 3…).
+- `highlight` lights up some words and fades the rest.
+- `angle: ['warm', 'wake']` draws the angle between two words, with its size in degrees.
+- `sentences: ['warm wake']` draws each named sentence from `content.sentences`: its words' arrows,
+  added on one after another, tip to tail, then one arrow for the sum. Use it without `circle`,
+  since the sum needs the words' real lengths. `angle` can name two drawn sentences.
+- `average: true` shrinks each sentence's arrow to the average of its words: the same direction.
+
+The map is scaled so the farthest word sits well inside the circle. Labels go outside their dots,
+away from the middle, and move aside when they would overlap.
+
+```js
+{
+  type: 'word-map',
+  content: {
+    title: 'The map',
+    words: { warm: [-0.351, 0.128], wake: [-0.392, 0.159], password: [0.25, 0.126] },
+    groups: { warm: 1, wake: 1, password: 2 },
+    sentences: { 'warm wake': ['warm', 'wake'] },
+    steps: [
+      { caption: 'Two numbers each' },
+      { caption: 'Arrows from the middle', arrows: true },
+      { caption: 'Add up two words', sentences: ['warm wake'] },
+      { caption: 'The average points the same way', average: true },
+      { caption: 'Only the direction counts', circle: true, sentences: [] },
+      { caption: 'Groups', grouped: true },
+      { caption: '2° apart', angle: ['warm', 'wake'], highlight: ['warm', 'wake'] },
+    ],
+    note: 'Optional small print',
+  },
+}
+```
+
 ### Comparison Slide (with bullet points)
 
 ```js

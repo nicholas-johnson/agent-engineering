@@ -3,15 +3,15 @@
 #                         or: source ../../.venv/bin/activate && python playground/chunk-sizes/play.py
 #
 # To play: change SIZES or OVERLAP, or TOP, and rerun.
-# Each way of chunking is kept in its own table in output/chunks.db, so a rerun only embeds what's new.
+# Each way of chunking is kept in its own ChromaDB collection in output/chroma, so a rerun only embeds what's new.
 
 import hashlib
 import json
 import re
-import sqlite3
 from pathlib import Path
 
-import sqlite_vec
+import chromadb
+from chromadb.config import Settings
 from dotenv import load_dotenv
 from openai import OpenAI
 
@@ -22,10 +22,11 @@ DATA = HERE.parent.parent / "data"
 OUTPUT = HERE / "output"
 OUTPUT.mkdir(exist_ok=True)
 
-DATABASE = OUTPUT / "chunks.db"
+DATABASE = OUTPUT / "chroma"
 MODEL = "gpt-6-luna"
 EMBEDDING_MODEL = "text-embedding-3-small"
 BATCH = 100
+UPSERT = 5000  # Chroma stores at most about 5,000 chunks in one call
 TOP = 5
 SIZES = [50, 150, 400]  # words in each fixed window
 OVERLAP = 0  # words each window repeats from the one before it (try 25)
@@ -93,43 +94,36 @@ def embed(texts):
     return vectors
 
 
-def open_database():
-    db = sqlite3.connect(DATABASE)
-    db.enable_load_extension(True)
-    sqlite_vec.load(db)
-    db.enable_load_extension(False)
-    return db
+def open_collection(database, way):
+    # One collection per way of chunking, compared by cosine similarity, with our own embeddings.
+    name = "chunks_" + slug(way).replace("-", "_")
+    return database.get_or_create_collection(name, configuration={"hnsw": {"space": "cosine"}}, embedding_function=None)
 
 
-def table_for(way):
-    return "chunks_" + slug(way).replace("-", "_")
+def update(collection, chunks):
+    # Embed new and changed chunks; remove the ones that have gone.
+    stored = collection.get(include=["metadatas"])
+    stored = dict(zip(stored["ids"], (m["checksum"] for m in stored["metadatas"])))
+    checksums = {c["id"]: hashlib.sha256(c["text"].encode()).hexdigest() for c in chunks}
+    changed = [c for c in chunks if stored.get(c["id"]) != checksums[c["id"]]]
+    removed = set(stored) - set(checksums)
 
-
-def update(db, table, chunks):
-    # One table per way of chunking. Embed new and changed chunks; remove the ones that have gone.
-    db.execute(
-        f"create virtual table if not exists {table} using vec0("
-        "id text primary key, embedding float[1536] distance_metric=cosine, +text text, +checksum text)"
-    )
-    stored = dict(db.execute(f"select id, checksum from {table}"))
-    current = {c["id"]: hashlib.sha256(c["text"].encode()).hexdigest() for c in chunks}
-    changed = [c for c in chunks if stored.get(c["id"]) != current[c["id"]]]
-    for id in (set(stored) - set(current)) | {c["id"] for c in changed}:
-        db.execute(f"delete from {table} where id = ?", (id,))
-    for chunk, vector in zip(changed, embed([c["text"] for c in changed])):
-        db.execute(
-            f"insert into {table} (id, embedding, text, checksum) values (?, ?, ?, ?)",
-            (chunk["id"], sqlite_vec.serialize_float32(vector), chunk["text"], current[chunk["id"]]),
+    if removed:
+        collection.delete(ids=list(removed))
+    vectors = embed([c["text"] for c in changed])
+    for start in range(0, len(changed), UPSERT):
+        batch = changed[start : start + UPSERT]
+        collection.upsert(
+            ids=[c["id"] for c in batch],
+            embeddings=vectors[start : start + UPSERT],
+            documents=[c["text"] for c in batch],
+            metadatas=[{"checksum": checksums[c["id"]]} for c in batch],
         )
-    db.commit()
 
 
-def search(db, table, vector):
-    rows = db.execute(
-        f"select id, text from {table} where embedding match ? and k = ? order by distance",
-        (sqlite_vec.serialize_float32(vector), TOP),
-    )
-    return [{"id": id, "text": text} for id, text in rows]
+def search(collection, vector):
+    results = collection.query(query_embeddings=[vector], n_results=TOP, include=["documents"])
+    return [{"id": id, "text": text} for id, text in zip(results["ids"][0], results["documents"][0])]
 
 
 def prompt(question, found):
@@ -157,9 +151,10 @@ ways = {"headings": [c for d in documents for c in split_into_chunks(d)]}
 for size in SIZES:
     ways[f"{size} words"] = [c for d in documents for c in split_into_windows(d, size)]
 
-db = open_database()
+database = chromadb.PersistentClient(path=str(DATABASE), settings=Settings(anonymized_telemetry=False))
+collections = {way: open_collection(database, way) for way in ways}
 for way, chunks in ways.items():
-    update(db, table_for(way), chunks)
+    update(collections[way], chunks)
 
 questions = [q for q in json.loads((DATA / "questions.json").read_text()) if q["kind"] in ("everyday", "error code")]
 vectors = embed([q["question"] for q in questions])
@@ -169,7 +164,7 @@ for n, (way, chunks) in enumerate(ways.items(), 1):
     print(f"  Searching and counting tokens: {n}/{len(ways)}", end="\r")
     checks, prompts = [], []
     for q, vector in zip(questions, vectors):
-        top = search(db, table_for(way), vector)
+        top = search(collections[way], vector)
         found = any(contains_facts(c["text"], q["facts"]) for c in top)
         checks.append({"id": q["id"], "found": found, "top": [c["id"] for c in top]})
         prompts.append(prompt(q["question"], top))

@@ -15,7 +15,7 @@ source ../../.venv/bin/activate
 python playground/how-many-chunks/play.py
 ```
 
-Needs `OPENAI_API_KEY` in `.env`. The first run embeds all 1,823 chunks and keeps them in `playground/how-many-chunks/output/knowledge.db`. That took 13 minutes when I ran it, with the embeddings API slow and other scripts embedding at the same time; on a quiet day it's a couple of minutes. After that, a run embeds the 24 questions and counts tokens. Each row of the table, and the rank of each question's first right chunk, are written to `playground/how-many-chunks/output/results.json`.
+Needs `OPENAI_API_KEY` in `.env`. The first run embeds all 1,823 chunks and keeps them in a ChromaDB store in `playground/how-many-chunks/output/chroma`. That took 13 minutes when I ran it, with the embeddings API slow and other scripts embedding at the same time; on a quiet day it's a couple of minutes. After that, a run embeds the 24 questions and counts tokens. Each row of the table, and the rank of each question's first right chunk, are written to `playground/how-many-chunks/output/results.json`.
 
 ---
 
@@ -27,7 +27,7 @@ To save 480 calls, the script counts the instructions and questions once, then a
    TOP  Facts in the top TOP, of 24  Tokens in   Per question
      1   16  ################               156      $0.000016
      2   18  ##################             272      $0.000027
-     3   21  #####################          387      $0.000039
+     3   21  #####################          388      $0.000039
      4   22  ######################         496      $0.000050
      5   22  ######################         612      $0.000061
      6   23  #######################        729      $0.000073
@@ -35,16 +35,16 @@ To save 480 calls, the script counts the instructions and questions once, then a
      8   23  #######################        943      $0.000094
      9   23  #######################      1,066      $0.000107
     10   24  ########################     1,182      $0.000118
-    11   24  ########################     1,304      $0.000130
-    12   24  ########################     1,415      $0.000141
+    11   24  ########################     1,303      $0.000130
+    12   24  ########################     1,415      $0.000142
     13   24  ########################     1,539      $0.000154
-    14   24  ########################     1,651      $0.000165
-    15   24  ########################     1,760      $0.000176
+    14   24  ########################     1,655      $0.000165
+    15   24  ########################     1,765      $0.000177
     16   24  ########################     1,883      $0.000188
     17   24  ########################     2,003      $0.000200
     18   24  ########################     2,114      $0.000211
     19   24  ########################     2,233      $0.000223
-    20   24  ########################     2,362      $0.000236
+    20   24  ########################     2,359      $0.000236
 
   Embedding each question costs $0.00000026, whatever TOP is.
 ```

@@ -50,6 +50,7 @@ Usage:
   pnpm slides:pdf 10           one module, by number
   pnpm slides:pdf 03 langchain several modules, concatenated when more than one
   pnpm slides:pdf day-one-closing   a day's closing deck
+  pnpm slides:pdf day-two-recap     a day's opening recap deck
 `);
 }
 
@@ -63,23 +64,30 @@ async function moduleDirs() {
       const dir = path.join(dayDir, entry.name);
       if (entry.name.startsWith('module-')) {
         dirs.push({ name: entry.name, day: day.name, dir });
-      } else if (entry.name === 'closing') {
-        dirs.push({ name: `${day.name}-closing`, day: day.name, closing: true, dir });
+      } else if (entry.name === 'recap' || entry.name === 'closing') {
+        dirs.push({
+          name: `${day.name}-${entry.name}`,
+          day: day.name,
+          kind: entry.name,
+          dir,
+        });
       }
     }
   }
   return dirs;
 }
 
-// A day's closing deck sorts straight after that day's last module.
+// A day's recap deck sorts straight before that day's first module, and its
+// closing deck straight after its last ("module-05" sorts before "module-05-...").
 function sortKey(mod, modules) {
-  if (!mod.closing) return mod.name;
-  const last = modules
-    .filter((other) => other.day === mod.day && !other.closing)
+  if (!mod.kind) return mod.name;
+  const names = modules
+    .filter((other) => other.day === mod.day && !other.kind)
     .map((other) => other.name)
-    .sort()
-    .at(-1);
-  return `${last ?? mod.name}~`;
+    .sort();
+  if (names.length === 0) return mod.name;
+  if (mod.kind === 'recap') return names[0].match(/^module-\d+/)[0];
+  return `${names.at(-1)}~`;
 }
 
 async function listModules() {

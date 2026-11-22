@@ -1,6 +1,6 @@
 # Other languages
 
-Not every customer writes in English. You'll ask the same four questions in six languages and search the English documentation, once by keywords (BM25, as in demo 1) and once by vectors (as in demo 5), and see which search still finds the right document.
+Not every customer writes in English. You'll ask the same four questions in six languages and search the English documentation, once by keywords (BM25, as in demo 1) and once by vectors (as in demo 6), and see which search still finds the right document.
 
 From the module folder (`day-two/module-05-embeddings-and-vector-search`):
 

@@ -12,5 +12,7 @@ export { CardsSlide } from "./CardsSlide";
 export { DescriptionSlide } from "./DescriptionSlide";
 export { NetworkSlide } from "./NetworkSlide";
 export { ToolLoopSlide } from "./ToolLoopSlide";
+export { WordLineSlide } from "./WordLineSlide";
+export { WordMapSlide } from "./WordMapSlide";
 export { SlideIcon, availableIcons } from "./SlideIcon";
 export { InlineMarkdown, BlockMarkdown } from "./InlineMarkdown";

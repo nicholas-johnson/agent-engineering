@@ -23,6 +23,8 @@ import {
   DescriptionSlide,
   NetworkSlide,
   ToolLoopSlide,
+  WordLineSlide,
+  WordMapSlide,
 } from "./components";
 
 // Keep in sync with scripts/export-slides-pdf.mjs (SLIDE_WIDTH / SLIDE_HEIGHT).
@@ -99,6 +101,10 @@ function SlideBody({ slide }) {
       return <NetworkSlide content={slide.content} />;
     case "tool-loop":
       return <ToolLoopSlide content={slide.content} />;
+    case "word-line":
+      return <WordLineSlide content={slide.content} />;
+    case "word-map":
+      return <WordMapSlide content={slide.content} />;
     default:
       return <StandardSlide content={slide.content} />;
   }

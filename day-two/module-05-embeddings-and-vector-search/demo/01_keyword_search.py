@@ -40,24 +40,29 @@ def words(text):
     return re.findall(r"[a-z0-9]+", text.lower())
 
 
-def bm25(question, documents):
-    texts = [words(d["text"]) for d in documents]
-    average_length = sum(len(t) for t in texts) / len(texts)
-    # How many documents each word appears in: rare words count for more.
-    appears_in = Counter(w for t in texts for w in set(t))
+def build_index(documents):
+    # Ahead of time: each word → {document number: how many times}, and each document's length.
+    index = {}
+    lengths = []
+    for number, document in enumerate(documents):
+        text = words(document["text"])
+        lengths.append(len(text))
+        for word, count in Counter(text).items():
+            index.setdefault(word, {})[number] = count
+    return index, lengths
 
-    results = []
-    for document, text in zip(documents, texts):
-        counts = Counter(text)
-        score = 0
-        for word in set(words(question)):
-            if word not in counts:
-                continue
-            rarity = math.log(1 + (len(texts) - appears_in[word] + 0.5) / (appears_in[word] + 0.5))
-            count = counts[word]
-            score += rarity * count * (K1 + 1) / (count + K1 * (1 - B + B * len(text) / average_length))
-        results.append((score, document))
-    return sorted(results, key=lambda r: r[0], reverse=True)
+
+def search(question, documents, index, lengths):
+    # For each question: score only the documents listed under the question's words.
+    average_length = sum(lengths) / len(lengths)
+    scores = Counter()
+    for word in set(words(question)):
+        entry = index.get(word, {})
+        # len(entry) is how many documents contain the word: rare words count for more.
+        rarity = math.log(1 + (len(documents) - len(entry) + 0.5) / (len(entry) + 0.5))
+        for number, count in entry.items():
+            scores[number] += rarity * count * (K1 + 1) / (count + K1 * (1 - B + B * lengths[number] / average_length))
+    return [(score, documents[number]) for number, score in scores.most_common()]
 
 
 documents = read_documents()
@@ -65,7 +70,8 @@ libraries = {"The user guide": user_guide_sections(documents), "All the document
 
 found = {}
 for name, library in libraries.items():
-    results = bm25(QUESTION, library)
+    index, lengths = build_index(library)
+    results = search(QUESTION, library, index, lengths)
     print(f"\n=== {name}: {len(library):,} {'sections' if library[0]['id'] == 'user-guide' else 'documents'} ===")
     print(f"Q: {QUESTION}")
     for score, document in results[:3]:
@@ -73,3 +79,10 @@ for name, library in libraries.items():
     found[name] = [{"score": round(s, 3), "id": d["id"], "title": d["title"]} for s, d in results]
 
 (OUTPUT / "01_keyword_search.json").write_text(json.dumps({"question": QUESTION, "found": found}, indent=2))
+
+# The last index built is the one for all 275 documents. Save it, most mentions first.
+readable = {
+    word: {documents[number]["id"]: count for number, count in sorted(entry.items(), key=lambda e: -e[1])}
+    for word, entry in sorted(index.items())
+}
+(OUTPUT / "01_index.json").write_text(json.dumps(readable, indent=2))

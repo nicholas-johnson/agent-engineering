@@ -4,7 +4,7 @@ Course materials for _Agent Engineering_, a hands-on Python course on building A
 
 ## Repository
 
-- **Python**: managed with uv (`pyproject.toml`). Dependencies so far: `openai` and `python-dotenv` (Module 2), `mcp` (Module 3; version 2, where the server class is `MCPServer` from `mcp.server.mcpserver`), `anthropic` and `google-genai` (Module 4), `chromadb` (Module 5), `sqlite-vec` (Modules 6 and 8). An optional `local` extra adds `transformers` and PyTorch for self-hosting (`uv sync --extra local`). Run scripts with `uv run python ...`; the system `python3` is too old.
+- **Python**: managed with uv (`pyproject.toml`). Dependencies so far: `openai` and `python-dotenv` (Module 2), `mcp` (Module 3; version 2, where the server class is `MCPServer` from `mcp.server.mcpserver`), `anthropic` and `google-genai` (Module 4), `chromadb` (Modules 6 and 8). An optional `local` extra adds `transformers` and PyTorch for self-hosting (`uv sync --extra local`). Run scripts with `uv run python ...`; the system `python3` is too old.
 - **API keys**: read from `.env` at the repo root (gitignored; copy `.env.example`). `OPENAI_API_KEY` from Module 2; Module 4 also uses `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, `XAI_API_KEY` and `OPENROUTER_API_KEY` when present.
 - **Local models**: Module 4 uses Ollama with `qwen3:1.7b` (and `qwen3:0.6b` in a playground), and `Qwen/Qwen3-1.7B` from Hugging Face.
 - **Slides**: a pnpm workspace. `slide-deck/` is the shared React slide components; each module's `slides/` is a Vite app that uses it.

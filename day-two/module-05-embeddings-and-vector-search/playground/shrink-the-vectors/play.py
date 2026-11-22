@@ -66,7 +66,7 @@ def cosine_similarity(a, b):
 
 
 def rank_of_right_document(question, question_vector, vectors):
-    # Search every document, as demo 5 does. 1 + how many documents beat the best right one.
+    # Search every document, as demo 6 does. 1 + how many documents beat the best right one.
     similarities = {d["id"]: cosine_similarity(question_vector, v) for d, v in zip(documents, vectors)}
     best = max(similarities[id] for id in question["expected"])
     return 1 + sum(similarity > best for similarity in similarities.values())

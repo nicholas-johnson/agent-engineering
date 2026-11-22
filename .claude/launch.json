@@ -1,0 +1,98 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "module-05-document-search-slides",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "--dir",
+        "/Users/nicholasjohnson/code/agent-engineering-module-05-subtitle",
+        "--filter",
+        "@agent-engineering/module-05-slides",
+        "dev",
+        "--port",
+        "5205",
+        "--strictPort"
+      ],
+      "port": 5205
+    },
+    {
+      "name": "module-05-slides",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "--filter",
+        "@agent-engineering/module-05-slides",
+        "dev",
+        "--port",
+        "5195",
+        "--strictPort"
+      ],
+      "port": 5195
+    },
+    {
+      "name": "module-06-slides",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "--filter",
+        "@agent-engineering/module-06-slides",
+        "dev",
+        "--port",
+        "5196",
+        "--strictPort"
+      ],
+      "port": 5196
+    },
+    {
+      "name": "module-07-slides",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "--filter",
+        "@agent-engineering/module-07-slides",
+        "dev",
+        "--port",
+        "5197",
+        "--strictPort"
+      ],
+      "port": 5197
+    },
+    {
+      "name": "module-08-slides",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "--filter",
+        "@agent-engineering/module-08-slides",
+        "dev",
+        "--port",
+        "5198",
+        "--strictPort"
+      ],
+      "port": 5198
+    },
+    {
+      "name": "day-two-recap-slides",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "--filter",
+        "@agent-engineering/day-two-recap-slides",
+        "dev",
+        "--port",
+        "5199",
+        "--strictPort"
+      ],
+      "port": 5199
+    },
+    {
+      "name": "day-two-closing-slides",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "--filter",
+        "@agent-engineering/day-two-closing-slides",
+        "dev",
+        "--port",
+        "5200",
+        "--strictPort"
+      ],
+      "port": 5200
+    }
+  ]
+}

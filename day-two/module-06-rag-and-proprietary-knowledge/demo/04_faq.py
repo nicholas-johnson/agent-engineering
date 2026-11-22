@@ -3,10 +3,10 @@
 import hashlib
 import json
 import re
-import sqlite3
 from pathlib import Path
 
-import sqlite_vec
+import chromadb
+from chromadb.config import Settings
 from dotenv import load_dotenv
 from openai import OpenAI
 
@@ -17,11 +17,12 @@ DATA = HERE.parent / "data"
 OUTPUT = HERE / "output"
 OUTPUT.mkdir(exist_ok=True)
 
-DATABASE = OUTPUT / "knowledge.db"
+DATABASE = OUTPUT / "chroma"
 MODEL = "gpt-6-luna"
 EMBEDDING_MODEL = "text-embedding-3-small"
 BATCH = 100
 TOP = 5
+STORE_BATCH = 5000  # ChromaDB takes at most 5,461 items in one call
 INSTRUCTIONS = "You are the support assistant for Dormouse, a smart thermostat. Answer the customer in a short paragraph."
 QUESTION = "Why does my Dormouse turn the heating on before the time I set?"
 
@@ -51,7 +52,7 @@ def split_into_chunks(document):
             id = f"{document['name']}#{slug(path[-1]) if path else 'top'}"
             while id in {c["id"] for c in chunks}:
                 id += "-2"
-            chunks.append({"id": id, "document": document["name"], "text": f"{heading}\n\n{content}"})
+            chunks.append({"id": id, "document": document["name"], "audience": document["audience"], "text": f"{heading}\n\n{content}"})
 
     for line in document["body"].splitlines():
         heading = re.match(r"(#{1,3}) (.+)", line)
@@ -80,76 +81,72 @@ def checksum(text):
     return hashlib.sha256(text.encode()).hexdigest()
 
 
-def open_database():
-    db = sqlite3.connect(DATABASE)
-    db.enable_load_extension(True)
-    sqlite_vec.load(db)
-    db.enable_load_extension(False)
-    db.execute(
-        "create virtual table if not exists chunks using vec0("
-        "id text primary key, embedding float[1536] distance_metric=cosine,"
-        "document text, +text text, +checksum text)"
-    )
+def open_collections():
+    database = chromadb.PersistentClient(path=str(DATABASE), settings=Settings(anonymized_telemetry=False))
+    # Compare by cosine similarity, and use our own embeddings rather than Chroma's built-in model.
+    space = {"hnsw": {"space": "cosine"}}
+    chunk_store = database.get_or_create_collection("chunks", configuration=space, embedding_function=None)
     # Each chunk's questions, pointing back to the chunk that answers them.
-    db.execute(
-        "create virtual table if not exists questions using vec0("
-        "id text primary key, embedding float[1536] distance_metric=cosine,"
-        "+chunk text, +question text, +checksum text)"
-    )
-    return db
+    question_store = database.get_or_create_collection("questions", configuration=space, embedding_function=None)
+    return chunk_store, question_store
 
 
-def update(db, chunks):
-    stored = dict(db.execute("select id, checksum from chunks"))
+def update(chunk_store, chunks):
+    stored = chunk_store.get(include=["metadatas"])
+    stored = dict(zip(stored["ids"], (m["checksum"] for m in stored["metadatas"])))
     current = {c["id"]: checksum(c["text"]) for c in chunks}
     changed = [c for c in chunks if stored.get(c["id"]) != current[c["id"]]]
-    for id in (set(stored) - set(current)) | {c["id"] for c in changed}:
-        db.execute("delete from chunks where id = ?", (id,))
-    for chunk, vector in zip(changed, embed([c["text"] for c in changed])):
-        db.execute(
-            "insert into chunks (id, embedding, document, text, checksum) values (?, ?, ?, ?, ?)",
-            (chunk["id"], sqlite_vec.serialize_float32(vector), chunk["document"], chunk["text"], current[chunk["id"]]),
+    removed = set(stored) - set(current)
+    if removed:
+        chunk_store.delete(ids=list(removed))
+    if changed:
+        chunk_store.upsert(
+            ids=[c["id"] for c in changed],
+            embeddings=embed([c["text"] for c in changed]),
+            documents=[c["text"] for c in changed],
+            metadatas=[{"document": c["document"], "audience": c["audience"], "checksum": current[c["id"]]} for c in changed],
         )
-    db.commit()
 
 
-def update_questions(db, faq, chunks):
+def update_questions(question_store, faq, chunks):
     # Embed the questions for chunks that are new or have changed. data/build_faq.py wrote them.
     current = {c["id"]: checksum(c["text"]) for c in chunks}
-    stored = list(db.execute("select id, chunk, checksum from questions"))
-    for id, chunk, written_for in stored:
-        if current.get(chunk) != written_for:
-            db.execute("delete from questions where id = ?", (id,))
-    done = {chunk for _, chunk, written_for in stored if current.get(chunk) == written_for}
+    stored = question_store.get(include=["metadatas"])
+    stale = [id for id, m in zip(stored["ids"], stored["metadatas"]) if current.get(m["chunk"]) != m["checksum"]]
+    if stale:
+        question_store.delete(ids=stale)
+    done = {m["chunk"] for m in stored["metadatas"] if current.get(m["chunk"]) == m["checksum"]}
     todo = [
         (id, n, question)
         for id, entry in faq.items()
         if id not in done and current.get(id) == entry["checksum"]
         for n, question in enumerate(entry["questions"])
     ]
-    for (id, n, question), vector in zip(todo, embed([q for _, _, q in todo])):
-        db.execute(
-            "insert into questions (id, embedding, chunk, question, checksum) values (?, ?, ?, ?, ?)",
-            (f"{id}?{n}", sqlite_vec.serialize_float32(vector), id, question, current[id]),
+    vectors = embed([q for _, _, q in todo])
+    for start in range(0, len(todo), STORE_BATCH):
+        batch = todo[start : start + STORE_BATCH]
+        question_store.upsert(
+            ids=[f"{id}?{n}" for id, n, _ in batch],
+            embeddings=vectors[start : start + STORE_BATCH],
+            documents=[question for _, _, question in batch],
+            metadatas=[{"chunk": id, "checksum": current[id]} for id, _, _ in batch],
         )
-    db.commit()
 
 
-def search(db, vector, by):
+def search(chunk_store, question_store, vector, by):
     # Search the chunks, their questions, or both, keeping each chunk's best match.
     best = {}
     if by in ("chunks", "both"):
-        for id, similarity in db.execute(
-            "select id, 1 - distance from chunks where embedding match ? and k = ?",
-            (sqlite_vec.serialize_float32(vector), TOP),
-        ):
-            best[id] = max(best.get(id, (0, None)), (similarity, None), key=lambda b: b[0])
+        results = chunk_store.query(query_embeddings=[vector], n_results=TOP, include=["distances"])
+        for id, distance in zip(results["ids"][0], results["distances"][0]):
+            best[id] = max(best.get(id, (0, None)), (1 - distance, None), key=lambda b: b[0])
     if by in ("questions", "both"):
-        for chunk, similarity, matched in db.execute(
-            "select chunk, 1 - distance, question from questions where embedding match ? and k = ?",
-            (sqlite_vec.serialize_float32(vector), TOP * 4),
-        ):
-            best[chunk] = max(best.get(chunk, (0, None)), (similarity, matched), key=lambda b: b[0])
+        results = question_store.query(
+            query_embeddings=[vector], n_results=TOP * 4, include=["distances", "documents", "metadatas"]
+        )
+        for distance, matched, metadata in zip(results["distances"][0], results["documents"][0], results["metadatas"][0]):
+            chunk = metadata["chunk"]
+            best[chunk] = max(best.get(chunk, (0, None)), (1 - distance, matched), key=lambda b: b[0])
     ranked = sorted(best.items(), key=lambda item: item[1][0], reverse=True)[:TOP]
     return [{"id": id, "similarity": round(sim, 3), "matched_question": matched} for id, (sim, matched) in ranked]
 
@@ -178,9 +175,9 @@ documents = load_documents(DATA / "docs")
 chunks = [chunk for document in documents for chunk in split_into_chunks(document)]
 chunks_by_id = {c["id"]: c for c in chunks}
 faq = json.loads((DATA / "faq.json").read_text())
-db = open_database()
-update(db, chunks)
-update_questions(db, faq, chunks)
+chunk_store, question_store = open_collections()
+update(chunk_store, chunks)
+update_questions(question_store, faq, chunks)
 print(f"\n{len(chunks):,} chunks, and {sum(len(e['questions']) for e in faq.values()):,} questions they answer.")
 
 warm_wake = "user-guide.md#warm-wake"
@@ -190,7 +187,7 @@ for question in faq[warm_wake]["questions"]:
 
 print(f"\nQ: {QUESTION}")
 [question_vector] = embed([QUESTION])
-found = search(db, question_vector, "both")
+found = search(chunk_store, question_store, question_vector, "both")
 for chunk in found:
     via = f'  via "{chunk["matched_question"]}"' if chunk["matched_question"] else ""
     print(f"   {chunk['similarity']:.3f}  {chunk['id']}{via}")
@@ -203,7 +200,7 @@ scores, checks = {}, []
 for by in ("chunks", "questions", "both"):
     hits = 0
     for q, vector in zip(questions, vectors):
-        top = search(db, vector, by)
+        top = search(chunk_store, question_store, vector, by)
         hit = any(contains_facts(chunks_by_id[c["id"]]["text"], q["facts"]) for c in top)
         hits += hit
         checks.append({"by": by, "id": q["id"], "question": q["question"], "found": hit, "top": top})

@@ -1,6 +1,6 @@
 # Further reading and extensions
 
-Why did demo 1 make up a fix for E-305? Why not just put every document in the prompt? Where did RAG come from? Why does a list of made-up customer questions help search find the right chunk? How do you check a citation? And why is fine-tuning the wrong way to teach a model facts?
+Why did demo 1 make up a fix for E-305? Why not just put every document in the prompt? Where did RAG come from, and how does a vector database find the nearest chunks without checking every one? Why does a list of made-up customer questions help search find the right chunk? How do you check a citation? And why is fine-tuning the wrong way to teach a model facts?
 
 ## The exercise
 
@@ -58,6 +58,10 @@ A map of everything people have added to RAG since 2020. Don't read it through; 
 **Chen, T., Wang, H., Chen, S., Yu, W., Ma, K., Zhao, X., Zhang, H. & Yu, D. (2024). "Dense X Retrieval: What Retrieval Granularity Should We Use?" *EMNLP 2024*, 15159–15177. [arXiv:2312.06648](https://arxiv.org/abs/2312.06648)**
 
 How big should a chunk be? Demo 3 cuts at headings. This paper compares 100-word passages, single sentences and **propositions**: the smallest statements that each carry one fact and make sense on their own. Figure 1 shows why it matters. Asked how far the Leaning Tower of Pisa leans, a passage brings dates and other details, a sentence says "the tower" without saying which, and the proposition "The Leaning Tower of Pisa now leans at about 3.99 degrees" answers it alone. For embedding models trained without labelled examples, propositions raised top-20 recall by 10.1 points on average; for models trained with them, by 2.7. Look at figure 1 and table 3. "Make sense on their own" is the reason demo 3 puts "Document title > Heading" at the top of every chunk.
+
+**⭐ Malkov, Y. A. & Yashunin, D. A. (2020). "Efficient and Robust Approximate Nearest Neighbor Search Using Hierarchical Navigable Small World Graphs." *IEEE Transactions on Pattern Analysis and Machine Intelligence* 42(4):824–836. [arXiv:1603.09320](https://arxiv.org/abs/1603.09320)**
+
+How ChromaDB searches demo 3's chunks without comparing the question with every one. **HNSW** links each vector to a few of its neighbours, in layers. A search starts on a top layer with few vectors and long links, and zooms in layer by layer. It is **approximate**: it can miss the true nearest neighbour, in exchange for being much faster. Look at figure 1 and algorithm 2. In demo 3, `configuration={"hnsw": {"space": "cosine"}}` is the setting for this index, and Chroma's `max_neighbors` and `ef_search` settings are the paper's `M` and `ef`. On our 1,823 chunks it finds exactly what comparing every chunk finds; the speed only matters at millions.
 
 ### Turning documents into questions: where demo 4 comes from
 
@@ -134,6 +138,7 @@ Once the knowledge base decides the answers, whoever can write to it can change 
 - **[Anthropic: Citations](https://platform.claude.com/docs/en/build-with-claude/citations)**. Citations built into an API. You pass documents, and the reply comes back with the exact text it cites, which the API guarantees points into the documents you sent. It can't be combined with structured outputs, so you'd get citations or demo 5's JSON, not both.
 - **[OpenAI: Structured Outputs](https://developers.openai.com/api/docs/guides/structured-outputs)**. How demo 5 makes gpt-6-luna reply with exactly `answered`, `answer` and `citations`, and nothing else.
 - **[OpenAI: Retrieval](https://developers.openai.com/api/docs/guides/retrieval)**. Demo 3 as a service. Upload files to a vector store and OpenAI chunks them (800 tokens with 400 tokens of overlap, by default), embeds them and searches them, with filters on metadata and a mix of keyword and vector ranking. Worth comparing with what we built by hand.
+- **[Chroma documentation](https://docs.trychroma.com/)**: collections, metadata filters (`where`, and `where_document` for filtering on the text itself), and the HNSW settings behind demo 3.
 - **Eugene Yan (2023). "Patterns for Building LLM-based Systems & Products."** [Blog post](https://eugeneyan.com/writing/llm-patterns/). Seven patterns, from evaluations to defensive user interfaces. The RAG section makes demo 6's point: keeping an index up to date is cheaper than training the model again.
 - **Hamel Husain (2024). "Your AI Product Needs Evals."** [Blog post](https://hamel.dev/blog/posts/evals/). The case for a test set like our 30 questions. Start with cheap checks that run on every change (demo 3's `contains_facts` is one), add review by people and by models, and look at your data. It has a section on evaluating RAG.
 

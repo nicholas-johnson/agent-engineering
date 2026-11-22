@@ -19,7 +19,7 @@ Needs `OPENAI_API_KEY` in `.env`. The first run embeds the library four ways (ab
 
 ---
 
-Demos 5 and 6 embed each document whole: all of its Markdown after the front matter. That is about 149,000 words for 275 documents. This playground tests that choice. Each document is turned into text four ways:
+Demo 6 embeds each document whole: all of its Markdown after the front matter. That is about 149,000 words for 275 documents. This playground tests that choice. Each document is turned into text four ways:
 
 ```python
 WAYS = {

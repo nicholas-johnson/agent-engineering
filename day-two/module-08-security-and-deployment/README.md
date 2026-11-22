@@ -38,13 +38,13 @@ From this folder:
 uv run python demo/01_ship_it.py
 ```
 
-The first demo to run embeds the knowledge base into `demo/output/knowledge.db`, which takes a few seconds; after that only new or changed chunks are embedded. Demo 3 makes over 400 calls, ten at a time, and took 85 seconds. The others take under 40 seconds each.
+The first demo to run embeds the knowledge base into a ChromaDB store in `demo/output/chroma/`, as in Module 6, which takes a few seconds; after that only new or changed chunks are embedded. Demo 3 makes over 400 calls, ten at a time, and took 85 seconds. The others take under 40 seconds each.
 
 Demos 4 and 6 ask you to confirm actions. To run them without typing: `printf 'n\ny\n' | uv run python demo/04_guardrails.py` and `printf 'y\n' | uv run python demo/06_two_assistants.py`.
 
 | Demo | Writes to `demo/output/` |
 |------|--------------------------|
-| `01_ship_it.py` | `knowledge.db`, `01_ship_it.json` |
+| `01_ship_it.py` | `chroma/`, `01_ship_it.json` |
 | `02_access_control.py` | `02_access_control.json` |
 | `03_prompt_injection.py` | `03_prompt_injection.json`, every run of every trial |
 | `04_guardrails.py` | `04_audit.jsonl`, one line per event |
@@ -136,12 +136,11 @@ Three changes, all in code.
 SESSION = {"customer": "C-1001", "audience": "customer"}
 ```
 
-**The search only reaches what this customer may read.** It is Module 5's metadata filter, in SQL this time: the database only compares the question with chunks for the right audience, so internal documents never reach the model at all.
+**The search only reaches what this customer may read.** It is Module 6's metadata filter, `where`, on each chunk's audience: ChromaDB only searches the chunks for the right audience, so internal documents never reach the model at all.
 
 ```python
-rows = db.execute(
-    "select id, text from chunks where embedding match ? and k = ? and audience = ? order by distance",
-    (sqlite_vec.serialize_float32(vector), TOP, SESSION["audience"]),
+results = collection.query(
+    query_embeddings=[vector], n_results=TOP, where={"audience": SESSION["audience"]}, include=["documents"]
 )
 ```
 

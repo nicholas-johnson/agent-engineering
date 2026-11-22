@@ -15,7 +15,7 @@ source ../../.venv/bin/activate
 python playground/stale-copies/play.py
 ```
 
-Needs `OPENAI_API_KEY` in `.env`. The first run embeds all 1,823 chunks and keeps them in `playground/stale-copies/output/knowledge.db`; after that a run takes a few seconds. Every document to update, with each chunk's place in the vector search and the exact sentences that state the old fact, is written to `playground/stale-copies/output/stale-copies.json`.
+Needs `OPENAI_API_KEY` in `.env`. The first run embeds all 1,823 chunks and keeps them in a ChromaDB store in `playground/stale-copies/output/chroma`; after that a run takes a few seconds. Every document to update, with each chunk's place in the vector search and the exact sentences that state the old fact, is written to `playground/stale-copies/output/stale-copies.json`.
 
 ---
 
@@ -38,7 +38,7 @@ The fact "A household invitation works for 7 days." is now "A household invitati
 
   Plain text search for 7 days, seven days, 7-day, seven-day: 30 chunks in 18 documents
   Vector search for the old fact: 20 of them are in the nearest 20
-  The furthest is number 718 of 1,823
+  The furthest is number 738 of 1,823
 
   The documents to update, and where their chunks came in the vector search:
 
@@ -60,14 +60,14 @@ The fact "A household invitation works for 7 days." is now "A household invitati
   37                  internal         internal  thermostat-firmware-release-history.md
   39                  app              customer  web-dashboard-account-settings-screen-guide.md
   47                  support          customer  manage-household-member-permissions.md
-  98, 718             internal         internal  thermostat-firmware-4-1-baseline.md
+  98, 738             internal         internal  thermostat-firmware-4-1-baseline.md
 ```
 
 ## Things to notice
 
 - **Eighteen documents state one fact.** Thirty chunks say invitations last 7 days. Update the user guide alone, as demo 6 did for Warm Wake, and 29 stale copies stay in the index, waiting to be retrieved.
 - **The search doesn't prefer the source of truth.** The user guide comes 23rd, outside the top 20. Its "Household sharing" section is also about owners, members and permissions, so the invitation sentence is one of several. In [ask-your-docs](../ask-your-docs/), the question "My partner didn't accept the invite in time" was answered from two other documents, and the user guide wasn't in its top five. Fixing only the user guide would have changed nothing for that customer.
-- **Vector search is precise but stops short.** All 20 of its results say 7 days, but 10 of the 30 chunks are further down. The furthest, 718th, is a row in a release history table: `| 3.3 | 2025-08-11 | Support for eight household members; invitations expire after 7 days.` Long chunks about something else, with the fact in passing, sink.
+- **Vector search is precise but stops short.** All 20 of its results say 7 days, but 10 of the 30 chunks are further down. The furthest, 738th, is a row in a release history table: `| 3.3 | 2025-08-11 | Support for eight household members; invitations expire after 7 days.` Long chunks about something else, with the fact in passing, sink.
 - **Text search finds everything you thought to spell.** It found all 30, because the documents happen to use only the four wordings in the list. A document that said "a week" would have been missed, and you'd never know.
 - **Not every match should change.** Four of the chunks are history: the firmware 3.3 release notes ("Invitations to join a household now expire after 7 days."), the release history, the table row above, and the QA report's "Release context" section ("Firmware 3.3 ... changed invitations to expire after seven days."). They were true when written. Change them and the history is wrong instead. Neither search can tell history from a statement about today. The document's `type` in the front matter is a clue, but the QA report and the baseline document mix both.
 - **Internal documents count too.** Four of the eighteen are internal. Customers never see them, but support staff do, and in this knowledge base so does the search.

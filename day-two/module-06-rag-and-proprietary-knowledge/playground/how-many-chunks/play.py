@@ -3,15 +3,15 @@
 #                         or: source ../../.venv/bin/activate && python playground/how-many-chunks/play.py
 #
 # To play: change MAX_TOP or the prices, and rerun.
-# Vectors are kept in output/knowledge.db, so after the first run only the 24 questions are embedded.
+# Vectors are kept in a ChromaDB store in output/chroma, so after the first run only the 24 questions are embedded.
 
 import hashlib
 import json
 import re
-import sqlite3
 from pathlib import Path
 
-import sqlite_vec
+import chromadb
+from chromadb.config import Settings
 from dotenv import load_dotenv
 from openai import OpenAI
 
@@ -22,7 +22,7 @@ DATA = HERE.parent.parent / "data"
 OUTPUT = HERE / "output"
 OUTPUT.mkdir(exist_ok=True)
 
-DATABASE = OUTPUT / "knowledge.db"
+DATABASE = OUTPUT / "chroma"
 MODEL = "gpt-6-luna"
 EMBEDDING_MODEL = "text-embedding-3-small"
 BATCH = 100
@@ -85,40 +85,36 @@ def embed(texts):
     return vectors, tokens
 
 
-def open_database():
-    db = sqlite3.connect(DATABASE)
-    db.enable_load_extension(True)
-    sqlite_vec.load(db)
-    db.enable_load_extension(False)
-    db.execute(
-        "create virtual table if not exists chunks using vec0("
-        "id text primary key, embedding float[1536] distance_metric=cosine,"
-        "document text, +text text, +checksum text)"
+def open_collection():
+    database = chromadb.PersistentClient(path=str(DATABASE), settings=Settings(anonymized_telemetry=False))
+    # Compare by cosine similarity, and use our own embeddings rather than Chroma's built-in model.
+    return database.get_or_create_collection(
+        "chunks", configuration={"hnsw": {"space": "cosine"}}, embedding_function=None
     )
-    return db
 
 
-def update(db, chunks):
-    stored = dict(db.execute("select id, checksum from chunks"))
-    current = {c["id"]: hashlib.sha256(c["text"].encode()).hexdigest() for c in chunks}
-    changed = [c for c in chunks if stored.get(c["id"]) != current[c["id"]]]
-    for id in (set(stored) - set(current)) | {c["id"] for c in changed}:
-        db.execute("delete from chunks where id = ?", (id,))
-    vectors, _ = embed([c["text"] for c in changed])
-    for chunk, vector in zip(changed, vectors):
-        db.execute(
-            "insert into chunks (id, embedding, document, text, checksum) values (?, ?, ?, ?, ?)",
-            (chunk["id"], sqlite_vec.serialize_float32(vector), chunk["document"], chunk["text"], current[chunk["id"]]),
+def update(collection, chunks):
+    stored = collection.get(include=["metadatas"])
+    stored = dict(zip(stored["ids"], (m["checksum"] for m in stored["metadatas"])))
+    checksums = {c["id"]: hashlib.sha256(c["text"].encode()).hexdigest() for c in chunks}
+    changed = [c for c in chunks if stored.get(c["id"]) != checksums[c["id"]]]
+    removed = set(stored) - set(checksums)
+
+    if removed:
+        collection.delete(ids=list(removed))
+    if changed:
+        vectors, _ = embed([c["text"] for c in changed])
+        collection.upsert(
+            ids=[c["id"] for c in changed],
+            embeddings=vectors,
+            documents=[c["text"] for c in changed],
+            metadatas=[{"document": c["document"], "checksum": checksums[c["id"]]} for c in changed],
         )
-    db.commit()
 
 
-def search(db, vector):
-    rows = db.execute(
-        "select id, text from chunks where embedding match ? and k = ? order by distance",
-        (sqlite_vec.serialize_float32(vector), MAX_TOP),
-    )
-    return [{"id": id, "text": text} for id, text in rows]
+def search(collection, vector):
+    results = collection.query(query_embeddings=[vector], n_results=MAX_TOP, include=["documents"])
+    return [{"id": id, "text": text} for id, text in zip(results["ids"][0], results["documents"][0])]
 
 
 def wrap(chunk):
@@ -141,12 +137,12 @@ def contains_facts(text, facts):
 
 
 documents = load_documents(DATA / "docs")
-db = open_database()
-update(db, [chunk for document in documents for chunk in split_into_chunks(document)])
+collection = open_collection()
+update(collection, [chunk for document in documents for chunk in split_into_chunks(document)])
 
 questions = [q for q in json.loads((DATA / "questions.json").read_text()) if q["kind"] in ("everyday", "error code")]
 vectors, question_tokens = embed([q["question"] for q in questions])
-tops = [search(db, vector) for vector in vectors]
+tops = [search(collection, vector) for vector in vectors]
 
 # The rank of the first chunk that holds each question's facts (None if it isn't in the top MAX_TOP).
 ranks = [

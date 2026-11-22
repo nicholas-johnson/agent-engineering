@@ -3,10 +3,10 @@
 import hashlib
 import json
 import re
-import sqlite3
 from pathlib import Path
 
-import sqlite_vec
+import chromadb
+from chromadb.config import Settings
 from dotenv import load_dotenv
 from openai import OpenAI
 
@@ -17,7 +17,7 @@ DATA = HERE.parent / "data"
 OUTPUT = HERE / "output"
 OUTPUT.mkdir(exist_ok=True)
 
-DATABASE = OUTPUT / "knowledge.db"
+DATABASE = OUTPUT / "chroma"
 MODEL = "gpt-6-luna"
 EMBEDDING_MODEL = "text-embedding-3-small"
 BATCH = 100
@@ -74,7 +74,7 @@ def split_into_chunks(document):
             id = f"{document['name']}#{slug(path[-1]) if path else 'top'}"
             while id in {c["id"] for c in chunks}:
                 id += "-2"
-            chunks.append({"id": id, "document": document["name"], "text": f"{heading}\n\n{content}"})
+            chunks.append({"id": id, "document": document["name"], "audience": document["audience"], "text": f"{heading}\n\n{content}"})
 
     for line in document["body"].splitlines():
         heading = re.match(r"(#{1,3}) (.+)", line)
@@ -99,41 +99,35 @@ def embed(texts):
     return vectors
 
 
-def open_database():
-    db = sqlite3.connect(DATABASE)
-    db.enable_load_extension(True)
-    sqlite_vec.load(db)
-    db.enable_load_extension(False)
-    db.execute(
-        "create virtual table if not exists chunks using vec0("
-        "id text primary key, embedding float[1536] distance_metric=cosine,"
-        "document text, +text text, +checksum text)"
+def open_collection():
+    database = chromadb.PersistentClient(path=str(DATABASE), settings=Settings(anonymized_telemetry=False))
+    # Compare by cosine similarity, and use our own embeddings rather than Chroma's built-in model.
+    return database.get_or_create_collection(
+        "chunks", configuration={"hnsw": {"space": "cosine"}}, embedding_function=None
     )
-    return db
 
 
-def update(db, chunks):
-    stored = dict(db.execute("select id, checksum from chunks"))
+def update(collection, chunks):
+    stored = collection.get(include=["metadatas"])
+    stored = dict(zip(stored["ids"], (m["checksum"] for m in stored["metadatas"])))
     current = {c["id"]: hashlib.sha256(c["text"].encode()).hexdigest() for c in chunks}
     changed = [c for c in chunks if stored.get(c["id"]) != current[c["id"]]]
     removed = set(stored) - set(current)
-    for id in removed | {c["id"] for c in changed}:
-        db.execute("delete from chunks where id = ?", (id,))
-    for chunk, vector in zip(changed, embed([c["text"] for c in changed])):
-        db.execute(
-            "insert into chunks (id, embedding, document, text, checksum) values (?, ?, ?, ?, ?)",
-            (chunk["id"], sqlite_vec.serialize_float32(vector), chunk["document"], chunk["text"], current[chunk["id"]]),
+    if removed:
+        collection.delete(ids=list(removed))
+    if changed:
+        collection.upsert(
+            ids=[c["id"] for c in changed],
+            embeddings=embed([c["text"] for c in changed]),
+            documents=[c["text"] for c in changed],
+            metadatas=[{"document": c["document"], "audience": c["audience"], "checksum": current[c["id"]]} for c in changed],
         )
-    db.commit()
     return len(changed), len(removed)
 
 
-def search(db, vector):
-    rows = db.execute(
-        "select id, text from chunks where embedding match ? and k = ? order by distance",
-        (sqlite_vec.serialize_float32(vector), TOP),
-    )
-    return [{"id": id, "text": text} for id, text in rows]
+def search(collection, vector):
+    results = collection.query(query_embeddings=[vector], n_results=TOP, include=["documents"])
+    return [{"id": id, "text": text} for id, text in zip(results["ids"][0], results["documents"][0])]
 
 
 def answer(question, found):
@@ -158,8 +152,8 @@ def check(citations, found):
     return [{**c, "checked": words(c["quote"]) in texts.get(c["chunk"], "")} for c in citations]
 
 
-def ask(db):
-    found = search(db, embed([QUESTION])[0])
+def ask(collection):
+    found = search(collection, embed([QUESTION])[0])
     reply = answer(QUESTION, found)
     reply["citations"] = check(reply["citations"], found)
     print(f"Q: {QUESTION}\nA: {reply['answer']}")
@@ -173,20 +167,20 @@ def chunks_of(documents):
     return [chunk for document in documents for chunk in split_into_chunks(document)]
 
 
-db = open_database()
+collection = open_collection()
 documents = {d["name"]: d for d in load_documents(DATA / "docs")}
-update(db, chunks_of(documents.values()))
+update(collection, chunks_of(documents.values()))
 print("\n=== The knowledge base for firmware 4.1 ===")
-before = ask(db)
+before = ask(collection)
 
 # Firmware 4.2 ships: a new release note, and a new version of the user guide.
 updates = load_documents(DATA / "updates")
 documents.update({d["name"]: d for d in updates})
 chunks = chunks_of(documents.values())
-changed, removed = update(db, chunks)
+changed, removed = update(collection, chunks)
 print(f"\n=== Firmware 4.2: {len(updates)} documents changed ===")
 print(f"Re-embedded {changed} of {len(chunks):,} chunks and removed {removed}. No retraining.\n")
-after = ask(db)
+after = ask(collection)
 
 (OUTPUT / "06_keep_it_current.json").write_text(
     json.dumps({"question": QUESTION, "before": before, "changed": changed, "removed": removed, "after": after}, indent=2)

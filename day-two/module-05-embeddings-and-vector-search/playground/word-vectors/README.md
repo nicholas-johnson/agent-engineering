@@ -1,6 +1,6 @@
 # Word vectors
 
-Demo 3 trained a small word2vec model on the user guide, with its settings fixed. Here they're all yours. You'll change what it reads, how many numbers each word gets and how wide its window is, retrain, and see which words end up next to which. Then you can type any word and see its closest words.
+Demo 5 trained a small word2vec model on the user guide, with its settings fixed. Here they're all yours. You'll change what it reads, how many numbers each word gets and how wide its window is, retrain, and see which words end up next to which. Then you can type any word and see its closest words.
 
 From the module folder (`day-two/module-05-embeddings-and-vector-search`):
 
@@ -25,7 +25,7 @@ The vectors are written to `playground/word-vectors/output/vectors.txt`, one wor
 
 ---
 
-The model is **skip-gram with negative sampling**, the same as demo 3. Every word starts with `SIZE` random numbers. Training reads the text one word at a time. For each word near it (up to `WINDOW` words either side), it nudges the two words' vectors closer together, and pushes the word away from `NEGATIVES` words picked at random. Words that keep turning up beside the same neighbours end up pointing the same way. This is the step that does it:
+The model is **skip-gram with negative sampling**, the same as demo 5. Every word starts with `SIZE` random numbers. Training reads the text one word at a time. For each word near it (up to `WINDOW` words either side), it nudges the two words' vectors closer together, and pushes the word away from `NEGATIVES` words picked at random. Words that keep turning up beside the same neighbours end up pointing the same way. This is the step that does it:
 
 ```python
 for other, is_neighbour in [(tokens[j], 1)] + [(random.choice(noise), 0) for _ in range(NEGATIVES)]:
@@ -35,7 +35,7 @@ for other, is_neighbour in [(tokens[j], 1)] + [(random.choice(noise), 0) for _ i
     neighbours[other] = [n + step * v for n, v in zip(neighbour, vector)]
 ```
 
-The settings are at the top of `play.py`. They start at demo 3's values:
+The settings are at the top of `play.py`. They start at demo 5's values:
 
 | Setting | Starts at | What it does |
 |---------|-----------|--------------|
@@ -48,7 +48,7 @@ The settings are at the top of `play.py`. They start at demo 3's values:
 | `LEARNING_RATE` | 0.05 | How big each nudge is at the start. It shrinks to nothing by the last epoch |
 | `SEED` | 1 | Picks the random starting numbers and the random words, so a rerun gives the same result |
 
-The arithmetic is written a little differently from demo 3's so that it runs faster, but with these settings it finds the same closest words. Here is a run, typing `boost` and `sunrise`:
+The arithmetic is written a little differently from demo 5's so that it runs faster, but with these settings it finds the same closest words. Here is a run, typing `boost` and `sunrise`:
 
 ```text
 === Trained on 1 document in 6 seconds: 1,794 words, 235 different words ===
@@ -106,7 +106,7 @@ A real word2vec library does the same sums in compiled code, far faster (see Rab
 - **Others are chance.** "password" comes out next to sign, network, link, account and cleaning. Set `SEED = 2` and "warm" keeps wake, heat, early and sunrise, but "password" gets a completely new list: android, ios, email, later and address. Both words appear about as often in the user guide (8 times and 7), but "warm" is almost always followed by "Wake", while "password" turns up in a different sentence every time.
 - **More text fixes some words.** Trained on all 275 documents, where it appears 238 times, "password" sits next to reset, forgot, forgotten and passwords. Nobody told the model that "passwords" is the plural; it noticed they are used the same way. "boost" moves from see and running to button, hour and cancel.
 - **But a word needs more than two sightings.** "morning" appears twice in all 275 documents. That passes `MIN_COUNT = 2`, so it gets a vector, but its neighbours are half, degree, later, reflects and conflict: noise.
-- **"alarm" is never seen.** Not in the user guide, and not in any of the 275 documents, so no setting can give it a vector. It's the customer's word, not the documentation's. `text-embedding-3-small` in demo 4 has no such gap: it can turn any text into numbers.
+- **"alarm" is never seen.** Not in the user guide, and not in any of the 275 documents, so no setting can give it a vector. It's the customer's word, not the documentation's. `text-embedding-3-small` in demo 6 has no such gap: it can turn any text into numbers.
 - **Neighbours are used alike, not mean alike.** "boost" ends up next to button and pressing, because they appear in the same sentences ("press the boost button"). A neighbour is a word that turns up in the same places, which is often, but not always, a word that means something similar.
 
 ## Try this
@@ -116,7 +116,7 @@ A real word2vec library does the same sums in compiled code, far faster (see Rab
 3. **A dozen more documents.** Add twelve documents about the features in `WORDS` to `DOCUMENTS`: `understand-warm-wake`, `warm-wake-known-issue-register`, `thermostat-shows-the-sunrise-symbol`, `start-or-cancel-a-boost`, `boost-does-not-start`, `boost-stops-before-the-hour-ends`, `boost-uses-an-unexpected-temperature`, `change-the-boost-temperature`, `set-a-heating-schedule`, `understand-how-schedule-periods-work`, `copy-schedule-periods-to-another-day` and `schedule-periods-are-missing`. It takes about half a minute. How do "warm", "boost" and "schedule" change? What happens to "password", which none of them mention?
 4. **Skip some of the "the"s.** "the" is nearly one word in ten, and teaches the model very little. Section 2.3 of the second paper below drops each appearance of a common word with a chance that grows with how common it is. Add that before training. Is it faster, and are the neighbours better?
 5. **Word sums.** word2vec became famous for sums like king − man + woman ≈ queen. Add a few lines that work out a sum such as `warm − wake + boost` and find the closest word to the result. Do any sums work on 1,794 words? On all 275 documents?
-6. **Document vectors.** Average each document's word vectors, as demo 4 does, and rank all 275 documents against the running question with cosine similarity. Where does Understand Warm Wake come? Which words of the question have no vector to add?
+6. **Sentences on more text.** Add up word vectors into sentences, as demos 4 and 5 do, and compare a few pairs: "Warm Wake starts the heating early" against "Frost protection turns the heating on" and "Reset your password by email". Then train on the twelve documents from Try this 3 and compare them again. Do sentences about different features move further apart?
 
 ## Questions
 

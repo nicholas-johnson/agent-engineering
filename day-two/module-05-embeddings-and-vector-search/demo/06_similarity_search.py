@@ -1,4 +1,4 @@
-# Run from the module folder: uv run python demo/05_similarity_search.py
+# Run from the module folder: uv run python demo/06_similarity_search.py
 
 import json
 import math
@@ -81,4 +81,4 @@ for name, library in libraries.items():
         {"similarity": round(s, 4), "id": d["id"], "audience": d["audience"], "title": d["title"]} for s, d in results
     ]
 
-(OUTPUT / "05_similarity_search.json").write_text(json.dumps({"question": QUESTION, "found": found}, indent=2))
+(OUTPUT / "06_similarity_search.json").write_text(json.dumps({"question": QUESTION, "found": found}, indent=2))

@@ -6,7 +6,7 @@
 
 - Explain why a model makes up answers about things it has never seen (**hallucination**), and why the answers sound right.
 - Put documents in a model's prompt, and measure what that costs in **tokens**, money and time for each question.
-- Split documents into **chunks**, find the relevant ones with a vector search, and answer from them: **retrieval-augmented generation** (**RAG**).
+- Split documents into **chunks**, store them in a **vector database** with **metadata** to filter on, find the relevant ones, and answer from them: **retrieval-augmented generation** (**RAG**).
 - Turn documentation into the questions customers ask (an **FAQ**), search those too, and **measure** whether it helps.
 - Make a model **cite its sources**, check each quote in code, and let it say when the documentation doesn't answer.
 - Update what a model knows by changing documents, not by **retraining**, and re-embed only what changed.
@@ -24,14 +24,18 @@ The fix is the one a new support agent uses: look it up, then answer. Find the p
 
 Everything runs on the documentation for **Dormouse**, the smart thermostat from Module 5. **Dormouse and all its documents are invented for this course.** Your own documentation would work the same way.
 
-| File | What | Size |
-|------|------|------|
-| `data/docs/user-guide.md` | Written by hand: the user guide, and the source of truth for everything else | 1 document, 26 sections |
-| `data/docs/internal-relay-click-revision-c.md` | Written by hand: an internal engineering note | 1 document |
-| `data/docs/*.md` | The two above, plus 273 written by `gpt-6-luna` with `data/build_docs.py`: support, troubleshooting, app, installation, specification, integration, policy, error-code and release-note documents, and 40 more internal ones | 275 documents, about 154,000 words |
-| `data/updates/` | Written by hand: firmware 4.2's release notes and new user guide, for section 6 | 2 documents |
-| `data/questions.json` | 30 questions, each with the facts a right answer must contain | 30 questions |
-| `data/faq.json` | The questions each chunk answers, written by `gpt-6-luna` with `data/build_faq.py`, for section 4 | 6,358 questions |
+| File                                           | What                                                                                                                                                                                                                         | Size                               |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| `data/docs/user-guide.md`                      | Written by hand: the user guide, and the source of truth for everything else                                                                                                                                                 | 1 document, 26 sections            |
+| `data/docs/internal-relay-click-revision-c.md` | Written by hand: an internal engineering note                                                                                                                                                                                | 1 document                         |
+| `data/docs/*.md`                               | The two above, plus 273 written by `gpt-6-luna` with `data/build_docs.py`: support, troubleshooting, app, installation, specification, integration, policy, error-code and release-note documents, and 40 more internal ones | 275 documents, about 154,000 words |
+| `data/updates/`                                | Written by hand: firmware 4.2's release notes and new user guide, for section 6                                                                                                                                              | 2 documents                        |
+| `data/questions.json`                          | 30 questions, each with the facts a right answer must contain                                                                                                                                                                | 30 questions                       |
+| `data/faq.json`                                | The questions each chunk answers, written by `gpt-6-luna` with `data/build_faq.py`, for section 4                                                                                                                            | 6,358 questions                    |
+
+## Setting up
+
+You need `OPENAI_API_KEY` in `.env` (see Module 2). This module adds one package, **ChromaDB**, a vector database. `uv` installs it with everything else. It's a big install: 84 packages, including numpy and onnxruntime. We give Chroma our own vectors, so it never downloads an embeddings model of its own.
 
 ## Running the demos
 
@@ -41,7 +45,7 @@ From this folder:
 uv run python demo/01_just_ask.py
 ```
 
-The first run of demo 3 embeds all 1,823 chunks, and the first run of demo 4 embeds all 6,358 questions. Both are stored in `demo/output/knowledge.db`, and later runs only embed what has changed. On a slow connection those first runs take several minutes each, so run demos 3 and 4 once before a session. Demo 7 starts its MCP server, `demo/07_docs_server.py`, itself. Model output is random, so your answers will differ from the ones quoted here.
+The first run of demo 3 embeds all 1,823 chunks, and the first run of demo 4 embeds all 6,358 questions. Both are stored in ChromaDB, in `demo/output/chroma/`, and later runs only embed what has changed. On a slow connection those first runs take several minutes each, so run demos 3 and 4 once before a session. Demo 7 starts its MCP server, `demo/07_docs_server.py`, itself. Model output is random, so your answers will differ from the ones quoted here.
 
 ## 1. Just ask
 
@@ -73,7 +77,7 @@ The first answer is the interesting one, because it is nearly right. Lots of the
 
 ### Why this breaks
 
-The model has never seen our documents, and it doesn't say so. It writes the most likely answer for a thermostat in general, and fills in the details. Plausible, confident and wrong is called **hallucination**. It is most dangerous when the answer is *nearly* right, like the first one, because nobody checks it.
+The model has never seen our documents, and it doesn't say so. It writes the most likely answer for a thermostat in general, and fills in the details. Plausible, confident and wrong is called **hallucination**. It is most dangerous when the answer is _nearly_ right, like the first one, because nobody checks it.
 
 ## 2. Put the documents in the prompt
 
@@ -108,12 +112,12 @@ A: That’s likely Warm Wake: it starts heating ahead of a scheduled period so y
 
 Both answers are right, with the feature's real name and the real place to turn it off. The model hasn't learned anything: it read the answer this time.
 
-| | User guide | Whole knowledge base |
-|---|---|---|
-| Documents | 1 | 275 |
-| Tokens read per question | 2,380 | 191,548 |
-| Cost per question | $0.0003 | $0.0192 |
-| Time per question | 3.1 seconds | 24.4 seconds |
+|                          | User guide  | Whole knowledge base |
+| ------------------------ | ----------- | -------------------- |
+| Documents                | 1           | 275                  |
+| Tokens read per question | 2,380       | 191,548              |
+| Cost per question        | $0.0003     | $0.0192              |
+| Time per question        | 3.1 seconds | 24.4 seconds         |
 
 Be honest about this result: **for a small set of documents that rarely changes, putting it all in the prompt is a fair answer.** It is simple, and nothing can go wrong in a search step, because there isn't one. Providers also cache a prompt that starts the same way each time and charge less for the cached part, which helps here.
 
@@ -137,11 +141,38 @@ Demo 2's model needed one section of one document, and read 275 documents to fin
    Warm Wake makes sure the home has already reached the target temperature when a schedule period starts, ...
    ```
 
-2. **Embed** every chunk and store it in a vector database. Module 5 used ChromaDB; here we use **sqlite-vec**, which adds vector search to SQLite, so a search is one SQL query. The idea is the same: one row per chunk with its vector, its document (to filter on) and its text. A checksum on each chunk means a rerun only embeds what has changed.
+2. **Embed** every chunk and store it in a **vector database**: a database that keeps vectors, finds the ones nearest a question's vector, and keeps facts about each one (**metadata**) to filter by. We use **ChromaDB**, which runs inside the script and keeps everything in a folder, `demo/output/chroma/` (33 MB for 1,823 chunks):
 
-3. **Retrieve and answer.** Embed the question, take the 5 nearest chunks, and paste just those into the instructions:
+   ```python
+   database = chromadb.PersistentClient(path=str(DATABASE), settings=Settings(anonymized_telemetry=False))
+   collection = database.get_or_create_collection(
+       "chunks", configuration={"hnsw": {"space": "cosine"}}, embedding_function=None
+   )
+   ```
+
+   A **collection** is like a table. We ask it to compare by cosine similarity, and to use the vectors we give it rather than Chroma's built-in embeddings model. `anonymized_telemetry=False` stops Chroma sending usage statistics. Each chunk goes in with its vector, its text and its metadata: the document it came from, who that document is for, and a **checksum**, a short fingerprint of the text that changes whenever the text does:
+
+   ```python
+   collection.upsert(
+       ids=[c["id"] for c in changed],
+       embeddings=embed([c["text"] for c in changed]),
+       documents=[c["text"] for c in changed],
+       metadatas=[{"document": c["document"], "audience": c["audience"], "checksum": ...} for c in changed],
+   )
+   ```
+
+   **Embed once.** On every run, only chunks that are new, or whose text has changed, are embedded, and chunks that are no longer in the documents are deleted. The first run embeds all 1,823 chunks. The second:
+
+   ```text
+   275 documents, 1,823 chunks. Embedded 0 new or changed chunks.
+   ```
+
+3. **Retrieve and answer.** Embed the question, ask the collection for the 5 nearest chunks, and paste just those into the instructions:
 
 ```python
+results = collection.query(query_embeddings=[vector], n_results=5, include=["distances", "documents"])
+found = [{"id": id, "text": text} for id, text in zip(results["ids"][0], results["documents"][0])]
+
 documentation = "\n\n".join(f'<chunk id="{c["id"]}">\n{c["text"]}\n</chunk>' for c in found)
 response = client.responses.create(
     model=MODEL,
@@ -152,6 +183,16 @@ response = client.responses.create(
 ```
 
 That is **retrieval-augmented generation**: retrieve, then generate. The 275 documents make 1,823 chunks, 86 words long on average.
+
+**Search with a filter.** `where` limits a search to the chunks whose metadata matches. The demo uses it to search the user guide alone, then the whole knowledge base:
+
+```python
+collection.query(query_embeddings=[vector], n_results=5, where={"document": "user-guide.md"})
+```
+
+The same filter on `audience` would keep a customer away from the 41 internal documents. None of this module's demos use it; Module 8 does.
+
+**Not every vector is compared.** Chroma organises the vectors as an **HNSW** graph ("hierarchical navigable small world"): each vector is linked to its near neighbours, and a search hops from vector to vector towards the question instead of checking them all. That's how a vector database searches millions of vectors in milliseconds. The price is that the search is **approximate**: very occasionally it misses a vector that's slightly closer. Here it made no difference: an exact search, comparing all 1,823, finds the same five chunks with the same similarities.
 
 ```text
 275 documents, 1,823 chunks. Embedded 1,823 new or changed chunks.
@@ -172,28 +213,28 @@ The cost has collapsed: 906 tokens instead of 191,548, a two-hundredth as many, 
 
 But look at our question. All five chunks are about smart-home routines and smart plugs: sections that talk about schedules, heating and Dormouse, the question's words. The Warm Wake section came **sixth**, with a similarity of 0.606 against 0.609 for fifth place. The answer is vague, and its first sentence isn't in any of the five chunks: the model filled the gap with a guess, just as in demo 1.
 
-| | Chunks searched | Answer in the top 5 |
-|---|---|---|
-| User guide | 26 | 23 of 24 |
-| Whole knowledge base | 1,823 | 22 of 24 |
+|                      | Chunks searched | Answer in the top 5 |
+| -------------------- | --------------- | ------------------- |
+| User guide           | 26              | 23 of 24            |
+| Whole knowledge base | 1,823           | 22 of 24            |
 
 The two misses on the whole knowledge base are our running question and Q11, "The heating turns down every time I nip out to the shops", which is about geofencing.
 
 ### Why this breaks
 
-The customer and the documentation describe the same thing in different words. The customer says the heating comes on *before the time I set*. The user guide says Warm Wake *starts the heating early*, and never mentions a time the customer set. A question about "heating" and "the time I set" looks most like other sections about heating and schedules. With 26 chunks that doesn't matter much; with 1,823, plenty of chunks are about heating and schedules. The more documents you add, the more near misses there are to beat the right one.
+The customer and the documentation describe the same thing in different words. The customer says the heating comes on _before the time I set_. The user guide says Warm Wake _starts the heating early_, and never mentions a time the customer set. A question about "heating" and "the time I set" looks most like other sections about heating and schedules. With 26 chunks that doesn't matter much; with 1,823, plenty of chunks are about heating and schedules. The more documents you add, the more near misses there are to beat the right one.
 
 What if the documentation came with the questions customers actually ask?
 
 <!-- Sections 4 to 6 (FAQs, citations, keeping it current) go here. -->
 
-## 7. Share it: an MCP server
+## 4. Share it: an MCP server
 
 **Demo:** `demo/07_agent.py`, which starts `demo/07_docs_server.py`
 
 Our search lives inside our scripts. Demos 3 to 6 each carry their own copy of the code that reads the documents, splits them into chunks, embeds them and searches the database: 89 lines in demo 3. That's fine for teaching. In a company, the support chat, the help website, the staff's own tools and the AI assistants people already use would all need that search. A copy in each, every one a little different, is how answers start to disagree.
 
-Module 3 had the fix: an **MCP server**, a small program that offers tools to any MCP client. So we put the search behind one server, and every application asks it. This is what *exposing existing company functionality to an LLM* means in practice. The search already exists; the server is a thin layer that lets any model use it.
+Module 3 had the fix: an **MCP server**, a small program that offers tools to any MCP client. So we put the search behind one server, and every application asks it. This is what _exposing existing company functionality to an LLM_ means in practice. The search already exists; the server is a thin layer that lets any model use it.
 
 ### The server
 
@@ -213,7 +254,7 @@ def search_docs(query: str) -> str:
     ...
 ```
 
-It uses the same database as demos 3 to 6, `demo/output/knowledge.db`, and checks it against the documents on every search. So an edited document can be found straight away, as in section 6, without restarting the server.
+It uses the same ChromaDB collection as demos 3 to 6, in `demo/output/chroma/`, and checks it against the documents on every search. So an edited document can be found straight away, as in section 6, without restarting the server.
 
 ### The agent
 
@@ -243,17 +284,17 @@ The answer was in the chunks the agent found, for 24 questions: 24 (1.2 searches
 
 Look at what it searched for. The customer wrote "before the time I set". The model wrote "early start, preheat, learns how long home takes to warm to target temperature": the words a manual uses. That is the gap demo 3 fell into, and the model stepped over it. Warm Wake came **first**, where demo 3 had it sixth, and the answer has the 90 minutes, the sunrise symbol and the place to turn it off. It cites the section it used, once at the end, although we asked for a citation after every sentence.
 
-| | Demo 3: we search | Demo 7: the model searches |
-|---|---|---|
-| What is searched for | The customer's words, as they are | Words the model chooses |
-| Searches per question | 1 | 1.2: four of the 24 searched twice |
-| Answer in what was found | 22 of 24 | 24 of 24 (23 from the first search alone) |
-| Warm Wake, for our question | 6th | 1st |
-| Our question: tokens in | 906 | 1,063 |
-| Our question: cost | $0.0001 | $0.0002 |
-| Our question: time | 2.1 seconds | 5.6 seconds |
+|                             | Demo 3: we search                 | Demo 7: the model searches                |
+| --------------------------- | --------------------------------- | ----------------------------------------- |
+| What is searched for        | The customer's words, as they are | Words the model chooses                   |
+| Searches per question       | 1                                 | 1.2: four of the 24 searched twice        |
+| Answer in what was found    | 22 of 24                          | 24 of 24 (23 from the first search alone) |
+| Warm Wake, for our question | 6th                               | 1st                                       |
+| Our question: tokens in     | 906                               | 1,063                                     |
+| Our question: cost          | $0.0001                           | $0.0002                                   |
+| Our question: time          | 2.1 seconds                       | 5.6 seconds                               |
 
-Both of demo 3's misses were found: our question, and Q11, *"The heating turns down every time I nip out to the shops"*, where the model searched for "stop away mode geofencing presence detection". Three of the four second searches were for error codes: the first search found what the code means, and the second went back for the fix. The fourth was Q11 going back for how to turn geofencing off. (Every question's searches and answer are in `demo/output/07_agent.json`.)
+Both of demo 3's misses were found: our question, and Q11, _"The heating turns down every time I nip out to the shops"_, where the model searched for "stop away mode geofencing presence detection". Three of the four second searches were for error codes: the first search found what the code means, and the second went back for the fix. The fourth was Q11 going back for how to turn geofencing off. (Every question's searches and answer are in `demo/output/07_agent.json`.)
 
 The price is a second model call. The model reads the question to write a search, then reads the results to answer, so every question takes at least two calls instead of one. It is still a fraction of a cent, but it is more than twice as slow.
 
@@ -272,7 +313,13 @@ Claude Desktop takes the same command as JSON, in `claude_desktop_config.json` (
   "mcpServers": {
     "dormouse-docs": {
       "command": "uv",
-      "args": ["run", "--directory", "/full/path/to/module-06-rag-and-proprietary-knowledge", "python", "demo/07_docs_server.py"]
+      "args": [
+        "run",
+        "--directory",
+        "/full/path/to/module-06-rag-and-proprietary-knowledge",
+        "python",
+        "demo/07_docs_server.py"
+      ]
     }
   }
 }

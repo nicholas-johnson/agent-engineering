@@ -3,15 +3,15 @@
 #                         or: source ../../.venv/bin/activate && python playground/ask-your-docs/play.py
 #
 # To play: ask your own questions (an empty line stops), or point DOCS at a folder of your own Markdown.
-# Vectors are kept in output/knowledge.db, so only new or changed chunks are embedded.
+# Vectors are kept in a ChromaDB store in output/chroma, so only new or changed chunks are embedded.
 
 import hashlib
 import json
 import re
-import sqlite3
 from pathlib import Path
 
-import sqlite_vec
+import chromadb
+from chromadb.config import Settings
 from dotenv import load_dotenv
 from openai import OpenAI
 
@@ -22,10 +22,11 @@ DOCS = HERE.parent.parent / "data" / "docs"  # any folder of Markdown files will
 OUTPUT = HERE / "output"
 OUTPUT.mkdir(exist_ok=True)
 
-DATABASE = OUTPUT / "knowledge.db"
+DATABASE = OUTPUT / "chroma"
 MODEL = "gpt-6-luna"
 EMBEDDING_MODEL = "text-embedding-3-small"
 BATCH = 100
+UPSERT = 5000  # Chroma stores at most about 5,000 chunks in one call
 TOP = 5  # chunks the model is given for each question
 
 # Demo 5's instructions. Change the first line if you point DOCS at your own documents.
@@ -109,41 +110,42 @@ def embed(texts):
     return vectors
 
 
-def open_database():
-    db = sqlite3.connect(DATABASE)
-    db.enable_load_extension(True)
-    sqlite_vec.load(db)
-    db.enable_load_extension(False)
-    db.execute(
-        "create virtual table if not exists chunks using vec0("
-        "id text primary key, embedding float[1536] distance_metric=cosine,"
-        "document text, +text text, +checksum text)"
+def open_collection():
+    database = chromadb.PersistentClient(path=str(DATABASE), settings=Settings(anonymized_telemetry=False))
+    # Compare by cosine similarity, and use our own embeddings rather than Chroma's built-in model.
+    return database.get_or_create_collection(
+        "chunks", configuration={"hnsw": {"space": "cosine"}}, embedding_function=None
     )
-    return db
 
 
-def update(db, chunks):
+def update(collection, chunks):
     # Embed new and changed chunks, and remove chunks that are no longer in DOCS.
-    stored = dict(db.execute("select id, checksum from chunks"))
-    current = {c["id"]: hashlib.sha256(c["text"].encode()).hexdigest() for c in chunks}
-    changed = [c for c in chunks if stored.get(c["id"]) != current[c["id"]]]
-    for id in (set(stored) - set(current)) | {c["id"] for c in changed}:
-        db.execute("delete from chunks where id = ?", (id,))
-    for chunk, vector in zip(changed, embed([c["text"] for c in changed])):
-        db.execute(
-            "insert into chunks (id, embedding, document, text, checksum) values (?, ?, ?, ?, ?)",
-            (chunk["id"], sqlite_vec.serialize_float32(vector), chunk["document"], chunk["text"], current[chunk["id"]]),
+    stored = collection.get(include=["metadatas"])
+    stored = dict(zip(stored["ids"], (m["checksum"] for m in stored["metadatas"])))
+    checksums = {c["id"]: hashlib.sha256(c["text"].encode()).hexdigest() for c in chunks}
+    changed = [c for c in chunks if stored.get(c["id"]) != checksums[c["id"]]]
+    removed = set(stored) - set(checksums)
+
+    if removed:
+        collection.delete(ids=list(removed))
+    vectors = embed([c["text"] for c in changed])
+    for start in range(0, len(changed), UPSERT):
+        batch = changed[start : start + UPSERT]
+        collection.upsert(
+            ids=[c["id"] for c in batch],
+            embeddings=vectors[start : start + UPSERT],
+            documents=[c["text"] for c in batch],
+            metadatas=[{"document": c["document"], "checksum": checksums[c["id"]]} for c in batch],
         )
-    db.commit()
 
 
-def search(db, question):
+def search(collection, question):
     [vector] = embed([question])
-    rows = db.execute(
-        "select id, 1 - distance, text from chunks where embedding match ? and k = ? order by distance",
-        (sqlite_vec.serialize_float32(vector), TOP),
-    )
-    return [{"id": id, "similarity": round(similarity, 3), "text": text} for id, similarity, text in rows]
+    results = collection.query(query_embeddings=[vector], n_results=TOP, include=["distances", "documents"])
+    return [
+        {"id": id, "similarity": round(1 - distance, 3), "text": text}
+        for id, distance, text in zip(results["ids"][0], results["distances"][0], results["documents"][0])
+    ]
 
 
 def answer(question, found):
@@ -170,8 +172,8 @@ def check(citations, found):
 
 documents = load_documents(DOCS)
 chunks = [chunk for document in documents for chunk in split_into_chunks(document)]
-db = open_database()
-update(db, chunks)
+collection = open_collection()
+update(collection, chunks)
 print(f"{len(documents):,} documents, {len(chunks):,} chunks. Ask a question; an empty line stops.\n")
 
 transcript = []
@@ -180,7 +182,7 @@ while True:
     if not question:
         break
 
-    found = search(db, question)
+    found = search(collection, question)
     reply = answer(question, found)
     reply["citations"] = check(reply["citations"], found)
 

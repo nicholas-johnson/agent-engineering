@@ -15,7 +15,7 @@ source ../../.venv/bin/activate
 python playground/grounding-rules/play.py
 ```
 
-Needs `OPENAI_API_KEY` in `.env`. The first run embeds all 1,823 chunks and keeps them in `playground/grounding-rules/output/knowledge.db`. After that, a run makes 174 model calls, eight at a time, and took about a minute and a half. Every question, rule, reply and verdict is written to `playground/grounding-rules/output/results.json`.
+Needs `OPENAI_API_KEY` in `.env`. The first run embeds all 1,823 chunks and keeps them in a ChromaDB store in `playground/grounding-rules/output/chroma`. After that, a run makes 174 model calls, eight at a time, and took about a minute and a half. Every question, rule, reply and verdict is written to `playground/grounding-rules/output/results.json`.
 
 ---
 

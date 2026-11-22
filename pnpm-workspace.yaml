@@ -3,6 +3,7 @@ packages:
   - 'clip-deck'
   - 'social-scripts'
   - 'day-*/module-*/slides'
+  - 'day-*/recap/slides'
   - 'day-*/closing/slides'
 
 shamefullyHoist: true

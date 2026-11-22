@@ -3,11 +3,11 @@
 import hashlib
 import json
 import re
-import sqlite3
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-import sqlite_vec
+import chromadb
+from chromadb.config import Settings
 from dotenv import load_dotenv
 from openai import OpenAI
 
@@ -18,7 +18,7 @@ DATA = HERE.parent / "data"
 OUTPUT = HERE / "output"
 OUTPUT.mkdir(exist_ok=True)
 
-DATABASE = OUTPUT / "knowledge.db"
+DATABASE = OUTPUT / "chroma"
 MODEL = "gpt-6-luna"
 EMBEDDING_MODEL = "text-embedding-3-small"
 BATCH = 100
@@ -91,42 +91,39 @@ def embed(texts):
     return vectors
 
 
-def open_database():
-    db = sqlite3.connect(DATABASE)
-    db.enable_load_extension(True)
-    sqlite_vec.load(db)
-    db.enable_load_extension(False)
-    db.execute(
-        "create virtual table if not exists chunks using vec0("
-        "id text primary key, embedding float[1536] distance_metric=cosine,"
-        "audience text, +text text, +checksum text)"
+def open_collection():
+    database = chromadb.PersistentClient(path=str(DATABASE), settings=Settings(anonymized_telemetry=False))
+    # Compare by cosine similarity, and use our own embeddings rather than Chroma's built-in model.
+    return database.get_or_create_collection(
+        "chunks", configuration={"hnsw": {"space": "cosine"}}, embedding_function=None
     )
-    return db
 
 
-def update(db, chunks):
+def update(collection, chunks):
     # Embed new and changed chunks only, so later runs start straight away.
-    stored = dict(db.execute("select id, checksum from chunks"))
+    stored = collection.get(include=["metadatas"])
+    stored = dict(zip(stored["ids"], (m["checksum"] for m in stored["metadatas"])))
     checksums = {c["id"]: hashlib.sha256(c["text"].encode()).hexdigest() for c in chunks}
     changed = [c for c in chunks if stored.get(c["id"]) != checksums[c["id"]]]
-    for id in (set(stored) - set(checksums)) | {c["id"] for c in changed}:
-        db.execute("delete from chunks where id = ?", (id,))
-    for chunk, vector in zip(changed, embed([c["text"] for c in changed])):
-        db.execute(
-            "insert into chunks (id, embedding, audience, text, checksum) values (?, ?, ?, ?, ?)",
-            (chunk["id"], sqlite_vec.serialize_float32(vector), chunk["audience"], chunk["text"], checksums[chunk["id"]]),
+    removed = set(stored) - set(checksums)
+    if removed:
+        collection.delete(ids=list(removed))
+    if changed:
+        collection.upsert(
+            ids=[c["id"] for c in changed],
+            embeddings=embed([c["text"] for c in changed]),
+            documents=[c["text"] for c in changed],
+            metadatas=[{"audience": c["audience"], "checksum": checksums[c["id"]]} for c in changed],
         )
-    db.commit()
 
 
-def search(db, question):
+def search(collection, question):
     vector = client.embeddings.create(model=EMBEDDING_MODEL, input=question).data[0].embedding
-    # Module 5's metadata filter: only documents for this audience are searched at all.
-    rows = db.execute(
-        "select id, text from chunks where embedding match ? and k = ? and audience = ? order by distance",
-        (sqlite_vec.serialize_float32(vector), TOP, SESSION["audience"]),
+    # Module 6's metadata filter: only documents for this audience are searched at all.
+    results = collection.query(
+        query_embeddings=[vector], n_results=TOP, where={"audience": SESSION["audience"]}, include=["documents"]
     )
-    return [{"id": id, "text": text} for id, text in rows]
+    return [{"id": id, "text": text} for id, text in zip(results["ids"][0], results["documents"][0])]
 
 
 def tool(name, description, **properties):
@@ -222,11 +219,11 @@ def ask(question, documentation, injection, defence):
 
 documents = load_documents(DATA / "kb")
 chunks = [chunk for document in documents for chunk in split_into_chunks(document)]
-db = open_database()
-update(db, chunks)
+collection = open_collection()
+update(collection, chunks)
 
 question = attacks["question"]
-documentation = "\n\n".join(f'<chunk id="{c["id"]}">\n{c["text"]}\n</chunk>' for c in search(db, question))
+documentation = "\n\n".join(f'<chunk id="{c["id"]}">\n{c["text"]}\n</chunk>' for c in search(collection, question))
 
 TRIALS = [
     ("Obvious injection", attacks["injection"]["obvious"], None),

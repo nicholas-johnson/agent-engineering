@@ -15,7 +15,7 @@ source ../../.venv/bin/activate
 python playground/chunk-headings/play.py
 ```
 
-Needs `OPENAI_API_KEY` in `.env`. The first run embeds all 1,823 chunks twice and keeps each way in its own table in `playground/chunk-headings/output/chunks.db`. That took 17 minutes when I ran it, with the embeddings API slow and other scripts embedding at the same time; on a quiet day it's a few minutes. After that a run only embeds the 24 questions. Where the right chunk landed, and the top five each way, are written to `playground/chunk-headings/output/results.json`.
+Needs `OPENAI_API_KEY` in `.env`. The first run embeds all 1,823 chunks twice and keeps each way in its own ChromaDB collection in `playground/chunk-headings/output/chroma`. That took 17 minutes when I ran it, with the embeddings API slow and other scripts embedding at the same time; on a quiet day it's a few minutes. After that a run only embeds the 24 questions. Where the right chunk landed, and the top five each way, are written to `playground/chunk-headings/output/results.json`.
 
 ---
 
@@ -34,7 +34,7 @@ Either way, the database stores the whole chunk, heading line included, because 
 Where the first chunk with the facts lands (1 = first), searching 1,823 chunks:
 
   Question                                                    without      with
-  Why does my Dormouse turn the heating on before the ...          90         6
+  Why does my Dormouse turn the heating on before the ...          89         6
   We switched the heating off before going away in Jan...           1         1
   How do I warm the house up quickly for a little while?            1         1
   Boost isn't warm enough for me. Can I make it hotter?             1         1
@@ -44,7 +44,7 @@ Where the first chunk with the facts lands (1 = first), searching 1,823 chunks:
   Can I have a separate thermostat for upstairs?                    3         1
   We had a power cut. Will I lose my heating times?                 1         1
   Is the heating off while the thermostat updates itse...           2         4
-  The heating turns down every time I nip out to the s...           6         9
+  The heating turns down every time I nip out to the s...           6        10
   Where can I see how much gas I've been using?                     1         2
   How do I wipe the thermostat before I sell the house?             3         1
   There's a little sun coming up on the screen. What d...           1         1
@@ -62,12 +62,12 @@ Where the first chunk with the facts lands (1 = first), searching 1,823 chunks:
   Facts in the top 5, of 24                                        21        22
 ```
 
-The API can return very slightly different vectors from one call to the next, so a rank may move by one between runs, or between this and the other playgrounds.
+The API can return very slightly different vectors from one call to the next, so a rank may move by one between runs, or between this and the other playgrounds. ChromaDB's search is also approximate: it finds the nearest chunks exactly, but far down the list it can skip one. When I checked, an exact search of the same vectors put the Warm Wake chunk 90th, where ChromaDB put it 89th.
 
 ## Things to notice
 
 - **One more question in the top five.** 22 against 21. The one that crossed the line is E-217, from 9th to 3rd.
-- **The ranks move far more than the count.** The Warm Wake question jumps from 90th to 6th. The section itself never says "Dormouse"; with its heading line, it starts `Dormouse Thermostat User Guide > Schedules > Warm Wake`, and the question asks about "my Dormouse" and "the time I set". It still misses the top five.
+- **The ranks move far more than the count.** The Warm Wake question jumps from 89th to 6th. The section itself never says "Dormouse"; with its heading line, it starts `Dormouse Thermostat User Guide > Schedules > Warm Wake`, and the question asks about "my Dormouse" and "the time I set". It still misses the top five.
 - **The heading helps when it names what the question asks about.** E-305 goes from 4th to 1st, and "How do I wipe the thermostat" from 3rd to 1st.
 - **And hurts in the same way.** For "E-110 keeps appearing on the display", the first chunk without headings was a section of the known-issues document that says to check the router. With headings, the first two are chunks headed "What E-110 means". Their headings match the question perfectly, and neither mentions the router; the first chunk that does comes third.
 - **Eight questions better, six worse, ten the same.** The heading line moves chunks towards questions about their topic, which is usually, but not always, where the answer is.

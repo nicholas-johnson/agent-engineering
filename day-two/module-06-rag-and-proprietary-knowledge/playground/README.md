@@ -2,7 +2,7 @@
 
 Things to play with between exercises: the choices inside a RAG system, and what each one costs. How to cut the documents into chunks, what to put at the top of each chunk, how many chunks to send, what to tell the model, and what happens when a fact changes. Each folder has a short script to run and a list of ideas to take it further. None of them are required, and there are no right answers.
 
-They all need your OpenAI API key in `.env` (see the module README). Each script builds what it needs from `data/`, so you don't have to run the demos first. The scripts that embed the knowledge base keep the vectors in a sqlite-vec database in their own `output/` folder, so only the first run waits for the embeddings.
+They all need your OpenAI API key in `.env` (see the module README). Each script builds what it needs from `data/`, so you don't have to run the demos first. The scripts that embed the knowledge base keep the vectors in a ChromaDB store in their own `output/` folder, so only the first run waits for the embeddings.
 
 From the module folder (`day-two/module-06-rag-and-proprietary-knowledge`):
 

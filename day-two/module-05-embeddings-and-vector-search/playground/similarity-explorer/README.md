@@ -25,7 +25,7 @@ printf 'The heating works\nThe heating does not work\n\n\n' | uv run python play
 
 ---
 
-Each sentence is turned into 1,536 numbers by `text-embedding-3-small`, as in demo 4, and each score is the **cosine similarity** of two of those vectors, as in demo 5: near 1 when they point the same way, near 0 when they have nothing to do with each other. The list comes back closest first.
+Each sentence is turned into 1,536 numbers by `text-embedding-3-small`, as in demo 6, and each score is the **cosine similarity** of two of those vectors, as in demos 4 to 6: near 1 when they point the same way, near 0 when they have nothing to do with each other. The list comes back closest first.
 
 ```text
 Sentence: The heating doesn't work

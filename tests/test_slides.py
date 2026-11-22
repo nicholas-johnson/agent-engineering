@@ -27,17 +27,27 @@ VALID_SLIDE_TYPES = {
     "description",
     "network",
     "tool-loop",
+    "word-line",
+    "word-map",
     "custom",
 }
 
 
 def _discover_slide_decks() -> list[tuple[str, Path, str]]:
+    """Each module's deck, plus each day's recap and closing decks (named like day-two-recap)."""
     decks: list[tuple[str, Path, str]] = []
-    for pkg_json in sorted(REPO_ROOT.glob("day-*/module-*/slides/package.json")):
-        slides_dir = pkg_json.parent
-        module_name = slides_dir.parent.name
-        pkg_name = json.loads(pkg_json.read_text(encoding="utf-8"))["name"]
-        decks.append((module_name, slides_dir, pkg_name))
+    for pattern in ("day-*/module-*/slides", "day-*/recap/slides", "day-*/closing/slides"):
+        for slides_dir in sorted(REPO_ROOT.glob(pattern)):
+            pkg_json = slides_dir / "package.json"
+            if not pkg_json.is_file():
+                continue
+            folder = slides_dir.parent
+            if folder.name.startswith("module-"):
+                module_name = folder.name
+            else:
+                module_name = f"{folder.parent.name}-{folder.name}"
+            pkg_name = json.loads(pkg_json.read_text(encoding="utf-8"))["name"]
+            decks.append((module_name, slides_dir, pkg_name))
     return decks
 
 
@@ -101,6 +111,7 @@ def test_prettier_module_slides() -> None:
             "--check",
             "day-*/module-*/slides/src/**",
             "day-*/closing/slides/src/**",
+            "day-*/recap/slides/src/**",
         ],
         cwd=REPO_ROOT,
         capture_output=True,
@@ -120,8 +131,11 @@ def test_prettier_module_slides() -> None:
     ids=[m for m, _, _ in SLIDE_DECKS],
 )
 def test_slides_schema_and_icons(module_name: str, slides_dir: Path, pkg_name: str) -> None:
-    number = module_name.split("-")[1]
-    assert pkg_name == f"@agent-engineering/module-{number}-slides", (
+    if module_name.startswith("module-"):
+        expected = f"@agent-engineering/module-{module_name.split('-')[1]}-slides"
+    else:
+        expected = f"@agent-engineering/{module_name}-slides"
+    assert pkg_name == expected, (
         f"{slides_dir}/package.json name {pkg_name!r} does not match folder {module_name!r}"
     )
 

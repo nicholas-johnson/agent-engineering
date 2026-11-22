@@ -267,20 +267,15 @@ SCRIPTS: tuple[ScriptCase, ...] = (
     # --- Embeddings and Vector Search ---
     ScriptCase(
         f"{EMBEDDINGS}/demo/01_keyword_search.py",
-        outputs=("01_keyword_search.json",),
+        outputs=("01_keyword_search.json", "01_index.json"),
     ),
     ScriptCase(
         f"{EMBEDDINGS}/demo/02_count_vectors.py",
         outputs=("02_count_vectors.json",),
     ),
     ScriptCase(
-        f"{EMBEDDINGS}/demo/05_similarity_search.py",
-        outputs=("05_similarity_search.json",),
-        keys=("OPENAI_API_KEY",),
-    ),
-    ScriptCase(
-        f"{EMBEDDINGS}/demo/06_vector_database.py",
-        outputs=("06_vector_database.json",),
+        f"{EMBEDDINGS}/demo/06_similarity_search.py",
+        outputs=("06_similarity_search.json",),
         keys=("OPENAI_API_KEY",),
     ),
     ScriptCase(
@@ -500,11 +495,15 @@ DEDICATED_SCRIPTS: frozenset[str] = frozenset(
         f"{INTRO}/playground/neural-knobs/complete.py",
         f"{PROVIDERS}/data/build_prices.py",
         f"{PROVIDERS}/demo/01_big_labs.py",
-        # Demo 4 reads the word vectors demo 3 writes, so they run in order below.
-        f"{EMBEDDINGS}/demo/03_word_vectors.py",
-        f"{EMBEDDINGS}/demo/04_document_vectors.py",
+        # Demo 4 reads the map demo 3 writes, so they run in order below.
+        f"{EMBEDDINGS}/demo/03_word_map.py",
+        f"{EMBEDDINGS}/demo/04_sentence_vectors.py",
+        # Checked below for where its sums put Warm Wake.
+        f"{EMBEDDINGS}/demo/05_word_vectors.py",
         # Copies documents from Module 6: checked against them below instead.
         f"{EMBEDDINGS}/data/copy_docs.py",
+        # Writes committed data: checked against it below, in a temporary folder.
+        f"{EMBEDDINGS}/data/build_word_line.py",
         # Write the committed knowledge base and its FAQ with a model, so the same applies.
         f"{RAG}/data/build_docs.py",
         f"{RAG}/data/build_faq.py",
@@ -587,6 +586,22 @@ def test_build_tokens_matches_committed_data(tmp_path: Path) -> None:
 
 
 @pytest.mark.offline
+def test_build_word_line_matches_committed_data(tmp_path: Path) -> None:
+    """Run build_word_line.py in tmp_path so committed data/word_line.json is never modified."""
+    data_dir = REPO_ROOT / EMBEDDINGS / "data"
+    shutil.copy2(data_dir / "build_word_line.py", tmp_path / "build_word_line.py")
+    (tmp_path / "docs").mkdir()
+    shutil.copy2(data_dir / "docs" / "user-guide.md", tmp_path / "docs" / "user-guide.md")
+
+    execute_python_script(tmp_path / "build_word_line.py", cwd=tmp_path)
+
+    generated = json.loads((tmp_path / "word_line.json").read_text(encoding="utf-8"))
+    committed = json.loads((data_dir / "word_line.json").read_text(encoding="utf-8"))
+    assert len(generated["positions"]) == 16
+    assert generated == committed
+
+
+@pytest.mark.offline
 def test_embeddings_data_is_consistent() -> None:
     """Module 5's documents are an exact copy of Module 6's, and every question's answers exist."""
     data = REPO_ROOT / EMBEDDINGS / "data"
@@ -606,15 +621,29 @@ def test_embeddings_data_is_consistent() -> None:
         assert set(question["expected"]) <= ids, question["question"]
 
 
-@pytest.mark.api
-@pytest.mark.slow
-def test_word_vectors_then_document_vectors(pytestconfig: pytest.Config) -> None:
-    """Demo 4 averages the word vectors demo 3 trains, so run them in order."""
-    check_requirements(pytestconfig, keys=("OPENAI_API_KEY",))
+@pytest.mark.offline
+def test_word_map_then_sentence_vectors() -> None:
+    """Demo 4 adds up the two numbers per word that demo 3's map gives, so run them in order."""
     demo = REPO_ROOT / EMBEDDINGS / "demo"
-    trained = execute_python_script(demo / "03_word_vectors.py", outputs=("03_word_vectors.txt",))
-    assert "warm" in trained.stdout
-    execute_python_script(demo / "04_document_vectors.py", outputs=("04_document_vectors.json",))
+    mapped = execute_python_script(demo / "03_word_map.py", outputs=("03_word_map.json",))
+    assert "warm and wake" in mapped.stdout
+    summed = execute_python_script(demo / "04_sentence_vectors.py", outputs=("04_sentence_vectors.json",))
+    assert "Energy reports" in summed.stdout
+    ranked = json.loads((demo / "output" / "04_sentence_vectors.json").read_text(encoding="utf-8"))
+    places = {r["id"]: r["rank"] for r in ranked["libraries"]["All the documentation"]}
+    assert places["understand-warm-wake"] == 71
+
+
+@pytest.mark.offline
+@pytest.mark.slow
+def test_word_vectors_and_their_sums() -> None:
+    """Demo 5 trains word2vec, then searches with the sums of its word vectors."""
+    demo = REPO_ROOT / EMBEDDINGS / "demo"
+    trained = execute_python_script(demo / "05_word_vectors.py", outputs=("05_word_vectors.txt", "05_question.json"))
+    assert "wake, sunrise" in trained.stdout
+    ranked = json.loads((demo / "output" / "05_question.json").read_text(encoding="utf-8"))
+    places = {r["id"]: r["rank"] for r in ranked["All the documentation"]}
+    assert places["understand-warm-wake"] == 8
 
 
 @pytest.mark.network

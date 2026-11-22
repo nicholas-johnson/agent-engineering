@@ -193,7 +193,7 @@ A: That's likely Warm Wake ... You can turn it off in
       icon: 'route',
       points: [
         '**Split** each document into **chunks**: one per section',
-        '**Embed** every chunk and store it in a vector database: **sqlite-vec** this time',
+        '**Embed** every chunk and store it in a **vector database**: ChromaDB',
         '**Retrieve** the 5 chunks nearest the question',
         '**Generate** the answer from those chunks alone',
         'Retrieve, then generate: **RAG**',
@@ -214,30 +214,80 @@ heat up, and starts the heating early by up to 90 minutes. ...`,
         'Everything under one heading, down to the next',
         'Starts with the **title and headings** above it, so it says what it is about',
         '275 documents make **1,823 chunks**, 86 words on average',
-        'A checksum per chunk: a rerun only embeds what changed',
       ],
     },
   },
   {
     type: 'code',
     content: {
-      title: 'Retrieve, then answer',
-      code: `rows = db.execute(
-    """select id, 1 - distance, text from chunks
-       where embedding match ? and k = 5
-       order by distance""",
-    (sqlite_vec.serialize_float32(vector),),
+      title: 'ChromaDB',
+      code: `database = chromadb.PersistentClient(
+    path=str(DATABASE),
+    settings=Settings(anonymized_telemetry=False),
 )
+collection = database.get_or_create_collection(
+    "chunks",
+    configuration={"hnsw": {"space": "cosine"}},
+    embedding_function=None,
+)`,
+      highlights: [
+        'A **vector database**: stores vectors, finds the nearest, filters by facts about each',
+        'Runs inside our script: one folder, **33 MB** for 1,823 chunks',
+        'A **collection** is like a table. Compare by **cosine**',
+        "`embedding_function=None`: **our** vectors, not Chroma's own model",
+      ],
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'Store once',
+      code: `collection.upsert(
+    ids=[c["id"] for c in changed],
+    embeddings=embed([c["text"] for c in changed]),
+    documents=[c["text"] for c in changed],
+    metadatas=[{"document": ..., "audience": ...,
+                "checksum": ...} for c in changed],
+)`,
+      highlights: [
+        '**Metadata**: facts about each chunk, to filter by',
+        'A **checksum** of the text: embed only what is new or changed',
+        'First run: **1,823** chunks embedded. Second run: **0**',
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Not every vector is compared',
+      icon: 'route',
+      points: [
+        '**HNSW**: each vector is linked to its near neighbours',
+        'A search **hops** from vector to vector towards the question',
+        'Millions of vectors in milliseconds',
+        '**Approximate**: very occasionally it misses a slightly closer one. Here, the same top 5 as comparing all 1,823',
+      ],
+      credit:
+        'Malkov & Yashunin (2018). "Efficient and Robust Approximate Nearest Neighbor Search Using Hierarchical Navigable Small World Graphs." arXiv:1603.09320',
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'Retrieve, then answer',
+      code: `results = collection.query(query_embeddings=[vector], n_results=5)
+found = zip(results["ids"][0], results["documents"][0])
 
 documentation = "\\n\\n".join(
-    f'<chunk id="{c["id"]}">\\n{c["text"]}\\n</chunk>' for c in found)
+    f'<chunk id="{id}">\\n{text}\\n</chunk>' for id, text in found)
 response = client.responses.create(
     model=MODEL,
     instructions=f"{INSTRUCTIONS}\\n\\nUse our documentation:\\n\\n{documentation}",
     input=question,
 )`,
       highlights: [
-        "Module 5's nearest-neighbour search, in SQL",
+        "Module 5's nearest-neighbour search: the **5 closest** chunks",
+        '`where={"document": "user-guide.md"}`: only chunks whose metadata matches',
         'Each chunk keeps its id, so we can tell where an answer came from',
       ],
     },
@@ -302,7 +352,7 @@ A: Dormouse may turn the heating on early so the room reaches the
   {
     type: 'title',
     content: {
-      title: '7. Share it: an MCP server',
+      title: '4. Share it: an MCP server',
       subtitle: 'One search for every assistant',
       icon: 'share',
     },

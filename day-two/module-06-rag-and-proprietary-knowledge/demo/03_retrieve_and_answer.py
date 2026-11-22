@@ -3,11 +3,11 @@
 import hashlib
 import json
 import re
-import sqlite3
 import time
 from pathlib import Path
 
-import sqlite_vec
+import chromadb
+from chromadb.config import Settings
 from dotenv import load_dotenv
 from openai import OpenAI
 
@@ -18,7 +18,7 @@ DATA = HERE.parent / "data"
 OUTPUT = HERE / "output"
 OUTPUT.mkdir(exist_ok=True)
 
-DATABASE = OUTPUT / "knowledge.db"
+DATABASE = OUTPUT / "chroma"
 MODEL = "gpt-6-luna"
 EMBEDDING_MODEL = "text-embedding-3-small"
 BATCH = 100
@@ -55,7 +55,7 @@ def split_into_chunks(document):
             id = f"{document['name']}#{slug(path[-1]) if path else 'top'}"
             while id in {c["id"] for c in chunks}:
                 id += "-2"
-            chunks.append({"id": id, "document": document["name"], "text": f"{heading}\n\n{content}"})
+            chunks.append({"id": id, "document": document["name"], "audience": document["audience"], "text": f"{heading}\n\n{content}"})
 
     for line in document["body"].splitlines():
         heading = re.match(r"(#{1,3}) (.+)", line)
@@ -80,44 +80,44 @@ def embed(texts):
     return vectors
 
 
-def open_database():
-    db = sqlite3.connect(DATABASE)
-    db.enable_load_extension(True)
-    sqlite_vec.load(db)
-    db.enable_load_extension(False)
-    db.execute(
-        "create virtual table if not exists chunks using vec0("
-        "id text primary key, embedding float[1536] distance_metric=cosine,"
-        "document text, +text text, +checksum text)"
+def open_collection():
+    database = chromadb.PersistentClient(path=str(DATABASE), settings=Settings(anonymized_telemetry=False))
+    # Compare by cosine similarity, and use our own embeddings rather than Chroma's built-in model.
+    return database.get_or_create_collection(
+        "chunks", configuration={"hnsw": {"space": "cosine"}}, embedding_function=None
     )
-    return db
 
 
-def update(db, chunks):
+def update(collection, chunks):
     # Embed new and changed chunks, and remove chunks that are no longer in the documents.
-    stored = dict(db.execute("select id, checksum from chunks"))
+    stored = collection.get(include=["metadatas"])
+    stored = dict(zip(stored["ids"], (m["checksum"] for m in stored["metadatas"])))
     checksums = {c["id"]: hashlib.sha256(c["text"].encode()).hexdigest() for c in chunks}
     changed = [c for c in chunks if stored.get(c["id"]) != checksums[c["id"]]]
     removed = set(stored) - set(checksums)
 
-    for id in removed | {c["id"] for c in changed}:
-        db.execute("delete from chunks where id = ?", (id,))
-    for chunk, vector in zip(changed, embed([c["text"] for c in changed])):
-        db.execute(
-            "insert into chunks (id, embedding, document, text, checksum) values (?, ?, ?, ?, ?)",
-            (chunk["id"], sqlite_vec.serialize_float32(vector), chunk["document"], chunk["text"], checksums[chunk["id"]]),
+    if removed:
+        collection.delete(ids=list(removed))
+    if changed:
+        collection.upsert(
+            ids=[c["id"] for c in changed],
+            embeddings=embed([c["text"] for c in changed]),
+            documents=[c["text"] for c in changed],
+            metadatas=[
+                {"document": c["document"], "audience": c["audience"], "checksum": checksums[c["id"]]}
+                for c in changed
+            ],
         )
-    db.commit()
     return len(changed), len(removed)
 
 
-def search(db, vector, only_document=None):
-    where, parameters = ("and document = ?", (only_document,)) if only_document else ("", ())
-    rows = db.execute(
-        f"select id, 1 - distance, text from chunks where embedding match ? and k = ? {where} order by distance",
-        (sqlite_vec.serialize_float32(vector), TOP, *parameters),
-    )
-    return [{"id": id, "similarity": round(similarity, 3), "text": text} for id, similarity, text in rows]
+def search(collection, vector, where=None):
+    # The TOP nearest chunks. `where` keeps only the chunks whose metadata matches.
+    results = collection.query(query_embeddings=[vector], n_results=TOP, where=where, include=["distances", "documents"])
+    return [
+        {"id": id, "similarity": round(1 - distance, 3), "text": text}
+        for id, distance, text in zip(results["ids"][0], results["distances"][0], results["documents"][0])
+    ]
 
 
 def answer(question, found):
@@ -151,14 +151,14 @@ def contains_facts(text, facts):
 
 documents = load_documents(DATA / "docs")
 chunks = [chunk for document in documents for chunk in split_into_chunks(document)]
-db = open_database()
-changed, removed = update(db, chunks)
+collection = open_collection()
+changed, removed = update(collection, chunks)
 print(f"\n{len(documents):,} documents, {len(chunks):,} chunks. Embedded {changed:,} new or changed chunks.")
 (OUTPUT / "chunks.json").write_text(json.dumps(chunks, indent=2))
 
 print(f"\nQ: {QUESTION}")
 [question_vector] = embed([QUESTION])
-found = search(db, question_vector)
+found = search(collection, question_vector)
 for chunk in found:
     print(f"   {chunk['similarity']:.3f}  {chunk['id']}")
 result = answer(QUESTION, found)
@@ -169,10 +169,10 @@ print(f"   {result['input_tokens']:,} tokens in, ${result['cost_dollars']:.4f}, 
 questions = [q for q in json.loads((DATA / "questions.json").read_text()) if q["kind"] in ("everyday", "error code")]
 vectors = embed([q["question"] for q in questions])
 scores, checks = {}, []
-for name, only in [("user guide", "user-guide.md"), ("knowledge base", None)]:
+for name, where in [("user guide", {"document": "user-guide.md"}), ("knowledge base", None)]:
     hits = 0
     for q, vector in zip(questions, vectors):
-        top = search(db, vector, only)
+        top = search(collection, vector, where)
         hit = any(contains_facts(c["text"], q["facts"]) for c in top)
         hits += hit
         checks.append({"library": name, "id": q["id"], "question": q["question"], "found": hit, "top": [c["id"] for c in top]})

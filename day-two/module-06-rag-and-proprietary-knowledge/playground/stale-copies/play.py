@@ -3,15 +3,15 @@
 #                         or: source ../../.venv/bin/activate && python playground/stale-copies/play.py
 #
 # To play: change OLD_FACT and OLD_WORDINGS to another fact (the 48 hours of backup batteries, say),
-# or change NEAREST. Vectors are kept in output/knowledge.db, so reruns are quick.
+# or change NEAREST. Vectors are kept in a ChromaDB store in output/chroma, so reruns are quick.
 
 import hashlib
 import json
 import re
-import sqlite3
 from pathlib import Path
 
-import sqlite_vec
+import chromadb
+from chromadb.config import Settings
 from dotenv import load_dotenv
 from openai import OpenAI
 
@@ -22,7 +22,7 @@ DATA = HERE.parent.parent / "data"
 OUTPUT = HERE / "output"
 OUTPUT.mkdir(exist_ok=True)
 
-DATABASE = OUTPUT / "knowledge.db"
+DATABASE = OUTPUT / "chroma"
 EMBEDDING_MODEL = "text-embedding-3-small"
 BATCH = 100
 OLD_FACT = "A household invitation works for 7 days."  # what the documents say now
@@ -82,41 +82,36 @@ def embed(texts):
     return vectors
 
 
-def open_database():
-    db = sqlite3.connect(DATABASE)
-    db.enable_load_extension(True)
-    sqlite_vec.load(db)
-    db.enable_load_extension(False)
-    db.execute(
-        "create virtual table if not exists chunks using vec0("
-        "id text primary key, embedding float[1536] distance_metric=cosine,"
-        "document text, +text text, +checksum text)"
+def open_collection():
+    database = chromadb.PersistentClient(path=str(DATABASE), settings=Settings(anonymized_telemetry=False))
+    # Compare by cosine similarity, and use our own embeddings rather than Chroma's built-in model.
+    return database.get_or_create_collection(
+        "chunks", configuration={"hnsw": {"space": "cosine"}}, embedding_function=None
     )
-    return db
 
 
-def update(db, chunks):
-    stored = dict(db.execute("select id, checksum from chunks"))
-    current = {c["id"]: hashlib.sha256(c["text"].encode()).hexdigest() for c in chunks}
-    changed = [c for c in chunks if stored.get(c["id"]) != current[c["id"]]]
-    for id in (set(stored) - set(current)) | {c["id"] for c in changed}:
-        db.execute("delete from chunks where id = ?", (id,))
-    for chunk, vector in zip(changed, embed([c["text"] for c in changed])):
-        db.execute(
-            "insert into chunks (id, embedding, document, text, checksum) values (?, ?, ?, ?, ?)",
-            (chunk["id"], sqlite_vec.serialize_float32(vector), chunk["document"], chunk["text"], current[chunk["id"]]),
+def update(collection, chunks):
+    stored = collection.get(include=["metadatas"])
+    stored = dict(zip(stored["ids"], (m["checksum"] for m in stored["metadatas"])))
+    checksums = {c["id"]: hashlib.sha256(c["text"].encode()).hexdigest() for c in chunks}
+    changed = [c for c in chunks if stored.get(c["id"]) != checksums[c["id"]]]
+    removed = set(stored) - set(checksums)
+
+    if removed:
+        collection.delete(ids=list(removed))
+    if changed:
+        collection.upsert(
+            ids=[c["id"] for c in changed],
+            embeddings=embed([c["text"] for c in changed]),
+            documents=[c["text"] for c in changed],
+            metadatas=[{"document": c["document"], "checksum": checksums[c["id"]]} for c in changed],
         )
-    db.commit()
 
 
-def vector_ranking(db, text, k):
+def vector_ranking(collection, text, k):
     # Every chunk's id, nearest to the text first.
     [vector] = embed([text])
-    rows = db.execute(
-        "select id from chunks where embedding match ? and k = ? order by distance",
-        (sqlite_vec.serialize_float32(vector), k),
-    )
-    return [id for (id,) in rows]
+    return collection.query(query_embeddings=[vector], n_results=k, include=[])["ids"][0]
 
 
 def plain(text):
@@ -136,13 +131,13 @@ def sentences_saying(text, wordings):
 
 documents = {d["name"]: d for d in load_documents(DATA / "docs")}
 chunks = [chunk for document in documents.values() for chunk in split_into_chunks(document)]
-db = open_database()
-update(db, chunks)
+collection = open_collection()
+update(collection, chunks)
 
 # Plain text: every chunk that contains one of the wordings.
 by_text = [c for c in chunks if contains_facts(c["text"], ["|".join(OLD_WORDINGS)])]
 # Vectors: every chunk, nearest to the old fact first. A vector search would return the first NEAREST.
-ranking = vector_ranking(db, OLD_FACT, min(len(chunks), 4096))
+ranking = vector_ranking(collection, OLD_FACT, len(chunks))
 rank = {id: n for n, id in enumerate(ranking, 1)}
 in_nearest = sum(rank[c["id"]] <= NEAREST for c in by_text)
 furthest = max(rank[c["id"]] for c in by_text)

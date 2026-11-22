@@ -5,11 +5,11 @@ import hashlib
 import json
 import os
 import re
-import sqlite3
 from datetime import date
 from pathlib import Path
 
-import sqlite_vec
+import chromadb
+from chromadb.config import Settings
 from dotenv import load_dotenv
 from mcp.server.mcpserver import MCPServer
 from openai import OpenAI
@@ -21,7 +21,7 @@ DATA = HERE.parent / "data"
 OUTPUT = HERE / "output"
 OUTPUT.mkdir(exist_ok=True)
 
-DATABASE = OUTPUT / "knowledge.db"
+DATABASE = OUTPUT / "chroma"
 STATE = OUTPUT / "06_dormouse.json"  # Dormouse's data, as the API sees it; demo 6 resets it each run
 EMBEDDING_MODEL = "text-embedding-3-small"
 BATCH = 100
@@ -87,31 +87,29 @@ def embed(texts):
     return vectors
 
 
-def open_database():
-    db = sqlite3.connect(DATABASE)
-    db.enable_load_extension(True)
-    sqlite_vec.load(db)
-    db.enable_load_extension(False)
-    db.execute(
-        "create virtual table if not exists chunks using vec0("
-        "id text primary key, embedding float[1536] distance_metric=cosine,"
-        "audience text, +text text, +checksum text)"
+def open_collection():
+    database = chromadb.PersistentClient(path=str(DATABASE), settings=Settings(anonymized_telemetry=False))
+    # Compare by cosine similarity, and use our own embeddings rather than Chroma's built-in model.
+    return database.get_or_create_collection(
+        "chunks", configuration={"hnsw": {"space": "cosine"}}, embedding_function=None
     )
-    return db
 
 
-def update(db, chunks):
-    stored = dict(db.execute("select id, checksum from chunks"))
+def update(collection, chunks):
+    stored = collection.get(include=["metadatas"])
+    stored = dict(zip(stored["ids"], (m["checksum"] for m in stored["metadatas"])))
     checksums = {c["id"]: hashlib.sha256(c["text"].encode()).hexdigest() for c in chunks}
     changed = [c for c in chunks if stored.get(c["id"]) != checksums[c["id"]]]
-    for id in (set(stored) - set(checksums)) | {c["id"] for c in changed}:
-        db.execute("delete from chunks where id = ?", (id,))
-    for chunk, vector in zip(changed, embed([c["text"] for c in changed])):
-        db.execute(
-            "insert into chunks (id, embedding, audience, text, checksum) values (?, ?, ?, ?, ?)",
-            (chunk["id"], sqlite_vec.serialize_float32(vector), chunk["audience"], chunk["text"], checksums[chunk["id"]]),
+    removed = set(stored) - set(checksums)
+    if removed:
+        collection.delete(ids=list(removed))
+    if changed:
+        collection.upsert(
+            ids=[c["id"] for c in changed],
+            embeddings=embed([c["text"] for c in changed]),
+            documents=[c["text"] for c in changed],
+            metadatas=[{"audience": c["audience"], "checksum": checksums[c["id"]]} for c in changed],
         )
-    db.commit()
 
 
 def load():
@@ -134,16 +132,16 @@ def new_ticket(dormouse, customer, about):
 @server.tool()
 def search_docs(question: str) -> str:
     """Search Dormouse's documentation. Returns the five most relevant sections."""
-    db = open_database()
-    update(db, [chunk for document in load_documents(DATA / "kb") for chunk in split_into_chunks(document)])
+    collection = open_collection()
+    update(collection, [chunk for document in load_documents(DATA / "kb") for chunk in split_into_chunks(document)])
     [vector] = embed([question])
     audiences = AUDIENCES[account["role"]]
-    rows = db.execute(
-        f"select id, text from chunks where embedding match ? and k = ? and audience in ({', '.join('?' * len(audiences))})"
-        " order by distance",
-        (sqlite_vec.serialize_float32(vector), TOP, *audiences),
+    results = collection.query(
+        query_embeddings=[vector], n_results=TOP, where={"audience": {"$in": audiences}}, include=["documents"]
     )
-    return "\n\n".join(f'<chunk id="{id}">\n{text}\n</chunk>' for id, text in rows)
+    return "\n\n".join(
+        f'<chunk id="{id}">\n{text}\n</chunk>' for id, text in zip(results["ids"][0], results["documents"][0])
+    )
 
 
 # The server offers each person only the tools their role allows.

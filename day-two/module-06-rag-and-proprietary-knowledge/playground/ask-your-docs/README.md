@@ -15,7 +15,7 @@ source ../../.venv/bin/activate
 python playground/ask-your-docs/play.py
 ```
 
-Needs `OPENAI_API_KEY` in `.env`. The first run embeds all 1,823 chunks, which took about two minutes, and keeps them in `playground/ask-your-docs/output/knowledge.db`. After that, only new or changed chunks are embedded. Type a question and press Enter; an empty line stops. Every question, answer, citation and chunk is saved to `playground/ask-your-docs/output/transcript.json`.
+Needs `OPENAI_API_KEY` in `.env`. The first run embeds all 1,823 chunks, which took about two minutes, and keeps them in a ChromaDB store in `playground/ask-your-docs/output/chroma`. After that, only new or changed chunks are embedded. Type a question and press Enter; an empty line stops. Every question, answer, citation and chunk is saved to `playground/ask-your-docs/output/transcript.json`.
 
 You can also pipe the questions in:
 
@@ -25,7 +25,7 @@ printf 'How much does a Dormouse thermostat cost?\n\n' | uv run python playgroun
 
 ---
 
-This is demos 3 and 5 joined into a loop. Each question is embedded and compared with every chunk; the five nearest go to `gpt-6-luna` with demo 5's instructions: use only the documentation, quote each sentence you rely on with its chunk's id, and say so if the documentation doesn't answer. Each quote is then looked for, word for word, in the chunk it names. `quote checked` means it's there; `NOT IN THAT CHUNK` means the model misquoted or cited the wrong chunk. Under each answer are the chunks the search found, with their **cosine similarity** to the question.
+This is demos 3 and 5 joined into a loop. Each question is embedded, and the five nearest chunks go to `gpt-6-luna` with demo 5's instructions: use only the documentation, quote each sentence you rely on with its chunk's id, and say so if the documentation doesn't answer. Each quote is then looked for, word for word, in the chunk it names. `quote checked` means it's there; `NOT IN THAT CHUNK` means the model misquoted or cited the wrong chunk. Under each answer are the chunks the search found, with their **cosine similarity** to the question.
 
 ```text
 275 documents, 1,823 chunks. Ask a question; an empty line stops.
@@ -88,7 +88,7 @@ The model's answers change from run to run, so yours will be worded differently.
 
 1. **Ask it everything.** Try the questions in `data/questions.json`, then your own. Find a question it gets wrong with the right chunk in the top five, and one where the right chunk is missing.
 2. **More or fewer chunks.** Set `TOP = 1`, then `TOP = 20`. Does the Warm Wake question come right? What else changes?
-3. **Customers only.** Keep internal documents out of a customer's search. Add an `audience text` column to the `chunks` table (as demo 3 has `document`), fill it from each document's front matter, and add `and audience = 'customer'` to the search. Ask about the click again.
+3. **Customers only.** Keep internal documents out of a customer's search. Add `audience` to each chunk's metadata, next to `document`, fill it from each document's front matter, and pass `where={"audience": "customer"}` to `collection.query`. Ask about the click again.
 4. **Follow-up questions.** Ask "How do I invite someone?", then "How long does it last?". The second search only sees "How long does it last?". Pass the last few turns to the model and ask it to rewrite the question so it stands alone, then search with that. This is called **query rewriting**.
 5. **Your own documents.** Point `DOCS` at a folder of your own Markdown files: a project's `docs/`, or this course's module READMEs. Change the first line of `INSTRUCTIONS` to match. Front matter is optional; without a title, the file name is used.
 6. **Show the source.** Print each cited chunk's heading line (its first line) under the quote, so a reader can see "Dormouse Thermostat User Guide > Heating > Boost" rather than a chunk id.

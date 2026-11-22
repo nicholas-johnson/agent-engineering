@@ -22,7 +22,7 @@ Needs `OPENAI_API_KEY` in `.env`. The first run embeds the question and the 275 
 The script turns the question and every document into two kinds of vector:
 
 - **Word-count vectors**: one number for each of 2,493 different words (the 2,491 that the documentation uses, plus "my" and "alarm" from the question), saying how many times the text uses that word. It's one of the oldest ways of turning a text into a vector for search (see Further reading).
-- **Embeddings** from `text-embedding-3-small`, as in demos 4 and 5: 1,536 numbers each.
+- **Embeddings** from `text-embedding-3-small`, as in demo 6: 1,536 numbers each.
 
 A vector's **length** is the square root of the sum of its numbers squared: how far its point is from zero. A word-count vector gets longer as its document does. The user guide's has length 224.7; a 49-word release note's, 8.7. An embedding has length 1 (very nearly: see Things to notice), however long the text. Then the script ranks the documents three ways:
 
@@ -125,5 +125,5 @@ For discussion. There are no right answers.
 
 Optional extensions and interesting things to look at.
 
-1. **The measure inside ChromaDB.** Demo 6 creates its collection with `configuration={"hnsw": {"space": "cosine"}}`. ChromaDB's other choices are `"l2"`, distance squared, which is its default, and `"ip"` (inner product), which is one minus the dot product. Build demo 6's collection once with each and compare the top three for the running question. Then store the word-count vectors from this script instead, and watch the three come apart.
+1. **The measure inside ChromaDB.** Module 6 stores its vectors in ChromaDB, in a collection created with `configuration={"hnsw": {"space": "cosine"}}`. ChromaDB's other choices are `"l2"`, distance squared, which is its default, and `"ip"` (inner product), which is one minus the dot product. Store this script's embeddings in a collection once with each, and compare the top three for the running question. Then store the word-count vectors from this script instead, and watch the three come apart.
 2. **pgvector's operators.** [pgvector](https://github.com/pgvector/pgvector) adds vectors to PostgreSQL and gives each measure its own operator: `<->` for distance, `<#>` for the dot product and `<=>` for cosine distance. Its README says that for vectors of length 1, like OpenAI's, you should use the dot product because it's fastest. Read its Querying section, then find out from the README why `<#>` returns the dot product with its sign flipped.

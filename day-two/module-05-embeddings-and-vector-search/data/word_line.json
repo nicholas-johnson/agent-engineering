@@ -1,0 +1,20 @@
+{
+  "positions": {
+    "sunrise": -0.43,
+    "wake": -0.39,
+    "warm": -0.35,
+    "early": -0.18,
+    "frost": -0.17,
+    "heat": -0.12,
+    "temperature": 0.03,
+    "app": 0.08,
+    "schedule": 0.09,
+    "router": 0.12,
+    "boiler": 0.13,
+    "radiator": 0.22,
+    "account": 0.25,
+    "password": 0.25,
+    "phone": 0.3,
+    "email": 0.39
+  }
+}

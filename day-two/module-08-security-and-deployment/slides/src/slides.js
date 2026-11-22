@@ -184,7 +184,7 @@ Yes, home H-1043 is in Away mode until 30 November 2026.`,
       icon: 'shield',
       points: [
         '**Who** the customer is comes from their **sign-in**, never from the conversation',
-        "The **search** only reaches documents for the customer's audience: Module 5's metadata filter",
+        "The **search** only reaches documents for the customer's audience: Module 6's metadata filter",
         '**Tools take no IDs**: `get_my_home()`, not `get_home(home_id)`',
         'No rule in the prompt needed',
       ],
@@ -198,10 +198,10 @@ Yes, home H-1043 is in Away mode until 30 November 2026.`,
 # The model never sees it and can't change it.
 SESSION = {"customer": "C-1001", "audience": "customer"}
 
-rows = db.execute(
-    "select id, text from chunks where embedding match ? and k = ?"
-    " and audience = ? order by distance",
-    (sqlite_vec.serialize_float32(vector), TOP, SESSION["audience"]),
+results = collection.query(
+    query_embeddings=[vector],
+    n_results=TOP,
+    where={"audience": SESSION["audience"]},
 )`,
       highlights: [
         'Internal chunks are never compared with the question',

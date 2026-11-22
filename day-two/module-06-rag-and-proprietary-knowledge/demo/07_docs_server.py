@@ -4,10 +4,10 @@
 import hashlib
 import json
 import re
-import sqlite3
 from pathlib import Path
 
-import sqlite_vec
+import chromadb
+from chromadb.config import Settings
 from dotenv import load_dotenv
 from mcp.server.mcpserver import MCPServer
 from openai import OpenAI
@@ -19,7 +19,7 @@ DATA = HERE.parent / "data"
 OUTPUT = HERE / "output"
 OUTPUT.mkdir(exist_ok=True)
 
-DATABASE = OUTPUT / "knowledge.db"
+DATABASE = OUTPUT / "chroma"
 EMBEDDING_MODEL = "text-embedding-3-small"
 BATCH = 100
 TOP = 5
@@ -52,7 +52,7 @@ def split_into_chunks(document):
             id = f"{document['name']}#{slug(path[-1]) if path else 'top'}"
             while id in {c["id"] for c in chunks}:
                 id += "-2"
-            chunks.append({"id": id, "document": document["name"], "text": f"{heading}\n\n{content}"})
+            chunks.append({"id": id, "document": document["name"], "audience": document["audience"], "text": f"{heading}\n\n{content}"})
 
     for line in document["body"].splitlines():
         heading = re.match(r"(#{1,3}) (.+)", line)
@@ -77,31 +77,29 @@ def embed(texts):
     return vectors
 
 
-def open_database():
-    db = sqlite3.connect(DATABASE)
-    db.enable_load_extension(True)
-    sqlite_vec.load(db)
-    db.enable_load_extension(False)
-    db.execute(
-        "create virtual table if not exists chunks using vec0("
-        "id text primary key, embedding float[1536] distance_metric=cosine,"
-        "document text, +text text, +checksum text)"
+def open_collection():
+    database = chromadb.PersistentClient(path=str(DATABASE), settings=Settings(anonymized_telemetry=False))
+    # Compare by cosine similarity, and use our own embeddings rather than Chroma's built-in model.
+    return database.get_or_create_collection(
+        "chunks", configuration={"hnsw": {"space": "cosine"}}, embedding_function=None
     )
-    return db
 
 
-def update(db, chunks):
-    stored = dict(db.execute("select id, checksum from chunks"))
+def update(collection, chunks):
+    stored = collection.get(include=["metadatas"])
+    stored = dict(zip(stored["ids"], (m["checksum"] for m in stored["metadatas"])))
     current = {c["id"]: hashlib.sha256(c["text"].encode()).hexdigest() for c in chunks}
     changed = [c for c in chunks if stored.get(c["id"]) != current[c["id"]]]
-    for id in (set(stored) - set(current)) | {c["id"] for c in changed}:
-        db.execute("delete from chunks where id = ?", (id,))
-    for chunk, vector in zip(changed, embed([c["text"] for c in changed])):
-        db.execute(
-            "insert into chunks (id, embedding, document, text, checksum) values (?, ?, ?, ?, ?)",
-            (chunk["id"], sqlite_vec.serialize_float32(vector), chunk["document"], chunk["text"], current[chunk["id"]]),
+    removed = set(stored) - set(current)
+    if removed:
+        collection.delete(ids=list(removed))
+    if changed:
+        collection.upsert(
+            ids=[c["id"] for c in changed],
+            embeddings=embed([c["text"] for c in changed]),
+            documents=[c["text"] for c in changed],
+            metadatas=[{"document": c["document"], "audience": c["audience"], "checksum": current[c["id"]]} for c in changed],
         )
-    db.commit()
 
 
 @server.tool()
@@ -110,15 +108,17 @@ def search_docs(query: str) -> str:
     installation, specification, policy, error-code and release-note articles. Describe what to
     look for in `query`, in the words the documentation would use. Returns the five closest
     sections as JSON, closest first, each with an id to cite and its text."""
-    db = open_database()
+    collection = open_collection()
     # Always the documents as they are now: only new or changed chunks are embedded.
-    update(db, [chunk for document in load_documents(DATA / "docs") for chunk in split_into_chunks(document)])
+    update(collection, [chunk for document in load_documents(DATA / "docs") for chunk in split_into_chunks(document)])
     [vector] = embed([query])
-    rows = db.execute(
-        "select id, 1 - distance, text from chunks where embedding match ? and k = ? order by distance",
-        (sqlite_vec.serialize_float32(vector), TOP),
+    results = collection.query(query_embeddings=[vector], n_results=TOP, include=["distances", "documents"])
+    return json.dumps(
+        [
+            {"id": id, "similarity": round(1 - distance, 3), "text": text}
+            for id, distance, text in zip(results["ids"][0], results["distances"][0], results["documents"][0])
+        ]
     )
-    return json.dumps([{"id": id, "similarity": round(similarity, 3), "text": text} for id, similarity, text in rows])
 
 
 server.run()
