@@ -1,5 +1,5 @@
 import { SlideIcon } from "./SlideIcon";
-import { InlineMarkdown } from "./InlineMarkdown";
+import { BlockMarkdown } from "./InlineMarkdown";
 
 export function DescriptionSlide({ content }) {
   return (
@@ -13,9 +13,9 @@ export function DescriptionSlide({ content }) {
         <h1 className="text-4xl md:text-5xl font-bold text-white mb-8">
           {content.title}
         </h1>
-        <p className="text-xl md:text-2xl text-gray-200 leading-relaxed">
-          <InlineMarkdown text={content.description} />
-        </p>
+        <div className="text-xl md:text-2xl text-gray-200 leading-relaxed space-y-6">
+          <BlockMarkdown text={content.description} />
+        </div>
         {content.credit && (
           <p className="text-sm text-gray-400 text-center max-w-2xl mx-auto mt-6">
             {content.credit}

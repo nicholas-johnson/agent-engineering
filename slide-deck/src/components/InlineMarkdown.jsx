@@ -1,50 +1,46 @@
-const INLINE_PATTERN = /(\*\*(.+?)\*\*|\*(.+?)\*|`(.+?)`)/g;
+import { Fragment } from 'react';
+import Markdown from 'markdown-to-jsx/react';
 
-export function parseInlineMarkdown(text) {
-  if (typeof text !== "string") return text;
+const OPTIONS = {
+  wrapper: Fragment,
+  disableAutoLink: true,
+  disableParsingRawHTML: true,
+  overrides: {
+    strong: { props: { className: 'font-bold text-white' } },
+    em: { props: { className: 'italic' } },
+    code: {
+      props: {
+        className:
+          'bg-slate-700 text-amber-300 px-1.5 py-0.5 rounded text-[0.9em] font-mono',
+      },
+    },
+  },
+};
 
-  const parts = [];
-  let lastIndex = 0;
-  let match;
+// A bullet such as "1. Keep the words" is text, not a one-item list.
+function escapeBlockStart(text) {
+  return text.replace(/^(\d+)([.)])(?=\s)/, '$1\\$2').replace(/^([-+*>#])(?=\s)/, '\\$1');
+}
 
-  while ((match = INLINE_PATTERN.exec(text)) !== null) {
-    if (match.index > lastIndex) {
-      parts.push(text.slice(lastIndex, match.index));
-    }
-
-    if (match[2]) {
-      parts.push(
-        <strong key={match.index} className="font-bold text-white">
-          {match[2]}
-        </strong>
-      );
-    } else if (match[3]) {
-      parts.push(
-        <em key={match.index} className="italic">
-          {match[3]}
-        </em>
-      );
-    } else if (match[4]) {
-      parts.push(
-        <code
-          key={match.index}
-          className="bg-slate-700 text-amber-300 px-1.5 py-0.5 rounded text-[0.9em] font-mono"
-        >
-          {match[4]}
-        </code>
-      );
-    }
-
-    lastIndex = match.index + match[0].length;
-  }
-
-  if (lastIndex < text.length) {
-    parts.push(text.slice(lastIndex));
-  }
-
-  return parts.length === 0 ? text : parts;
+// A template literal keeps its source indentation, and four spaces would make a code block.
+function dedent(text) {
+  const [first, ...rest] = text.split('\n');
+  const indent = Math.min(
+    ...rest.filter((line) => line.trim()).map((line) => line.search(/\S/)),
+  );
+  return [first, ...rest.map((line) => line.slice(indent))].join('\n');
 }
 
 export function InlineMarkdown({ text }) {
-  return <>{parseInlineMarkdown(text)}</>;
+  if (typeof text !== 'string') return text;
+  return (
+    <Markdown options={{ ...OPTIONS, forceInline: true }}>
+      {escapeBlockStart(text)}
+    </Markdown>
+  );
+}
+
+export function BlockMarkdown({ text }) {
+  if (typeof text !== 'string') return text;
+  return <Markdown options={{ ...OPTIONS, forceBlock: true }}>{dedent(text)}</Markdown>;
 }
