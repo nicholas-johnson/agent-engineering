@@ -14,13 +14,19 @@ OUTPUT.mkdir(exist_ok=True)
 WINDOW = 3
 MIN_COUNT = 2
 WORDS = ["warm", "password", "heating", "alarm"]
+PICKED = [
+    "sunrise", "wake", "warm", "early", "heat", "frost", "temperature", "schedule",
+    "boiler", "radiator", "router", "app", "phone", "email", "account", "password",
+]
+STEPS = 200
+
+
+def dot(a, b):
+    return sum(x * y for x, y in zip(a, b))
 
 
 def cosine_similarity(a, b):
-    dot = sum(x * y for x, y in zip(a, b))
-    length_a = math.sqrt(sum(x * x for x in a))
-    length_b = math.sqrt(sum(y * y for y in b))
-    return dot / (length_a * length_b)
+    return dot(a, b) / math.sqrt(dot(a, a) * dot(b, b))
 
 
 text = GUIDE.read_text().split("---", 2)[2]
@@ -48,9 +54,31 @@ for word in WORDS:
     )
     print(f"  {word:<10} {', '.join(other for _, other in closest[:5])}")
 
+# 235 numbers are hard to picture. Squeeze 16 words we picked down to one number each, a place on a line.
+rows = [vectors[index[w]] for w in PICKED]
+similar = [[0 if i == j else cosine_similarity(a, b) for j, b in enumerate(rows)] for i, a in enumerate(rows)]
+pull = [sum(row) for row in similar]
+positions = [float(i) for i in range(len(PICKED))]  # Anywhere will do.
+for _ in range(STEPS):
+    # Move each word halfway towards the average position of the others, weighted by how alike they are.
+    positions = [(p + dot(s, positions) / total) / 2 for p, s, total in zip(positions, similar, pull)]
+    # Re-centre and stretch the line back out, or every word would end up at the same point.
+    middle = dot(pull, positions) / sum(pull)
+    positions = [p - middle for p in positions]
+    length = math.sqrt(dot(positions, positions))
+    positions = [p / length for p in positions]
+if positions[PICKED.index("warm")] > 0:
+    positions = [-p for p in positions]
+line = sorted(zip(positions, PICKED))
+
+print(f"\n=== {len(PICKED)} words we picked: one number each ===")
+for position, word in line:
+    print(f"  {position:5.2f}  {word}")
+
 # Each word's vector, with the zeros left out: its neighbours, most frequent first.
 written = {
     word: {vocabulary[j]: count for count, j in sorted(((c, j) for j, c in enumerate(vectors[i]) if c), reverse=True)}
     for word, i in index.items()
 }
 (OUTPUT / "02_count_vectors.json").write_text(json.dumps(written, indent=2))
+(OUTPUT / "02_word_line.json").write_text(json.dumps({w: round(p, 2) for p, w in line}, indent=2))

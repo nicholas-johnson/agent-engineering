@@ -1,6 +1,6 @@
 # Stale copies
 
-Demo 6 updated the user guide and re-embedded only the chunks that changed. But the user guide isn't the only document that states each fact. Here one fact changes, household invitations now last 14 days instead of 7, and you'll hunt down every chunk in the knowledge base that still says 7: with a vector search, with a plain text search, and with both. The result is the list of documents an editor would need to open.
+Demo 3 re-embeds only the chunks that change, so updating the user guide is quick. But the user guide isn't the only document that states each fact. Here one fact changes, household invitations now last 14 days instead of 7, and you'll hunt down every chunk in the knowledge base that still says 7: with a vector search, with a plain text search, and with both. The result is the list of documents an editor would need to open.
 
 From the module folder (`day-two/module-06-rag-and-proprietary-knowledge`):
 
@@ -65,7 +65,7 @@ The fact "A household invitation works for 7 days." is now "A household invitati
 
 ## Things to notice
 
-- **Eighteen documents state one fact.** Thirty chunks say invitations last 7 days. Update the user guide alone, as demo 6 did for Warm Wake, and 29 stale copies stay in the index, waiting to be retrieved.
+- **Eighteen documents state one fact.** Thirty chunks say invitations last 7 days. Update the user guide alone, and 29 stale copies stay in the index, waiting to be retrieved.
 - **The search doesn't prefer the source of truth.** The user guide comes 23rd, outside the top 20. Its "Household sharing" section is also about owners, members and permissions, so the invitation sentence is one of several. In [ask-your-docs](../ask-your-docs/), the question "My partner didn't accept the invite in time" was answered from two other documents, and the user guide wasn't in its top five. Fixing only the user guide would have changed nothing for that customer.
 - **Vector search is precise but stops short.** All 20 of its results say 7 days, but 10 of the 30 chunks are further down. The furthest, 738th, is a row in a release history table: `| 3.3 | 2025-08-11 | Support for eight household members; invitations expire after 7 days.` Long chunks about something else, with the fact in passing, sink.
 - **Text search finds everything you thought to spell.** It found all 30, because the documents happen to use only the four wordings in the list. A document that said "a week" would have been missed, and you'd never know.

@@ -1,4 +1,4 @@
-# Run from the module folder: uv run python demo/06_keep_it_current.py
+# Run from the module folder: uv run python demo/06_citations.py
 
 import hashlib
 import json
@@ -22,7 +22,10 @@ MODEL = "gpt-6-luna"
 EMBEDDING_MODEL = "text-embedding-3-small"
 BATCH = 100
 TOP = 5
-QUESTION = "Why does my Dormouse turn the heating on before the time I set?"
+QUESTIONS = [
+    "Why does my Dormouse turn the heating on before the time I set?",
+    "How much does a Dormouse thermostat cost?",
+]
 
 INSTRUCTIONS = """You are the support assistant for Dormouse, a smart thermostat. Answer the customer in a short paragraph.
 Use only the documentation below, never what you know from elsewhere.
@@ -122,7 +125,6 @@ def update(collection, chunks):
             documents=[c["text"] for c in changed],
             metadatas=[{"document": c["document"], "audience": c["audience"], "checksum": current[c["id"]]} for c in changed],
         )
-    return len(changed), len(removed)
 
 
 def search(collection, vector):
@@ -152,36 +154,64 @@ def check(citations, found):
     return [{**c, "checked": words(c["quote"]) in texts.get(c["chunk"], "")} for c in citations]
 
 
-def ask(collection):
-    found = search(collection, embed([QUESTION])[0])
-    reply = answer(QUESTION, found)
+def plain(text):
+    text = text.lower().replace("→", ">").replace("->", ">").replace("°c", " degrees")
+    return re.sub(r"\s*>\s*", ">", re.sub(r"\s+", " ", text))
+
+
+def contains_facts(text, facts):
+    return all(any(re.search(rf"\b{re.escape(plain(option))}\b", plain(text)) for option in fact.split("|")) for fact in facts)
+
+
+documents = load_documents(DATA / "docs")
+collection = open_collection()
+update(collection, [chunk for document in documents for chunk in split_into_chunks(document)])
+
+shown = []
+for question, vector in zip(QUESTIONS, embed(QUESTIONS)):
+    found = search(collection, vector)
+    reply = answer(question, found)
     reply["citations"] = check(reply["citations"], found)
-    print(f"Q: {QUESTION}\nA: {reply['answer']}")
+    print(f"\nQ: {question}\nA: {reply['answer']}")
     for citation in reply["citations"]:
         mark = "quote checked" if citation["checked"] else "NOT IN THAT CHUNK"
         print(f'   [{citation["chunk"]}] "{citation["quote"]}" ({mark})')
-    return reply
+    shown.append({"question": question, **reply})
 
+# Every question in the set: right, refused, or wrong?
+tally = {"answered right": 0, "answered wrong": 0, "said it didn't know": 0}
+refused = quoted = checked = 0
+results = []
+questions = json.loads((DATA / "questions.json").read_text())
+for n, (q, vector) in enumerate(zip(questions, embed([q["question"] for q in questions])), 1):
+    print(f"  Asking {n}/{len(questions)}", end="\r")
+    found = search(collection, vector)
+    reply = answer(q["question"], found)
+    reply["citations"] = check(reply["citations"], found)
+    quoted += len(reply["citations"])
+    checked += sum(c["checked"] for c in reply["citations"])
+    if q["kind"] in ("everyday", "error code"):
+        if not reply["answered"]:
+            outcome = "said it didn't know"
+        elif contains_facts(reply["answer"], q["facts"]):
+            outcome = "answered right"
+        else:
+            outcome = "answered wrong"
+        tally[outcome] += 1
+    elif q["kind"] == "not covered":
+        outcome = "said it didn't know" if not reply["answered"] else "made something up"
+        refused += not reply["answered"]
+    else:
+        outcome = "quoted an internal document" if contains_facts(reply["answer"], q["facts"]) else "kept it internal"
+    results.append({"id": q["id"], "kind": q["kind"], "question": q["question"], "outcome": outcome, **reply})
+print(" " * 40, end="\r")
 
-def chunks_of(documents):
-    return [chunk for document in documents for chunk in split_into_chunks(document)]
+answerable = sum(tally.values())
+covered = sum(q["kind"] == "not covered" for q in questions)
+print(f"\nOf {answerable} questions the documentation answers: " + ", ".join(f"{k} {v}" for k, v in tally.items()))
+print(f"Of {covered} questions it doesn't: said it didn't know {refused}")
+print(f"Quotes found in the chunk they cite: {checked} of {quoted}")
 
-
-collection = open_collection()
-documents = {d["name"]: d for d in load_documents(DATA / "docs")}
-update(collection, chunks_of(documents.values()))
-print("\n=== The knowledge base for firmware 4.1 ===")
-before = ask(collection)
-
-# Firmware 4.2 ships: a new release note, and a new version of the user guide.
-updates = load_documents(DATA / "updates")
-documents.update({d["name"]: d for d in updates})
-chunks = chunks_of(documents.values())
-changed, removed = update(collection, chunks)
-print(f"\n=== Firmware 4.2: {len(updates)} documents changed ===")
-print(f"Re-embedded {changed} of {len(chunks):,} chunks and removed {removed}. No retraining.\n")
-after = ask(collection)
-
-(OUTPUT / "06_keep_it_current.json").write_text(
-    json.dumps({"question": QUESTION, "before": before, "changed": changed, "removed": removed, "after": after}, indent=2)
+(OUTPUT / "06_citations.json").write_text(
+    json.dumps({"shown": shown, "tally": tally, "refused": refused, "quotes": [checked, quoted], "results": results}, indent=2)
 )

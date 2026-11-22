@@ -77,7 +77,7 @@ The API can return very slightly different vectors from one call to the next, so
 1. **The title alone.** Add a way that starts each chunk with the document's title but not its headings: `lambda chunk: chunk["heading"].split(" > ")[0] + "\n\n" + chunk["content"]`. Which part of the line does the work?
 2. **The heading alone.** Add a way that embeds only `chunk["heading"]`. How many questions does a list of headings answer?
 3. **More context from the front matter.** Add the document's type and audience: "Troubleshooting, for customers: Boost does not start > Check the button". You'll need to keep them in each chunk in `split_into_chunks`.
-4. **Ask a model for the context.** For each chunk, give `gpt-6-luna` the whole document and the chunk, and ask for one or two sentences on where the chunk fits. Embed those sentences plus the chunk. This is Anthropic's **contextual retrieval**, below. Batch 20 chunks to a call, as demo 4 does with its questions.
+4. **Ask a model for the context.** For each chunk, give `gpt-6-luna` the whole document and the chunk, and ask for one or two sentences on where the chunk fits. Embed those sentences plus the chunk. This is Anthropic's **contextual retrieval**, below. Send several chunks to each call, as `data/build_faq.py` sends 10 when it writes the FAQ's questions.
 5. **Deeper.** Set `TOP = 10`. Does the heading line still make a difference at ten?
 6. **Headings that answer.** "What E-110 means" won the search and lost the answer. Rewrite the headings of the three E-110 documents so each says what its section tells you to do, and run again.
 

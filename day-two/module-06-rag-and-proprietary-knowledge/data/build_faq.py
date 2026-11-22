@@ -1,7 +1,7 @@
 # Run from the module folder: uv run python data/build_faq.py
 #
 # Builds data/faq.json: for every chunk of the knowledge base, the questions a customer might
-# ask that the chunk answers, written by gpt-6-luna. Demo 4 searches these questions.
+# ask that the chunk answers, written by gpt-6-luna. Demo 5 searches these questions.
 # It saves as it goes and only writes questions for chunks that are new or have changed,
 # so it can be stopped and run again. Deleting faq.json and rerunning gives new questions.
 

@@ -1,4 +1,4 @@
-# Run from the module folder: uv run python demo/04_faq.py
+# Run from the module folder: uv run python demo/05_faq.py
 
 import hashlib
 import json
@@ -210,6 +210,6 @@ print(
     + ", ".join(f"searching {by} {hits}" for by, hits in scores.items())
 )
 
-(OUTPUT / "04_faq.json").write_text(
+(OUTPUT / "05_faq.json").write_text(
     json.dumps({"question": QUESTION, "found": found, "answer": reply, "scores": scores, "checks": checks}, indent=2)
 )

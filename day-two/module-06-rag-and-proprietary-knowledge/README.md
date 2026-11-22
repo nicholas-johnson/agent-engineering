@@ -1,16 +1,15 @@
 # Module 6 — RAG and Proprietary Knowledge
 
-> **Draft.** Sections 1 to 3 and 7 below are written from real runs. Sections 4 to 6 (FAQs, citations, keeping it current), the summary and their slides are still to come. The demos for them are in `demo/`, and the data they use is built.
+> A customer asks Dormouse's support assistant: _"Why does my Dormouse turn the heating on before the time I set?"_ **Just asking** the model gets a confident answer about thermostats in general, nearly right and partly made up: **hallucination**. Putting **all 275 documents in the prompt** gets the right answer, for 191,548 tokens and 24 seconds a question. **RAG** splits the documents into 1,823 **chunks**, stores them in a **vector database**, ChromaDB, and sends the model only the five nearest the question: 906 tokens and two seconds, with the right chunks for 22 of 24 questions. But not for ours. The customer's words aren't the documentation's, Warm Wake comes sixth, and the model fills the gap with a guess. Putting the search behind an **MCP server** shares it with every application, and lets the model write its own searches, in the documentation's words: Warm Wake comes first and all 24 are found, but every question now takes two model calls. An **FAQ**, the questions each chunk answers, written once ahead of time, finds 23 of 24 with the customer's own words, though questions that sound alike can point at the wrong chunk. Last, the model must **quote its sources**, code checks every quote, and the model says when the documentation doesn't answer: 59 of 60 quotes check out, and all 5 questions the documentation can't answer are turned down. But "I don't know" is only as good as the search, and a real quote can still leave out the fact that mattered. And no search in this module asks who is asking, so internal documents reach customers. That is Module 8.
 
 ## Learning goals
 
 - Explain why a model makes up answers about things it has never seen (**hallucination**), and why the answers sound right.
 - Put documents in a model's prompt, and measure what that costs in **tokens**, money and time for each question.
-- Split documents into **chunks**, store them in a **vector database** with **metadata** to filter on, find the relevant ones, and answer from them: **retrieval-augmented generation** (**RAG**).
+- Split documents into **chunks**, store them in a **vector database** with **metadata** to filter on, re-embed only what changed, find the relevant chunks, and answer from them: **retrieval-augmented generation** (**RAG**).
+- Offer the search to any AI application as an **MCP server**, and let the model write its own searches.
 - Turn documentation into the questions customers ask (an **FAQ**), search those too, and **measure** whether it helps.
 - Make a model **cite its sources**, check each quote in code, and let it say when the documentation doesn't answer.
-- Update what a model knows by changing documents, not by **retraining**, and re-embed only what changed.
-- Offer the search to any AI application as an **MCP server**, and let the model write its own searches.
 
 ---
 
@@ -18,7 +17,7 @@
 
 A language model only knows what was in its training data. Your specifications, manuals and support articles were not in it. Ask it about your product and it does what it always does: it writes the most likely-sounding answer. For a thermostat, that is an answer about thermostats in general, with the details made up.
 
-The fix is the one a new support agent uses: look it up, then answer. Find the parts of the documentation that are about the question, put them in front of the model, and ask it to answer from them. That is **retrieval-augmented generation**, or **RAG**. The retrieval part is Module 5's vector search. The generation part is Module 2's model call. Everything else in this module is about doing the two well: how much to retrieve, how to find it when the customer's words aren't the documentation's, how to check the answer came from the documents, and how to keep the documents current.
+The fix is the one a new support agent uses: look it up, then answer. Find the parts of the documentation that are about the question, put them in front of the model, and ask it to answer from them. That is **retrieval-augmented generation**, or **RAG**. The retrieval part is Module 5's vector search. The generation part is Module 2's model call. Everything else in this module is about doing the two well: how much to retrieve, how to share the search, how to find the right part when the customer's words aren't the documentation's, and how to check the answer came from the documents.
 
 ## The data
 
@@ -29,9 +28,8 @@ Everything runs on the documentation for **Dormouse**, the smart thermostat from
 | `data/docs/user-guide.md`                      | Written by hand: the user guide, and the source of truth for everything else                                                                                                                                                 | 1 document, 26 sections            |
 | `data/docs/internal-relay-click-revision-c.md` | Written by hand: an internal engineering note                                                                                                                                                                                | 1 document                         |
 | `data/docs/*.md`                               | The two above, plus 273 written by `gpt-6-luna` with `data/build_docs.py`: support, troubleshooting, app, installation, specification, integration, policy, error-code and release-note documents, and 40 more internal ones | 275 documents, about 154,000 words |
-| `data/updates/`                                | Written by hand: firmware 4.2's release notes and new user guide, for section 6                                                                                                                                              | 2 documents                        |
-| `data/questions.json`                          | 30 questions, each with the facts a right answer must contain                                                                                                                                                                | 30 questions                       |
-| `data/faq.json`                                | The questions each chunk answers, written by `gpt-6-luna` with `data/build_faq.py`, for section 4                                                                                                                            | 6,358 questions                    |
+| `data/questions.json`                          | 30 questions, each with the facts a right answer must contain: 24 the documentation answers, 5 it doesn't, and 1 that only an internal document answers                                                                      | 30 questions                       |
+| `data/faq.json`                                | The questions each chunk answers, written by `gpt-6-luna` with `data/build_faq.py`, for section 5                                                                                                                            | 6,358 questions                    |
 
 ## Setting up
 
@@ -45,7 +43,16 @@ From this folder:
 uv run python demo/01_just_ask.py
 ```
 
-The first run of demo 3 embeds all 1,823 chunks, and the first run of demo 4 embeds all 6,358 questions. Both are stored in ChromaDB, in `demo/output/chroma/`, and later runs only embed what has changed. On a slow connection those first runs take several minutes each, so run demos 3 and 4 once before a session. Demo 7 starts its MCP server, `demo/07_docs_server.py`, itself. Model output is random, so your answers will differ from the ones quoted here.
+| Demo                        | What it is                                                                                 | Writes to `demo/output/`                                                                                              |
+| --------------------------- | ------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| `01_just_ask.py`            | Ask the model three questions, with no documents                                           | `01_just_ask.json`: the instructions and the answers                                                                  |
+| `02_whole_manual.py`        | Put the user guide, then all 275 documents, in the prompt                                  | `02_whole_manual.json`: each answer, with its tokens, cost and time                                                   |
+| `03_retrieve_and_answer.py` | Chunk, embed and store the documents in ChromaDB, then answer from the five nearest chunks | `03_retrieve_and_answer.json`: the chunks found, the answer, and the 24 questions' checks; `chunks.json`: every chunk |
+| `04_agent.py`               | An agent that searches through an MCP server, `04_docs_server.py`, which it starts itself  | `04_agent.json`: every question's searches, results and answer                                                        |
+| `05_faq.py`                 | Search the questions each chunk answers, as well as the chunks                             | `05_faq.json`: the chunks found, the answer, and the 24 questions' checks, three ways                                 |
+| `06_citations.py`           | Answer only from the chunks, quote them, check every quote, and say when there's no answer | `06_citations.json`: all 30 answers, their quotes and checks, and how each turned out                                 |
+
+The first run of demo 3 embeds all 1,823 chunks, and the first run of demo 5 embeds all 6,358 questions. Both are stored in ChromaDB, in `demo/output/chroma/`, and later runs only embed what has changed. On a slow connection those first runs take several minutes each, so run demos 3 and 5 once before a session. Model output is random, so your answers will differ from the ones quoted here.
 
 ## 1. Just ask
 
@@ -224,21 +231,19 @@ The two misses on the whole knowledge base are our running question and Q11, "Th
 
 The customer and the documentation describe the same thing in different words. The customer says the heating comes on _before the time I set_. The user guide says Warm Wake _starts the heating early_, and never mentions a time the customer set. A question about "heating" and "the time I set" looks most like other sections about heating and schedules. With 26 chunks that doesn't matter much; with 1,823, plenty of chunks are about heating and schedules. The more documents you add, the more near misses there are to beat the right one.
 
-What if the documentation came with the questions customers actually ask?
-
-<!-- Sections 4 to 6 (FAQs, citations, keeping it current) go here. -->
+A support agent who didn't find it would search again, in other words. Our code can't: it embeds the customer's words once and takes what comes back. A model could, if we gave it the search as a tool.
 
 ## 4. Share it: an MCP server
 
-**Demo:** `demo/07_agent.py`, which starts `demo/07_docs_server.py`
+**Demo:** `demo/04_agent.py`, which starts `demo/04_docs_server.py`
 
-Our search lives inside our scripts. Demos 3 to 6 each carry their own copy of the code that reads the documents, splits them into chunks, embeds them and searches the database: 89 lines in demo 3. That's fine for teaching. In a company, the support chat, the help website, the staff's own tools and the AI assistants people already use would all need that search. A copy in each, every one a little different, is how answers start to disagree.
+Module 3 gave a model tools, and the search can be one. Making it a tool solves a second problem too. Our search lives inside our script: demo 3 carries its own copy of the code that reads the documents, splits them into chunks, embeds them and searches the database, 89 lines of it. That's fine for teaching. In a company, the support chat, the help website, the staff's own tools and the AI assistants people already use would all need that search. A copy in each, every one a little different, is how answers start to disagree.
 
 Module 3 had the fix: an **MCP server**, a small program that offers tools to any MCP client. So we put the search behind one server, and every application asks it. This is what _exposing existing company functionality to an LLM_ means in practice. The search already exists; the server is a thin layer that lets any model use it.
 
 ### The server
 
-`demo/07_docs_server.py` has one tool, and its body is demo 3's search. The docstring becomes the tool's **description**, which is all a client's model knows about the tool, so it says what is searched and how to ask:
+`demo/04_docs_server.py` has one tool, and its body is demo 3's search. The docstring becomes the tool's **description**, which is all a client's model knows about the tool, so it says what is searched and how to ask:
 
 ```python
 @server.tool()
@@ -254,11 +259,11 @@ def search_docs(query: str) -> str:
     ...
 ```
 
-It uses the same ChromaDB collection as demos 3 to 6, in `demo/output/chroma/`, and checks it against the documents on every search. So an edited document can be found straight away, as in section 6, without restarting the server.
+It uses the same ChromaDB collection as demo 3, in `demo/output/chroma/`, and checks it against the documents on every search. So an edited document can be found straight away, without restarting the server.
 
 ### The agent
 
-`demo/07_agent.py` starts the server, asks it for its tools, and runs Module 3's tool loop. One thing has changed since demo 3. **We no longer search for the customer: the model does.** It chooses the words, and whether to search again:
+`demo/04_agent.py` starts the server, asks it for its tools, and runs Module 3's tool loop. One thing has changed since demo 3. **We no longer search for the customer: the model does.** It chooses the words, and whether to search again:
 
 ```python
 INSTRUCTIONS = """You are the support assistant for Dormouse, a smart thermostat. Answer the customer in a short paragraph.
@@ -270,40 +275,38 @@ End each sentence that relies on the documentation with the id of the section it
 The server offers: search_docs
 
 Q: Why does my Dormouse turn the heating on before the time I set?
-   search_docs("thermostat heating starts before scheduled time set; early start, preheat, learns how long home takes to warm to target temperature")
+   search_docs("thermostat heating starts early before scheduled time set; schedule preheat smart start learns warm-up time")
       0.684  user-guide.md#warm-wake
-      0.623  set-a-heating-schedule.md#before-you-start
-      0.622  understand-warm-wake.md#what-warm-wake-does
-      0.621  set-a-heating-schedule.md#how-schedule-periods-work
-      0.610  heating-starts-below-five-degrees.md#if-the-room-is-not-below-five-degrees
-A: Dormouse’s Warm Wake feature starts heating early so your home reaches the scheduled target temperature by the time the period begins. It learns how long your home takes to warm up and may start up to 90 minutes early; you’ll see a sunrise symbol while it’s doing this. Warm Wake is on by default, but you can turn it off in Settings > Heating > Warm Wake. [user-guide.md#warm-wake]
-   1,063 tokens in, $0.0002, 5.6 seconds
+      0.629  understand-warm-wake.md#what-warm-wake-does
+      0.621  ios-app-schedule-screen-guide.md#review-your-schedule
+      0.616  set-a-heating-schedule.md#how-schedule-periods-work
+      0.596  set-a-heating-schedule.md#before-you-start
+A: Dormouse’s Warm Wake feature starts heating early so your home reaches the scheduled temperature when the period begins. It learns how long your home takes to heat and may start up to 90 minutes ahead; a sunrise symbol appears while it does this. Warm Wake is on by default, and you can turn it off under Settings > Heating > Warm Wake. [user-guide.md#warm-wake]
+   1,008 tokens in, $0.0002, 4.7 seconds
 
 The answer was in the chunks the agent found, for 24 questions: 24 (1.2 searches a question)
 ```
 
-Look at what it searched for. The customer wrote "before the time I set". The model wrote "early start, preheat, learns how long home takes to warm to target temperature": the words a manual uses. That is the gap demo 3 fell into, and the model stepped over it. Warm Wake came **first**, where demo 3 had it sixth, and the answer has the 90 minutes, the sunrise symbol and the place to turn it off. It cites the section it used, once at the end, although we asked for a citation after every sentence.
+Look at what it searched for. The customer wrote "before the time I set". The model wrote "heating starts early", "preheat" and "learns warm-up time": the words a manual uses. That is the gap demo 3 fell into, and the model stepped over it. Warm Wake came **first**, where demo 3 had it sixth, and the answer has the 90 minutes, the sunrise symbol and the place to turn it off. It cites the section it used, once at the end, although we asked for a citation after every sentence.
 
-|                             | Demo 3: we search                 | Demo 7: the model searches                |
+|                             | Demo 3: we search                 | Demo 4: the model searches                |
 | --------------------------- | --------------------------------- | ----------------------------------------- |
 | What is searched for        | The customer's words, as they are | Words the model chooses                   |
 | Searches per question       | 1                                 | 1.2: four of the 24 searched twice        |
 | Answer in what was found    | 22 of 24                          | 24 of 24 (23 from the first search alone) |
 | Warm Wake, for our question | 6th                               | 1st                                       |
-| Our question: tokens in     | 906                               | 1,063                                     |
+| Our question: tokens in     | 906                               | 1,008                                     |
 | Our question: cost          | $0.0001                           | $0.0002                                   |
-| Our question: time          | 2.1 seconds                       | 5.6 seconds                               |
+| Our question: time          | 2.1 seconds                       | 4.7 seconds                               |
 
-Both of demo 3's misses were found: our question, and Q11, _"The heating turns down every time I nip out to the shops"_, where the model searched for "stop away mode geofencing presence detection". Three of the four second searches were for error codes: the first search found what the code means, and the second went back for the fix. The fourth was Q11 going back for how to turn geofencing off. (Every question's searches and answer are in `demo/output/07_agent.json`.)
-
-The price is a second model call. The model reads the question to write a search, then reads the results to answer, so every question takes at least two calls instead of one. It is still a fraction of a cent, but it is more than twice as slow.
+Both of demo 3's misses were found: our question, and Q11, _"The heating turns down every time I nip out to the shops"_, where the model searched for "disable or adjust geofencing, Home/Away or presence-based automatic temperature setback". Three of the four second searches were for error codes: the first search found what the code means, and the second went back for what to do about it. The fourth was Q17, about someone trying to get into an account, going back with "account compromised". (Every question's searches and answer are in `demo/output/04_agent.json`.)
 
 ### The same server, another client
 
 The server isn't tied to our agent. To give it to Claude Code, run this from this folder:
 
 ```bash
-claude mcp add dormouse-docs -- uv run --directory "$PWD" python demo/07_docs_server.py
+claude mcp add dormouse-docs -- uv run --directory "$PWD" python demo/04_docs_server.py
 ```
 
 Claude Desktop takes the same command as JSON, in `claude_desktop_config.json` (Settings > Developer > Edit Config):
@@ -318,7 +321,7 @@ Claude Desktop takes the same command as JSON, in `claude_desktop_config.json` (
         "--directory",
         "/full/path/to/module-06-rag-and-proprietary-knowledge",
         "python",
-        "demo/07_docs_server.py"
+        "demo/04_docs_server.py"
       ]
     }
   }
@@ -336,13 +339,176 @@ In practical terms, this is what MCP gives us:
 
 ### Why this breaks
 
-The server searches every document it has, for whoever runs it. That includes the 41 internal ones: engineering notes, support playbooks and QA reports. Across the 24 customer questions, the server handed the model 5 sections from internal documents, and one answer cited one:
+- **Every question pays for the rewrite.** The model reads the question to write a search, then reads the results to answer, so every question takes at least two model calls instead of one. It is still a fraction of a cent, but our question took 4.7 seconds instead of 2.1. And the work is the same each time: customers ask why the heating comes on early in much the same words every week, and the model works out the manual's words for them again, every time.
+- **Nothing checks what goes back.** The client writes the answer now, so nothing checks that it came from what the search found. And the server searches every document it has, for whoever runs it, including the 41 internal ones. Across the 24 customer questions it handed the model 6 sections from internal documents: a QA report, a support playbook, support notes, a specification and a firmware baseline. None of them ended up in an answer this time, but nothing stopped them. We come back to both at the end of the module.
 
-```text
-Q: What's the coldest I can set the thermostat to?
-A: The coldest target temperature you can set is 5°C. The thermostat’s frost protection is always on and will turn the heating on if the room drops below 5°C. [thermostat-physical-and-environmental-limits.md#indoor-operating-range] [thermostat-electrical-safety-policy.md#limits-and-safety-features]
+Start with the first. Matching the customer's words to the documentation's could be done once, ahead of time, instead of on every question. What if the documentation came with the questions customers actually ask?
+
+## 5. FAQs: the questions customers ask
+
+**Demo:** `demo/05_faq.py`
+
+A manual is written in the manual's words. Customers ask in theirs. So turn every chunk into the questions it answers, written the way a customer would type them, and search those as well. It is what a good **FAQ** does, for every section at once.
+
+`data/build_faq.py` did the writing, once. It sends `gpt-6-luna` ten chunks at a time with these instructions:
+
+```python
+INSTRUCTIONS = """You turn documentation into the questions customers ask.
+For each chunk of Dormouse documentation, write 3 to 5 questions that the chunk answers.
+Write them as a customer who has never read the documentation would type them into a chat window:
+in everyday words, describing what they see or what they want. Plain ASCII."""
 ```
 
-The first source is an internal specification. This time the fact was harmless. Next time it could be a supplier's name, a known fault or another customer's details.
+The 1,823 chunks got 6,358 questions, saved in `data/faq.json` with a checksum of the chunk they came from. When a chunk changes, only its questions are written again.
 
-The server can't do better, because it has no idea who is asking. There is no sign-in: a customer's chat, a member of staff and anyone else given the command all get the same search. And section 5's check, that every quote really is in the chunk it cites, has gone: the client writes the answer now, and nothing checks it. Sharing the search with every application shared it with everyone. Deciding who may see what, and enforcing it in code rather than in a prompt, is Module 8.
+The demo embeds every question into a second ChromaDB collection, `questions`. Each question's metadata says which chunk it came from:
+
+```python
+question_store.upsert(
+    ids=[f"{id}?{n}" for id, n, _ in batch],
+    embeddings=vectors[start : start + STORE_BATCH],
+    documents=[question for _, _, question in batch],
+    metadatas=[{"chunk": id, "checksum": current[id]} for id, _, _ in batch],
+)
+```
+
+To answer, it searches both collections with the customer's own words, keeps each chunk's best match, and sends the model the top five chunks, exactly as demo 3 did. The model still sees chunks, never the made-up questions. There is one model call, and no rewriting at question time: that was done when the questions were written.
+
+```text
+1,823 chunks, and 6,358 questions they answer.
+
+The questions written for user-guide.md#warm-wake:
+   Why does my heating start before a schedule period begins?
+   What does the sunrise symbol on the display mean?
+   How do I turn Warm Wake off?
+   How far ahead can Warm Wake start heating?
+
+Q: Why does my Dormouse turn the heating on before the time I set?
+   0.728  thermostat-shows-the-wrong-room-temperature.md#top  via "Why does my Dormouse Thermostat show the wrong room temperature?"
+   0.728  thermostat-physical-dimensions-and-display-specification.md#product  via "What does the Dormouse Thermostat do?"
+   0.707  radiator-valve-does-not-heat-to-its-own-temperature.md#top  via "Why isn't my Dormouse Radiator Valve heating my radiator to its own temperature?"
+   0.693  create-a-smart-home-heating-routine.md#keep-temperature-schedules-on-dormouse  via "How can I keep heating schedules in Dormouse while using smart-home routines?"
+   0.684  firmware-4-0-release-notes.md#warm-wake  via "Why does my heating start before my schedule begins?"
+A: This is likely Warm Wake, which starts heating up to 90 minutes before a scheduled period so your home reaches the target temperature by the time it begins. To stop this, turn it off in **Settings > Heating > Warm Wake**.
+
+The answer was in the top 5 chunks, for 24 questions: searching chunks 22, searching questions 23, searching both 23
+```
+
+The first question written for the user guide's Warm Wake section is nearly the customer's question: _"Why does my heating start before a schedule period begins?"_ The section itself never says anything like it. A Warm Wake chunk came in fifth, through the firmware 4.0 release notes' question _"Why does my heating start before my schedule begins?"_, and the answer is right: Warm Wake, 90 minutes, and where to turn it off. But look at what came first: two questions about other problems that start like ours, _"Why does my Dormouse Thermostat show the wrong room temperature?"_ and _"Why isn't my Dormouse Radiator Valve heating..."_, then _"What does the Dormouse Thermostat do?"_, a question about everything, and one about schedules and smart-home routines. They share our question's words, "why", "Dormouse", "heating", more than its meaning.
+
+|                          | Demo 3: chunks | Demo 4: the model searches | Demo 5: chunks and questions |
+| ------------------------ | -------------- | -------------------------- | ---------------------------- |
+| Answer in what was found | 22 of 24       | 24 of 24                   | 23 of 24                     |
+| Missed                   | Q01, Q11       | none                       | Q06                          |
+| Model calls per question | 1              | 2 or more                  | 1                            |
+| Written ahead of time    | nothing        | nothing                    | 6,358 questions              |
+
+Searching the questions found both of demo 3's misses, our question and Q11 (geofencing), with the customer's own words. Searching the questions alone also found 23, with the same miss. (Every question's top five, and the question each chunk matched through, are in `demo/output/05_faq.json`.)
+
+### Why this breaks
+
+- **Questions that sound alike.** A question is short, so a few shared words count for a lot. Q06, _"How many people in my family can control the heating?"_, matched _"How many thermostats and heating zones can I have in my home?"_ first, and none of the five chunks it found says how many people a household can have. "How many" and "heating" were enough. Searching the chunks alone had found it. And for our question, the right chunk came fifth, behind four that only share its words.
+- **Finding the chunk isn't checking the answer.** Every count so far asks whether the right chunk was found. None asks whether the answer came from it. Demo 3's first sentence was in none of its chunks. This answer happens to be right, but nothing in it says where it came from, and a customer can't tell a fact from a guess.
+
+What if the model had to show where each sentence came from, and we checked?
+
+## 6. Citations: show the source, check it
+
+**Demo:** `demo/06_citations.py`
+
+Three changes to demo 3, and nothing else. The search stays as it was, the customer's words against the chunks, so we can see what the instructions and the check change on their own.
+
+1. **Stricter instructions.** Use only the documentation, quote it word for word, and say when it doesn't answer:
+
+   ```python
+   INSTRUCTIONS = """You are the support assistant for Dormouse, a smart thermostat. Answer the customer in a short paragraph.
+   Use only the documentation below, never what you know from elsewhere.
+   Quote, word for word, each sentence you rely on, with the id of the chunk it comes from.
+   If the documentation does not answer the question, set answered to false and say so. Do not guess."""
+   ```
+
+2. **A fixed shape for the reply.** **Structured outputs** make the model reply with JSON that matches a schema: `answered` (true or false), `answer`, and a list of `citations`, each a chunk id and a quote:
+
+   ```python
+   text={"format": {"type": "json_schema", "name": "answer", "schema": SCHEMA, "strict": True}}
+   ```
+
+3. **Check every quote in code.** A quote counts only if it really is in the chunk it cites, ignoring case, spacing and Markdown symbols:
+
+   ```python
+   def check(citations, found):
+       texts = {c["id"]: words(c["text"]) for c in found}
+       return [{**c, "checked": words(c["quote"]) in texts.get(c["chunk"], "")} for c in citations]
+   ```
+
+The demo asks two questions, then all 30 in `data/questions.json`: the 24 the documentation answers, the 5 it doesn't, and 1 only an internal note answers.
+
+```text
+Q: Why does my Dormouse turn the heating on before the time I set?
+A: The documentation does not explain why Dormouse might turn the heating on before a scheduled time.
+
+Q: How much does a Dormouse thermostat cost?
+A: The documentation does not specify the Dormouse Thermostat’s price.
+
+Of 24 questions the documentation answers: answered right 20, answered wrong 3, said it didn't know 1
+Of 5 questions it doesn't: said it didn't know 5
+Quotes found in the chunk they cite: 59 of 60
+```
+
+Our question first. Demo 3 searched the same way, missed Warm Wake, and guessed. Told not to, the model now says the documentation doesn't explain it. That is honest, and it is no help to the customer. The price question is better than demo 1, which sent the customer to a website and a sales team it knew nothing about. All five questions the documentation doesn't answer (the price, the founder, the next model, a discount and a phone number) got "the documentation doesn't say". The internal question, about a loud click, got the same.
+
+Of the 60 quotes, 59 are in the chunk they cite. The one that isn't, from `demo/output/06_citations.json`:
+
+```text
+Q: The heating turns down every time I nip out to the shops. How do I stop that?
+A: Away mode keeps the home at its configured away temperature until you turn it off. To stop the heating turning down when you go out, turn Away mode off; you can do this from Menu > Away on the thermostat or by tapping Away in the app. ...
+   [use-the-thermostat-menu.md#turn-away-mode-on] "Away mode keeps the home at the away temperature until you turn it off." (NOT IN THAT CHUNK)
+   [use-the-thermostat-menu.md#turn-away-mode-on] "Choose Menu > Away to turn Away mode on." (quote checked)
+   [use-the-thermostat-menu.md#turn-away-mode-on] "You can also turn Away mode on by tapping Away in the app." (quote checked)
+```
+
+The chunk says _"It keeps the home at the away temperature until you turn Away mode off."_ The model tidied the sentence and still called it a quote. The check caught it. This time the change was harmless; a check that looks for the exact words doesn't have to decide.
+
+| Outcome                          | Questions |
+| -------------------------------- | --------- |
+| Answerable: answered right       | 20 of 24  |
+| Answerable: answered wrong       | 3 of 24   |
+| Answerable: said it didn't know  | 1 of 24   |
+| Not covered: said it didn't know | 5 of 5    |
+| Internal: kept it internal       | 1 of 1    |
+
+The three counted wrong aren't made up. Each quotes real sentences, and leaves out what the customer needed. Q08 asks about a thermostat for upstairs, and gets "yes", without the limit of four. Q21 gets what E-217 means, but not that the thermostat needs a replacement. Q11 gets how to turn Away mode off by hand, when it's geofencing that turns it on.
+
+### Why this breaks
+
+- **"I don't know" is only as good as the search.** Our question was answered "the documentation doesn't explain" because the search missed Warm Wake. Sections 4 and 5 found it; this demo searches as demo 3 did.
+- **A real quote can still give a poor answer.** The check proves a quote is in the chunk it cites. It doesn't prove the answer is complete, or that the quote supports it. Q08, Q21 and Q11 passed the check and still missed.
+- **We can only check the answers we write.** Behind the MCP server in section 4, the client writes the answer, and nothing checks its quotes.
+- **No search here asks who is asking.** Every search in this module looks at all 275 documents. In section 4, 6 internal sections reached the model for customer questions. Deciding who may see what, and enforcing it in code rather than in a prompt, is Module 8.
+
+---
+
+## Summary
+
+| Step                               | Answers from                                   | Problem                                                                                |
+| ---------------------------------- | ---------------------------------------------- | -------------------------------------------------------------------------------------- |
+| 1. Just ask                        | What the model already knows                   | Makes up what it doesn't know: hallucination                                           |
+| 2. Put the documents in the prompt | Every document, every time                     | 191,548 tokens and 24 seconds a question, and a real company's documents won't fit     |
+| 3. Retrieve, then answer           | The 5 chunks nearest the customer's words      | The customer's words aren't the documentation's: it misses, then guesses               |
+| 4. Share it: an MCP server         | The chunks the model searches for              | Two model calls a question; nothing checks the answer, or who is asking                |
+| 5. FAQs                            | Chunks found through the questions they answer | Questions that sound alike point at the wrong chunk; the answer isn't checked          |
+| 6. Citations                       | Quotes from the chunks, checked in code        | Refuses when the search misses; real quotes, incomplete answers; no idea who is asking |
+
+## Playground
+
+[`playground/`](playground/) has seven things to play with: a chat over your own documents with checked quotes, chunk sizes, chunk headings, how many chunks to send, grounding rules, finding every stale copy of a fact, and the bill for long context against RAG.
+
+## Further reading and extensions
+
+The final exercise is in [`further-reading/`](further-reading/): papers on hallucination, long context, RAG, vector search, turning documents into questions, citations and fine-tuning, with a note on what to look for in each and which demo it relates to, plus extension projects to take home.
+
+## Slides
+
+```bash
+pnpm slides:06
+```

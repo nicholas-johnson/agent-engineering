@@ -1,6 +1,6 @@
 # Ask your docs
 
-A chat window over the Dormouse knowledge base. You'll ask your own questions and get demo 5's kind of answer: drawn only from the documentation, with quotes that are checked against the chunks they cite, and the five chunks the search found. Then you can point it at a folder of your own Markdown.
+A chat window over the Dormouse knowledge base. You'll ask your own questions and get demo 6's kind of answer: drawn only from the documentation, with quotes that are checked against the chunks they cite, and the five chunks the search found. Then you can point it at a folder of your own Markdown.
 
 From the module folder (`day-two/module-06-rag-and-proprietary-knowledge`):
 
@@ -25,7 +25,7 @@ printf 'How much does a Dormouse thermostat cost?\n\n' | uv run python playgroun
 
 ---
 
-This is demos 3 and 5 joined into a loop. Each question is embedded, and the five nearest chunks go to `gpt-6-luna` with demo 5's instructions: use only the documentation, quote each sentence you rely on with its chunk's id, and say so if the documentation doesn't answer. Each quote is then looked for, word for word, in the chunk it names. `quote checked` means it's there; `NOT IN THAT CHUNK` means the model misquoted or cited the wrong chunk. Under each answer are the chunks the search found, with their **cosine similarity** to the question.
+This is demos 3 and 6 joined into a loop. Each question is embedded, and the five nearest chunks go to `gpt-6-luna` with demo 6's instructions: use only the documentation, quote each sentence you rely on with its chunk's id, and say so if the documentation doesn't answer. Each quote is then looked for, word for word, in the chunk it names. `quote checked` means it's there; `NOT IN THAT CHUNK` means the model misquoted or cited the wrong chunk. Under each answer are the chunks the search found, with their **cosine similarity** to the question.
 
 ```text
 275 documents, 1,823 chunks. Ask a question; an empty line stops.
@@ -79,7 +79,7 @@ The model's answers change from run to run, so yours will be worded differently.
 
 ## Things to notice
 
-- **The module's own question fails.** "Why does my Dormouse turn the heating on before the time I set?" is answered by the user guide's Warm Wake section, but the five nearest chunks are all about smart-home routines and smart plugs. The model, told not to guess, says the documentation doesn't explain it. That's an honest answer and a wrong one: the failure is in the search, not the model. Searching demo 4's customer-style questions is one way to close that gap.
+- **The module's own question fails.** "Why does my Dormouse turn the heating on before the time I set?" is answered by the user guide's Warm Wake section, but the five nearest chunks are all about smart-home routines and smart plugs. The model, told not to guess, says the documentation doesn't explain it. That's an honest answer and a wrong one: the failure is in the search, not the model. Searching demo 5's customer-style questions is one way to close that gap.
 - **The similarities don't tell you whether it worked.** The failed search's best match scored 0.667; the invitation question, which worked, scored 0.469. A score only ranks the chunks for one question. It says nothing about whether the right chunk is among them.
 - **Three quotes, all checked.** The invitation answer rests on three sentences from two documents, and each is really in the chunk it names. When a quote isn't, you'll see `NOT IN THAT CHUNK`.
 - **An internal document answered a customer.** The click question was answered from `internal-relay-click-revision-c.md`, a note for support staff. Its `#summary` chunk, also in the top five, names the supplier batch that the note says never to mention. This time the model kept to the scripted line. Nothing in the search stopped it from doing otherwise.

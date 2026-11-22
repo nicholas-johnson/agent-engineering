@@ -1,5 +1,5 @@
-# Run from the module folder: uv run python demo/07_docs_server.py
-# You don't need to run it yourself: demo/07_agent.py starts it.
+# Run from the module folder: uv run python demo/04_docs_server.py
+# You don't need to run it yourself: demo/04_agent.py starts it.
 
 import hashlib
 import json

@@ -346,9 +346,7 @@ A: Dormouse may turn the heating on early so the room reaches the
     },
   },
 
-  // ---- Sections 4 to 6 (FAQs, citations, keeping it current) go here ----
-
-  // ---- Section 7: Share it ----
+  // ---- Section 4: Share it ----
   {
     type: 'title',
     content: {
@@ -363,7 +361,8 @@ A: Dormouse may turn the heating on early so the room reaches the
       title: 'One search, many copies',
       icon: 'layers',
       points: [
-        'Demos 3 to 6 each carry **their own copy** of the search: 89 lines in demo 3',
+        'A person who missed would **search again**, in other words. Demo 3 searches once',
+        'And demo 3 carries **its own copy** of the search: 89 lines',
         'The support chat, the website, staff tools and Claude would all need one',
         'Copies drift apart, and **answers start to disagree**',
         'Module 3: an **MCP server** offers tools to any client',
@@ -419,7 +418,7 @@ async with Client(DOCS_SERVER) as docs:
     type: 'title',
     content: {
       title: 'Demo — Share it',
-      subtitle: 'Switch to terminal: python demo/07_agent.py',
+      subtitle: 'Switch to terminal: python demo/04_agent.py',
       icon: 'rocket',
     },
   },
@@ -428,18 +427,17 @@ async with Client(DOCS_SERVER) as docs:
     content: {
       title: 'The model found Warm Wake',
       code: `Q: Why does my Dormouse turn the heating on before the time I set?
-   search_docs("thermostat heating starts before scheduled time
-     set; early start, preheat, learns how long home takes to
-     warm to target temperature")
+   search_docs("thermostat heating starts early before scheduled
+     time set; schedule preheat smart start learns warm-up time")
       0.684  user-guide.md#warm-wake
-      0.623  set-a-heating-schedule.md#before-you-start
-      0.622  understand-warm-wake.md#what-warm-wake-does
+      0.629  understand-warm-wake.md#what-warm-wake-does
+      0.621  ios-app-schedule-screen-guide.md#review-your-schedule
 A: Dormouse’s Warm Wake feature starts heating early so your
-   home reaches the scheduled target temperature ... may start
-   up to 90 minutes early ... [user-guide.md#warm-wake]
-   1,063 tokens in, $0.0002, 5.6 seconds`,
+   home reaches the scheduled temperature ... may start up to
+   90 minutes ahead ... [user-guide.md#warm-wake]
+   1,008 tokens in, $0.0002, 4.7 seconds`,
       highlights: [
-        "The model wrote **the documentation's words**: *early start, preheat*",
+        "The model wrote **the documentation's words**: *heating starts early, preheat*",
         'Warm Wake came **first**; demo 3 had it sixth',
         'The right answer: 90 minutes, the sunrise symbol, where to turn it off',
       ],
@@ -459,12 +457,12 @@ A: Dormouse’s Warm Wake feature starts heating early so your
         ],
       },
       right: {
-        label: 'Demo 7: the model searches',
+        label: 'Demo 4: the model searches',
         items: [
           'Words the model chooses: **1.2 searches** a question',
           'Answer found for **24 of 24** questions',
           'Warm Wake 1st',
-          '1,063 tokens, 5.6 seconds: **two model calls**',
+          '1,008 tokens, 4.7 seconds: **two model calls**',
         ],
       },
     },
@@ -474,14 +472,14 @@ A: Dormouse’s Warm Wake feature starts heating early so your
     content: {
       title: 'The same server in Claude',
       code: `claude mcp add dormouse-docs -- \\
-    uv run --directory "$PWD" python demo/07_docs_server.py
+    uv run --directory "$PWD" python demo/04_docs_server.py
 
 {
   "mcpServers": {
     "dormouse-docs": {
       "command": "uv",
       "args": ["run", "--directory", "/full/path/to/module-06-...",
-               "python", "demo/07_docs_server.py"]
+               "python", "demo/04_docs_server.py"]
     }
   }
 }`,
@@ -507,21 +505,304 @@ A: Dormouse’s Warm Wake feature starts heating early so your
     },
   },
   {
-    type: 'code',
+    type: 'description',
     content: {
       title: 'Why this breaks',
-      code: `Q: What's the coldest I can set the thermostat to?
-A: The coldest target temperature you can set is 5°C. The
-   thermostat’s frost protection is always on and will turn
-   the heating on if the room drops below 5°C.
-   [thermostat-physical-and-environmental-limits.md#indoor-...]
-   [thermostat-electrical-safety-policy.md#limits-and-safety-...]`,
+      icon: 'warning',
+      description: `**Every question pays for the rewrite.** Two model calls instead of one: our question took 4.7 seconds instead of 2.1. Customers ask about the heating coming on early in the same words every week, and the model works out the manual's words for them again, every time.
+
+        **Nothing checks what goes back.** The client writes the answer. And the server searches every document: across 24 customer questions it handed the model **6 internal sections**.
+
+        Start with the first. What if the documentation came with **the questions customers ask**, written once, ahead of time?`,
+    },
+  },
+
+  // ---- Section 5: FAQs ----
+  {
+    type: 'title',
+    content: {
+      title: '5. FAQs',
+      subtitle: 'The questions customers ask',
+      icon: 'help-circle',
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Write the questions once',
+      icon: 'pen-tool',
+      points: [
+        'For every chunk, a model writes **the questions it answers**, as a customer would type them',
+        '`data/build_faq.py`: 10 chunks a call, **6,358 questions** for 1,823 chunks',
+        'Done **once**. When a chunk changes, only its questions are written again',
+        'Each question is embedded, and points back to **its chunk**',
+      ],
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'The questions for Warm Wake',
+      code: `user-guide.md#warm-wake:
+   Why does my heating start before a schedule period begins?
+   What does the sunrise symbol on the display mean?
+   How do I turn Warm Wake off?
+   How far ahead can Warm Wake start heating?`,
       highlights: [
-        'The first source is an **internal** specification',
-        '5 internal sections reached the model, across 24 customer questions',
-        "No sign-in: the server **can't tell who is asking**",
-        'Nothing checks the quotes now: the client writes the answer',
-        'Who may see what, enforced in code: **Module 8**',
+        "The first is **nearly the customer's question**",
+        'The section itself never says anything like it',
+        "The customer's words, written down **ahead of time**",
+      ],
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'Search the questions too',
+      code: `question_store.upsert(
+    ids=[f"{id}?{n}" for id, n, _ in batch],
+    embeddings=vectors[start : start + STORE_BATCH],
+    documents=[question for _, _, question in batch],
+    metadatas=[{"chunk": id, "checksum": current[id]}
+               for id, _, _ in batch],
+)
+
+found = search(chunk_store, question_store, vector, "both")`,
+      highlights: [
+        'A second collection, `questions`: each one **points to its chunk**',
+        "Search chunks and questions with the **customer's own words**",
+        "Keep each chunk's best match, and send the top 5 **chunks**, as in demo 3",
+        '**One model call**: the rewriting was done ahead of time',
+      ],
+    },
+  },
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — FAQs',
+      subtitle: 'Switch to terminal: python demo/05_faq.py',
+      icon: 'rocket',
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'Found through a question',
+      code: `Q: Why does my Dormouse turn the heating on before the time I set?
+   0.728  thermostat-shows-the-wrong-room-temperature.md#top
+            via "Why does my Dormouse Thermostat show the wrong ..."
+   0.728  thermostat-physical-dimensions-and-display-...#product
+            via "What does the Dormouse Thermostat do?"
+   ...
+   0.684  firmware-4-0-release-notes.md#warm-wake
+            via "Why does my heating start before my schedule begins?"
+A: This is likely Warm Wake, which starts heating up to 90 minutes
+   before a scheduled period ... turn it off in
+   **Settings > Heating > Warm Wake**.`,
+      highlights: [
+        "Warm Wake came **fifth**, through a release note's question",
+        'The right answer: Warm Wake, 90 minutes, where to turn it off',
+        'The four above it share **our words**, not our meaning',
+      ],
+    },
+  },
+  {
+    type: 'three-way',
+    content: {
+      title: 'Answer in what was found',
+      columns: [
+        {
+          label: 'Demo 3: chunks',
+          items: ['**22 of 24**', 'Missed Q01 and Q11', '1 model call'],
+        },
+        {
+          label: 'Demo 4: the model searches',
+          items: ['**24 of 24**', 'Missed none', '2 or more model calls'],
+        },
+        {
+          label: 'Demo 5: chunks and questions',
+          items: [
+            '**23 of 24**',
+            'Missed Q06',
+            '1 model call, 6,358 questions written ahead',
+          ],
+        },
+      ],
+    },
+  },
+  {
+    type: 'description',
+    content: {
+      title: 'Why this breaks',
+      icon: 'warning',
+      description: `**Questions that sound alike.** Q06, *"How many people in my family can control the heating?"*, matched *"How many thermostats and heating zones can I have in my home?"*. "How many" and "heating" were enough. Searching the chunks alone had found it.
+
+        **Finding the chunk isn't checking the answer.** Every count so far asks whether the right chunk was found, not whether the answer came from it. Demo 3's first sentence was in none of its chunks.
+
+        What if the model had to **show where each sentence came from**, and we checked?`,
+    },
+  },
+
+  // ---- Section 6: Citations ----
+  {
+    type: 'title',
+    content: {
+      title: '6. Citations',
+      subtitle: 'Show the source, and check it',
+      icon: 'check-square',
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'Stricter instructions',
+      code: `Use only the documentation below, never what you know
+from elsewhere.
+Quote, word for word, each sentence you rely on, with the
+id of the chunk it comes from.
+If the documentation does not answer the question, set
+answered to false and say so. Do not guess.`,
+      highlights: [
+        '**Only** the documentation',
+        "**Quote** it, with the chunk's id",
+        "Say when it **doesn't answer**",
+        'The same search as demo 3: only the instructions and the check change',
+      ],
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'A fixed shape, and a check',
+      code: `text={"format": {"type": "json_schema", "name": "answer",
+                 "schema": SCHEMA, "strict": True}}
+# {"answered": ..., "answer": ...,
+#  "citations": [{"chunk": ..., "quote": ...}]}
+
+def check(citations, found):
+    texts = {c["id"]: words(c["text"]) for c in found}
+    return [{**c, "checked": words(c["quote"])
+             in texts.get(c["chunk"], "")} for c in citations]`,
+      highlights: [
+        '**Structured outputs**: the reply is JSON that matches a schema',
+        '`answered`: true or false, so code can tell a refusal',
+        'A quote counts only if it **is in the chunk it cites**',
+      ],
+    },
+  },
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Citations',
+      subtitle: 'Switch to terminal: python demo/06_citations.py',
+      icon: 'rocket',
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'Honest, and checked',
+      code: `Q: Why does my Dormouse turn the heating on before the time I set?
+A: The documentation does not explain why Dormouse might turn
+   the heating on before a scheduled time.
+
+Q: How much does a Dormouse thermostat cost?
+A: The documentation does not specify the Dormouse Thermostat’s price.
+
+Of 24 questions the documentation answers: answered right 20,
+  answered wrong 3, said it didn't know 1
+Of 5 questions it doesn't: said it didn't know 5
+Quotes found in the chunk they cite: 59 of 60`,
+      highlights: [
+        "Demo 3 **guessed** our question. Now: *the documentation doesn't explain*",
+        "All **5** questions it can't answer: turned down",
+        '**59 of 60** quotes are really in their chunk',
+      ],
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'The check caught one',
+      code: `Q: The heating turns down every time I nip out to the shops.
+   How do I stop that?
+   [use-the-thermostat-menu.md#turn-away-mode-on]
+   "Away mode keeps the home at the away temperature until
+    you turn it off." (NOT IN THAT CHUNK)
+
+The chunk: "It keeps the home at the away temperature until
+            you turn Away mode off."`,
+      highlights: [
+        'The model **tidied** the sentence, and still called it a quote',
+        'The check looks for the **exact words**',
+        "The answer is wrong anyway: it's **geofencing** that turns Away mode on",
+      ],
+    },
+  },
+  {
+    type: 'description',
+    content: {
+      title: 'Why this breaks',
+      icon: 'warning',
+      description: `**"I don't know" is only as good as the search.** Our question was turned down because the search missed Warm Wake. Sections 4 and 5 found it.
+
+        **A real quote can still give a poor answer.** All three wrong answers passed the check. Q08 says yes to a thermostat upstairs, without the limit of four.
+
+        **We can only check the answers we write.** Behind the MCP server, the client writes them.
+
+        **No search here asks who is asking.** In demo 4, 6 internal sections reached the model. Who may see what, enforced in code: **Module 8**.`,
+    },
+  },
+
+  // ---- Wrap-up ----
+  {
+    type: 'title',
+    content: {
+      title: 'Wrap-up',
+      subtitle: 'Answering from your own documents',
+      icon: 'check',
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'What we built',
+      icon: 'blocks',
+      points: [
+        '**Just ask**: confident, and made up',
+        '**Documents in the prompt**: right, for 191,548 tokens a question',
+        "**Retrieve, then answer**: 906 tokens, but the customer's words miss",
+        '**An MCP server**: the model writes the search, in two calls a question',
+        '**FAQs**: questions written once, but alike questions mislead',
+        '**Citations**: checked quotes and honest refusals, only as good as the search',
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'What we learned',
+      icon: 'award',
+      points: [
+        "A model makes up what it hasn't seen: **hallucination**",
+        '**RAG**: retrieve the chunks that matter, then answer from them',
+        'A **vector database** stores chunks once, with metadata to filter by',
+        'Most misses are **search** misses: measure what was found, not just the answer',
+        'Make the model **cite**, and check the citations in code',
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Final exercise: further reading',
+      icon: 'book',
+      points: [
+        '**Lewis et al. (2020)**: the paper that named RAG',
+        '**Nogueira et al. (2019)**: doc2query, documents turned into questions',
+        '**Gao et al. (2023)**: scoring citations',
+        'Pick a paper, connect it to a demo, then start an extension',
+        'Everything is in `further-reading/`',
       ],
     },
   },

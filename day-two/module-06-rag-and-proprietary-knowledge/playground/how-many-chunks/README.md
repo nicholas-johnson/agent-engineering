@@ -59,7 +59,7 @@ To save 480 calls, the script counts the instructions and questions once, then a
 
 ## Try this
 
-1. **Answers, not chunks.** For `TOP` = 3, 5, 10 and 20, ask `gpt-6-luna` each question with that many chunks and check its answer with `contains_facts`, as demo 5 does. Does the right-answer count follow the found count, or fall off at 20?
+1. **Answers, not chunks.** For `TOP` = 3, 5, 10 and 20, ask `gpt-6-luna` each question with that many chunks and check its answer with `contains_facts`, as demo 6 does. Does the right-answer count follow the found count, or fall off at 20?
 2. **Order matters?** At `TOP = 10`, put the nearest chunk last instead of first. Do the answers change?
 3. **A similarity cut-off.** Instead of a fixed `TOP`, keep every chunk within 0.05 of the best one's similarity. How many chunks does each question get, and how many are found?
 4. **A pricier model.** Set `INPUT_PRICE` to a frontier model's price from Module 4's `data/prices.json`. At what price does `TOP = 10` stop being an easy choice?

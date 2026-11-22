@@ -270,10 +270,6 @@ SCRIPTS: tuple[ScriptCase, ...] = (
         outputs=("01_keyword_search.json", "01_index.json"),
     ),
     ScriptCase(
-        f"{EMBEDDINGS}/demo/02_count_vectors.py",
-        outputs=("02_count_vectors.json",),
-    ),
-    ScriptCase(
         f"{EMBEDDINGS}/demo/06_similarity_search.py",
         outputs=("06_similarity_search.json",),
         keys=("OPENAI_API_KEY",),
@@ -326,28 +322,67 @@ SCRIPTS: tuple[ScriptCase, ...] = (
         outputs=("03_retrieve_and_answer.json", "chunks.json"),
         keys=("OPENAI_API_KEY",),
     ),
+    # Starts demo/04_docs_server.py itself, and asks the agent 25 questions.
+    ScriptCase(
+        f"{RAG}/demo/04_agent.py",
+        outputs=("04_agent.json",),
+        keys=("OPENAI_API_KEY",),
+        timeout=600,
+    ),
     # The first run embeds every chunk and question, which can take a few minutes.
     ScriptCase(
-        f"{RAG}/demo/04_faq.py",
-        outputs=("04_faq.json",),
+        f"{RAG}/demo/05_faq.py",
+        outputs=("05_faq.json",),
         keys=("OPENAI_API_KEY",),
         timeout=600,
     ),
     ScriptCase(
-        f"{RAG}/demo/05_citations.py",
-        outputs=("05_citations.json",),
+        f"{RAG}/demo/06_citations.py",
+        outputs=("06_citations.json",),
+        keys=("OPENAI_API_KEY",),
+        timeout=600,
+    ),
+    # Each playground embeds the knowledge base into its own store on the first run.
+    ScriptCase(
+        f"{RAG}/playground/ask-your-docs/play.py",
+        stdin="How do I boost the heating?\n\n",
+        outputs=("transcript.json",),
         keys=("OPENAI_API_KEY",),
         timeout=600,
     ),
     ScriptCase(
-        f"{RAG}/demo/06_keep_it_current.py",
-        outputs=("06_keep_it_current.json",),
+        f"{RAG}/playground/chunk-headings/play.py",
+        outputs=("results.json",),
         keys=("OPENAI_API_KEY",),
+        timeout=600,
     ),
-    # Starts demo/07_docs_server.py itself, and asks the agent 25 questions.
     ScriptCase(
-        f"{RAG}/demo/07_agent.py",
-        outputs=("07_agent.json",),
+        f"{RAG}/playground/chunk-sizes/play.py",
+        outputs=("results.json",),
+        keys=("OPENAI_API_KEY",),
+        timeout=900,
+    ),
+    ScriptCase(
+        f"{RAG}/playground/grounding-rules/play.py",
+        outputs=("results.json",),
+        keys=("OPENAI_API_KEY",),
+        timeout=600,
+    ),
+    ScriptCase(
+        f"{RAG}/playground/how-many-chunks/play.py",
+        outputs=("results.json",),
+        keys=("OPENAI_API_KEY",),
+        timeout=600,
+    ),
+    ScriptCase(
+        f"{RAG}/playground/long-context-or-rag/play.py",
+        outputs=("costs.json", "token-counts.json"),
+        keys=("OPENAI_API_KEY",),
+        timeout=600,
+    ),
+    ScriptCase(
+        f"{RAG}/playground/stale-copies/play.py",
+        outputs=("stale-copies.json",),
         keys=("OPENAI_API_KEY",),
         timeout=600,
     ),
@@ -495,6 +530,8 @@ DEDICATED_SCRIPTS: frozenset[str] = frozenset(
         f"{INTRO}/playground/neural-knobs/complete.py",
         f"{PROVIDERS}/data/build_prices.py",
         f"{PROVIDERS}/demo/01_big_labs.py",
+        # Checked below against the numbers on the "word line" slide.
+        f"{EMBEDDINGS}/demo/02_count_vectors.py",
         # Demo 4 reads the map demo 3 writes, so they run in order below.
         f"{EMBEDDINGS}/demo/03_word_map.py",
         f"{EMBEDDINGS}/demo/04_sentence_vectors.py",
@@ -502,8 +539,6 @@ DEDICATED_SCRIPTS: frozenset[str] = frozenset(
         f"{EMBEDDINGS}/demo/05_word_vectors.py",
         # Copies documents from Module 6: checked against them below instead.
         f"{EMBEDDINGS}/data/copy_docs.py",
-        # Writes committed data: checked against it below, in a temporary folder.
-        f"{EMBEDDINGS}/data/build_word_line.py",
         # Write the committed knowledge base and its FAQ with a model, so the same applies.
         f"{RAG}/data/build_docs.py",
         f"{RAG}/data/build_faq.py",
@@ -586,19 +621,16 @@ def test_build_tokens_matches_committed_data(tmp_path: Path) -> None:
 
 
 @pytest.mark.offline
-def test_build_word_line_matches_committed_data(tmp_path: Path) -> None:
-    """Run build_word_line.py in tmp_path so committed data/word_line.json is never modified."""
-    data_dir = REPO_ROOT / EMBEDDINGS / "data"
-    shutil.copy2(data_dir / "build_word_line.py", tmp_path / "build_word_line.py")
-    (tmp_path / "docs").mkdir()
-    shutil.copy2(data_dir / "docs" / "user-guide.md", tmp_path / "docs" / "user-guide.md")
-
-    execute_python_script(tmp_path / "build_word_line.py", cwd=tmp_path)
-
-    generated = json.loads((tmp_path / "word_line.json").read_text(encoding="utf-8"))
-    committed = json.loads((data_dir / "word_line.json").read_text(encoding="utf-8"))
-    assert len(generated["positions"]) == 16
-    assert generated == committed
+def test_count_vectors_line_matches_the_slide() -> None:
+    """Demo 2 puts 16 words on a line, and the "word line" slide shows the same numbers."""
+    demo = REPO_ROOT / EMBEDDINGS / "demo"
+    execute_python_script(demo / "02_count_vectors.py", outputs=("02_count_vectors.json", "02_word_line.json"))
+    line = json.loads((demo / "output" / "02_word_line.json").read_text(encoding="utf-8"))
+    slides = (REPO_ROOT / EMBEDDINGS / "slides" / "src" / "slides.js").read_text(encoding="utf-8")
+    block = re.search(r"type: 'word-line',.*?words: \{(.*?)\}", slides, re.DOTALL)[1]
+    on_slide = {word: float(number) for word, number in re.findall(r"(\w+): (-?[\d.]+)", block)}
+    assert len(line) == 16
+    assert on_slide == line
 
 
 @pytest.mark.offline
@@ -742,7 +774,7 @@ def test_knowledge_base_is_consistent() -> None:
         assert [line.split(": ", 1)[0] for line in front] == fields, name
         assert f"audience: {'internal' if 'type: internal' in front else 'customer'}" in front, name
 
-    # Firmware 4.2 changes Warm Wake, so only these documents may say how it works.
+    # Only these documents say how early Warm Wake starts, so a right answer must come from one of them.
     for name, text in documents.items():
         if name not in {"user-guide.md", "firmware-4-0-release-notes.md"}:
             assert not re.search(r"minutes early|90 minutes|> Warm Wake", text, re.IGNORECASE), name
@@ -760,9 +792,6 @@ def test_knowledge_base_is_consistent() -> None:
     # Only internal documents explain the relay click, so a customer answer that explains it has leaked one.
     holders = [name for name, text in documents.items() if "click" in text.lower()]
     assert holders and all("audience: internal" in documents[name] for name in holders)
-
-    updates = sorted(path.name for path in (module / "updates").glob("*.md"))
-    assert updates == ["release-notes-4.2.md", "user-guide.md"]
 
     # data/build_faq.py wrote questions for (nearly) every chunk, and each has some.
     faq = json.loads((module / "faq.json").read_text(encoding="utf-8"))

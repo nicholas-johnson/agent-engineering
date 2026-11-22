@@ -20,10 +20,9 @@ export const slides = [
     content: {
       title: 'Dormouse',
       icon: 'question',
-      description:
-        `Dormouse is a fake company, making AI controlled thermostats. It has **275 documents** across a wide range of functions. 
+      description: `Dormouse is a fake company, making AI-controlled thermostats. It has **275 documents** across a wide range of functions. 
         
-        Here, I've moddled these as markdown files, but in reality these might be Confluence docs, Office 365, Jira, Support tickets, etc. We have a fake user guide, support and troubleshooting articles, policies, and internal notes for staff. 
+        Here, I've modelled these as markdown files, but in reality these might be Confluence docs, Office 365, Jira, Support tickets, etc. We have a fake user guide, support and troubleshooting articles, policies, and internal notes for staff. 
         
         A customer asks a question. The answer is in there somewhere. **How do we find it?**`,
     },
@@ -48,7 +47,7 @@ before a schedule period. ...`,
       highlights: [
         'The **user guide** has 26 sections, 1,794 words',
         '275 documents in all: **234 for customers, 41 internal**',
-        'How to search it?'
+        'How to search it?',
       ],
     },
   },
@@ -83,7 +82,6 @@ before a schedule period. ...`,
         '1. **Split** every document into words: lower case, letters and digits only',
         '2. **Build an inverted index**: each word points to the documents that contain it, and how many times. Like the index of a book',
         "3. Note each document's length",
-        
       ],
     },
   },
@@ -143,7 +141,7 @@ before a schedule period. ...`,
     },
   },
 
-  // ---- Section 2: Embeddings by counting ----
+  // ---- Section 2: Embeddings ----
   {
     type: 'title',
     content: {
@@ -160,8 +158,6 @@ before a schedule period. ...`,
       points: [
         'A **vector**: a list of numbers that stands for a piece of text',
         'Words that **mean** similar things get vectors that point the same way',
-        
-        
       ],
       credit: 'Harris (1954). "Distributional Structure." Word 10(2–3):146–162',
     },
@@ -185,7 +181,7 @@ for i, word in enumerate(tokens):
   {
     type: 'code',
     content: {
-      title: 'Neighboring words tend to be related',
+      title: 'Neighbouring words tend to be related',
       code: `=== Counted in the user guide: 1,794 words, 235 different words ===
   warm       wake, sunrise, early, heat, is
   password   link, schedules, your, choose, and
@@ -194,7 +190,6 @@ for i, word in enumerate(tokens):
       highlights: [
         "*warm*'s row: *wake* 10, *is* 4, *the* 3, *heating* 3, *sunrise* 2, ...",
         `Nobody told it what any word means. It's just looking for words that tend to be found together.`,
-        
       ],
     },
   },
@@ -202,7 +197,7 @@ for i, word in enumerate(tokens):
     type: 'word-line',
     content: {
       title: 'The counts on a line',
-      // From data/word_line.json, written by data/build_word_line.py.
+      // From demo/output/02_word_line.json, written by demo/02_count_vectors.py.
       words: {
         sunrise: -0.43,
         wake: -0.39,
@@ -249,7 +244,7 @@ for i, word in enumerate(tokens):
   {
     type: 'title',
     content: {
-      title: 'Demo — Embeddings by counting',
+      title: 'Demo — Embeddings',
       subtitle: 'Switch to terminal: python demo/02_count_vectors.py',
       icon: 'rocket',
     },
@@ -259,8 +254,7 @@ for i, word in enumerate(tokens):
     content: {
       title: 'Why this breaks',
       icon: 'warning',
-      description:
-        `We have assigned one number per word so they fit on a line. This means that words that want to be in two places have no way to do this.
+      description: `We have assigned one number per word so they fit on a line. This means that words that want to be in two places have no way to do this.
         
         What if we increased the number of vector dimensions to 2?`,
     },
@@ -358,7 +352,7 @@ for i, word in enumerate(tokens):
       note: 'The same 16 words as the line. The first number is the line from section 2; the second is a line at right angles to it. Groups found by k-means.',
     },
   },
-  
+
   {
     type: 'equation',
     content: {
@@ -528,7 +522,7 @@ cosine_similarity(sentence_vector(a, word_vectors),
       icon: 'rocket',
     },
   },
-  
+
   {
     type: 'description',
     content: {
@@ -549,7 +543,7 @@ cosine_similarity(sentence_vector(a, word_vectors),
       icon: 'brain',
     },
   },
-  
+
   {
     type: 'standard',
     content: {
@@ -591,10 +585,10 @@ Real neighbours of "wake", up to 3 words either side:
 for other, is_neighbour in samples:
     neighbour = neighbours[other]
     guess = sigmoid(sum(a * b for a, b in zip(vector, neighbour)))
-    loss = is_neighbour - guess
+    error = is_neighbour - guess
     for k in range(SIZE):
-        change[k] += rate * loss * neighbour[k]
-        neighbour[k] += rate * loss * vector[k]`,
+        change[k] += rate * error * neighbour[k]
+        neighbour[k] += rate * error * vector[k]`,
       highlights: [
         'Multiply and add: the bigger the total, the more it thinks **neighbours**',
         '`sigmoid` turns that into a guess from 0 to 1. At the start, every guess is **0.5**',
@@ -611,7 +605,7 @@ for other, is_neighbour in samples:
       icon: 'rocket',
     },
   },
-  
+
   {
     type: 'description',
     content: {
@@ -623,11 +617,11 @@ for other, is_neighbour in samples:
     },
   },
 
-  // ---- Section 6: Find by similarity ----
+  // ---- Section 6: A commercial embedding model ----
   {
     type: 'title',
     content: {
-      title: '6. A Commercial Embeeding Model',
+      title: '6. A commercial embedding model',
       subtitle: 'OpenAI text-embedding-3-small',
       icon: 'compass',
     },
@@ -644,7 +638,7 @@ vectors = [item.embedding for item in response.data]`,
       highlights: [
         '`text-embedding-3-small`: trained to embed **whole passages**, word order included',
         'Up to 8,191 tokens in, **1,536 numbers** out',
-        
+
         'Cost: All 275 documents: 179,993 tokens, **under half a cent**',
       ],
     },
@@ -663,7 +657,7 @@ vectors = [item.embedding for item in response.data]`,
 </math>`,
       points: [
         'The same angle as demos 4 and 5, now for vectors with **1,536 numbers**',
-        'Co-sign similarity works in any number of dimensions',
+        'Cosine similarity works in any number of dimensions',
       ],
     },
   },
@@ -691,7 +685,7 @@ results = sorted(
   {
     type: 'title',
     content: {
-      title: 'Demo — Find by similarity',
+      title: 'Demo — A commercial embedding model',
       subtitle: 'Switch to terminal: python demo/06_similarity_search.py',
       icon: 'rocket',
     },
@@ -767,11 +761,11 @@ results = sorted(
       icon: 'blocks',
       points: [
         '**Keyword search**: shared words, not meaning',
-        '**Counting**: neighbours counted, but long and mostly zeros',
+        '**Counting**: neighbours counted, but on a line each word has only one place',
         '**A map**: two numbers per word, but only for words we picked',
         '**Sentences from words**: add up the arrows, but two numbers are too few',
         '**An embeddings model**: 20 learned numbers, but too little text, and no word order',
-        '**Similarity search**: a model that reads the whole text puts the right document first',
+        '**A commercial embedding model**: reads the whole text, and puts the right document first',
       ],
     },
   },

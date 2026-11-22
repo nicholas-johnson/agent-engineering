@@ -1,6 +1,6 @@
 # Grounding rules
 
-Demo 3 told the model "Use our documentation". Demo 5 told it to use only the documentation, and to say when the documentation doesn't answer. Here you'll find out how much those words matter. The same five chunks go to the model with three sets of instructions, for 29 questions: the 24 the documentation answers and the 5 it doesn't. You'll count how often each set gets the answer right, and how often it makes something up.
+Demo 3 told the model "Use our documentation". Demo 6 told it to use only the documentation, and to say when the documentation doesn't answer. Here you'll find out how much those words matter. The same five chunks go to the model with three sets of instructions, for 29 questions: the 24 the documentation answers and the 5 it doesn't. You'll count how often each set gets the answer right, and how often it makes something up.
 
 From the module folder (`day-two/module-06-rag-and-proprietary-knowledge`):
 
@@ -30,7 +30,7 @@ RULES = {
 }
 ```
 
-Unlike demo 5, the answers are plain text, with no `answered` field to fill in, so the model isn't nudged towards refusing by the shape of its reply. That means something else has to decide whether a reply answered the question. A second call to `gpt-6-luna`, a **judge**, reads each question and reply and says whether it gave the information asked for. Then:
+Unlike demo 6, the answers are plain text, with no `answered` field to fill in, so the model isn't nudged towards refusing by the shape of its reply. That means something else has to decide whether a reply answered the question. A second call to `gpt-6-luna`, a **judge**, reads each question and reply and says whether it gave the information asked for. Then:
 
 - for the 24 answerable questions, a reply that answered is **right** if it contains the question's facts (the demos' `contains_facts`), and **wrong** if it doesn't
 - for the 5 questions the documentation doesn't answer, any reply that answered **made something up**

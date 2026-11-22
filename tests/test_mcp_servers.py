@@ -30,7 +30,7 @@ SERVER_TOOLS: dict[str, set[str]] = {
         "square_root",
     },
     f"{TOOLS}/playground/weather-server/server.py": {"find_place", "get_weather"},
-    f"{RAG}/demo/07_docs_server.py": {"search_docs"},
+    f"{RAG}/demo/04_docs_server.py": {"search_docs"},
 }
 
 # Module 8's server needs the signed-in person's token, so it has its own test below.

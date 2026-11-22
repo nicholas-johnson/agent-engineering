@@ -1,6 +1,6 @@
 # Module 5 — Embeddings and Vector Search
 
-> A customer asks: *"Why is the heating already on before my alarm goes off?"* The answer is in Dormouse's documentation, in a document called "Understand Warm Wake", and we want a search that finds it. **Keyword search** finds it in the 26 sections of the user guide, but in all 275 documents it comes 142nd: rare filler words like "why" and "goes" decide the order, and "alarm" isn't in any document. So we build **embeddings** ourselves from the user guide: a list of numbers for each word, made from the words around it. The easy way is to **count** them. It works (the closest words to *warm* are *wake* and *sunrise*), but each word gets 235 numbers, 90% of them zero. Squashed to two numbers each, 16 words we picked make a **map**: alike words point the same way from the middle, and the angle between them says how alike they are. **Adding up** a text's word vectors gives it one vector, and **cosine similarity**, the angle from the map, compares two. A sentence about heating and one about a password point almost opposite ways, but two numbers can't tell 275 documents apart, and Warm Wake comes 71st. An **embeddings model**, word2vec, learns 20 numbers per word instead, live, in about 11 seconds, and with its sums Warm Wake climbs to 8th. But 1,794 words is far too little text, our question's most important word is one no method so far has seen, and a sum can't see word order, so two sentences with opposite meanings score 1.000. A real embeddings model reads the whole text and turns it into 1,536 numbers, and the Warm Wake document comes first. It finds the right document, but the customer wanted an answer. Storing the vectors in a **vector database** and answering from what it finds is Module 6.
+> A customer asks: *"Why is the heating already on before my alarm goes off?"* The answer is in Dormouse's documentation, in a document called "Understand Warm Wake", and we want a search that finds it. **Keyword search** finds it in the 26 sections of the user guide, but in all 275 documents it comes 142nd: rare filler words like "why" and "goes" decide the order, and "alarm" isn't in any document. So we build **embeddings** ourselves from the user guide: a list of numbers for each word, made from the words around it. The easy way is to **count** them. It works (the closest words to *warm* are *wake* and *sunrise*), but each word gets 235 numbers, far too many to picture. Squeezed onto a line, one number each, 16 words we picked mostly fall into place, but each word gets only one place, so *router* ends up beside *schedule*. With two numbers each, they make a **map**: alike words point the same way from the middle, and the angle between them says how alike they are. **Adding up** a text's word vectors gives it one vector, and **cosine similarity**, the angle from the map, compares two. A sentence about heating and one about a password point almost opposite ways, but two numbers can't tell 275 documents apart, and Warm Wake comes 71st. An **embeddings model**, word2vec, learns 20 numbers per word instead, live, in about 11 seconds, and with its sums Warm Wake climbs to 8th. But 1,794 words is far too little text, our question's most important word is one no method so far has seen, and a sum can't see word order, so two sentences with opposite meanings score 1.000. A real embeddings model reads the whole text and turns it into 1,536 numbers, and the Warm Wake document comes first. It finds the right document, but the customer wanted an answer. Storing the vectors in a **vector database** and answering from what it finds is Module 6.
 
 ## Learning goals
 
@@ -30,7 +30,6 @@ Everything runs on the documentation for **Dormouse**, a smart thermostat with a
 | `data/docs/*.md` | Dormouse's documentation, copied from Module 6 by `data/copy_docs.py`: support, troubleshooting, app, installation, specification, policy, error-code and release-note documents for customers, and internal documents for staff | 275 documents, about 150,000 words |
 | `data/docs/user-guide.md` | Written by hand: the user guide. The small library in demos 1, 4, 5 and 6, and the text demos 2, 3 and 5 build word vectors from | 1 document, 26 sections, 1,794 words |
 | `data/questions.json` | 20 questions in customers' own words, each with the documents that answer it, for the playgrounds | 20 questions |
-| `data/word_line.json` | 16 words from the user guide, each placed on a line for the slides, by `data/build_word_line.py` (section 2) | 16 words |
 
 Each document starts with a few lines of **metadata**, facts about the document rather than its text:
 
@@ -62,7 +61,7 @@ uv run python demo/01_keyword_search.py
 | Demo | What it is | Writes to `demo/output/` |
 |------|------------|--------------------------|
 | `01_keyword_search.py` | BM25 keyword search, in plain Python | `01_keyword_search.json`: every section and document, ranked; `01_index.json`: the index of all 275 documents |
-| `02_count_vectors.py` | Build word vectors by counting neighbours in the user guide | `02_count_vectors.json`: every word's neighbours and their counts |
+| `02_count_vectors.py` | Build word vectors by counting neighbours in the user guide, then put 16 words on a line | `02_count_vectors.json`: every word's neighbours and their counts; `02_word_line.json`: the 16 words' places on the line |
 | `03_word_map.py` | Give words two numbers each, a map, and group them by direction | `03_word_map.json`: every word's two numbers, length and angle, and the 16 words' groups |
 | `04_sentence_vectors.py` | Add up the map's word vectors into one per sentence, and search with them (run demo 3 first) | `04_sentence_vectors.json`: three pairs of sentences, the question's two numbers and lost words, and every section and document, ranked |
 | `05_word_vectors.py` | Train word vectors on the user guide, in plain Python, and search with their sums | `05_word_vectors.txt`: one word per line, then its 20 numbers; `05_question.json`: every section and document, ranked |
@@ -171,7 +170,7 @@ In all 275 documents it fails. "Understand Warm Wake" comes **142nd**. The winne
 
 **Why this breaks:** keyword search matches **words, not meaning**. The document that answers the question doesn't use the question's words. Every extra document that happens to share a rare word is another chance to push the right one down, so a search that worked on 26 sections fails on 275 documents.
 
-## 2. Embeddings by counting
+## 2. Embeddings
 
 **Demo:** `demo/02_count_vectors.py`
 
@@ -211,7 +210,7 @@ The demo prints the five closest words to a few others. ("Closest" is measured b
 
 Nobody told it what any word means, yet *warm* is closest to *wake*, *sunrise*, *early* and *heat*, and *heating* to *thermostat* and *temperature*. Those are the words the guide uses together. Open `demo/output/02_count_vectors.json` to see every word's neighbours and their counts.
 
-235 numbers are hard to picture, so the slides put each word on a line instead: one number per word. `data/build_word_line.py` takes 16 words we picked from the guide and works out how alike each pair is (the cosine similarity of their rows). Then it puts the words anywhere on a line and, over and over:
+235 numbers are hard to picture, so the demo also squeezes 16 words we picked from the guide onto a line: one number per word. It works out how alike each pair is (the cosine similarity of their rows). Then it puts the words anywhere on a line and, over and over:
 
 1. moves each word halfway towards the average position of the others, weighted by how alike they are,
 2. re-centres the line and stretches it back out. Without this, every word would slide to the same point.
@@ -223,7 +222,7 @@ positions = [(p + dot(s, positions) / total) / 2 for p, s, total in zip(position
 ```
 
 ```text
-Each word pulled towards the words it is most like:
+=== 16 words we picked: one number each ===
   -0.43  sunrise
   -0.39  wake
   -0.35  warm
@@ -246,10 +245,13 @@ Warm Wake's words end up together at one end, with *frost* and *heat*, and the w
 
 The pull has to come from *similar company*, not from turning up together. Pull the words together by how often they're neighbours, and the line falls apart into three clumps: among these 16 words there are only 13 neighbouring pairs, and *radiator*, *router* and *account* are never near any of the others.
 
+The full rows have their own problems. They are long and mostly zeros: 90.3% of all the numbers in the table are zero, and *warm* has only 24 that aren't. All the documentation has 1,899 words that appear at least twice, so its rows would have 1,899 numbers each. And common words get in the way: *is*, *the* and *and* turn up near nearly everything, so *and* comes among the five closest words to both *password* and *heating*.
+
 **Why this breaks:**
 
-- **Long, and mostly zeros.** A vector has one number for every word in the vocabulary. Here that's 235 numbers, and 90.3% of all the numbers in the table are zero: *warm* has only 24 that aren't. All the documentation has 1,899 words that appear at least twice, so its vectors would have 1,899 numbers each, and a vocabulary for all of English runs to hundreds of thousands.
-- **Common words get in the way.** *is*, *the* and *and* turn up near nearly everything, so they fill every row. *warm*'s row counts *is* as often as *warm* itself, and *and* comes among the five closest words to both *password* and *heating*.
+- **One number per word.** On a line, each word has one place, so a word that belongs somewhere else has nowhere to go. *router* belongs with the words for getting connected, and *schedule* with the heating words, yet the line puts them 0.03 apart, in the middle, although their rows have almost nothing in common (a cosine similarity of 0.04). *frost* and *heat* are 0.05 apart, with a similarity of 0.02.
+
+What if each word had two numbers?
 
 ## 3. A map of meaning
 
@@ -470,7 +472,7 @@ It does worse than keyword search on the small library, and far better on the la
 
 We need a model that reads the whole text, in order, and has learned from far more of it.
 
-## 6. Find by similarity
+## 6. A commercial embedding model
 
 **Demo:** `demo/06_similarity_search.py`
 
@@ -524,11 +526,11 @@ The last three are what a **vector database** is for. Module 6 keeps its vectors
 | Step | Finds by | Problem |
 |------|----------|---------|
 | 1. Keyword search | Shared words, rare ones counting more | Matches words, not meaning |
-| 2. Embeddings by counting | Words used in the same places, counted | One number per vocabulary word, mostly zeros |
+| 2. Embeddings | Words used in the same places, counted | 235 numbers per word, mostly zeros; on a line, one place per word |
 | 3. A map of meaning | The direction from the middle, two numbers per word | Only works on words we picked; one vector per word |
 | 4. Sentences from words | The angle between sums of the map's word vectors | Two numbers can't tell documents apart; compares every pair first |
 | 5. Build an embeddings model | Words used in the same places, learned in 20 numbers, then added up | Too little text; loses word order; every word counts the same; unknown words add nothing |
-| 6. Find by similarity | The angle between vectors from a model trained on whole passages | Finds the document, not the answer; embeds and compares everything, every time; can't filter |
+| 6. A commercial embedding model | The angle between vectors from a model trained on whole passages | Finds the document, not the answer; embeds and compares everything, every time; can't filter |
 
 ## Playground
 

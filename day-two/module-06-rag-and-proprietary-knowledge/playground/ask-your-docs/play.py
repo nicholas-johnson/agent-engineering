@@ -29,7 +29,7 @@ BATCH = 100
 UPSERT = 5000  # Chroma stores at most about 5,000 chunks in one call
 TOP = 5  # chunks the model is given for each question
 
-# Demo 5's instructions. Change the first line if you point DOCS at your own documents.
+# Demo 6's instructions. Change the first line if you point DOCS at your own documents.
 INSTRUCTIONS = """You are the support assistant for Dormouse, a smart thermostat. Answer the customer in a short paragraph.
 Use only the documentation below, never what you know from elsewhere.
 Quote, word for word, each sentence you rely on, with the id of the chunk it comes from.

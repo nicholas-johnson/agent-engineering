@@ -1,4 +1,4 @@
-# Run from the module folder: uv run python demo/07_agent.py
+# Run from the module folder: uv run python demo/04_agent.py
 
 import asyncio
 import json
@@ -27,7 +27,7 @@ Search the documentation first, and answer only from what you find. If the resul
 End each sentence that relies on the documentation with the id of the section it came from, in square brackets."""
 QUESTION = "Why does my Dormouse turn the heating on before the time I set?"
 
-DOCS_SERVER = StdioServerParameters(command=sys.executable, args=[str(HERE / "07_docs_server.py")])
+DOCS_SERVER = StdioServerParameters(command=sys.executable, args=[str(HERE / "04_docs_server.py")])
 
 openai = OpenAI()
 
@@ -114,7 +114,7 @@ async def main():
         f" ({searches / len(questions):.1f} searches a question)"
     )
 
-    (OUTPUT / "07_agent.json").write_text(
+    (OUTPUT / "04_agent.json").write_text(
         json.dumps({"question": QUESTION, **shown, "found": hits, "checks": checks}, indent=2)
     )
 
