@@ -1,11 +1,12 @@
 # Module 5 — Embeddings and Vector Search
 
-> A customer asks: *"Why is the heating already on before my alarm goes off?"* The answer is in Dormouse's documentation, in a document called "Understand Warm Wake", and we want a search that finds it. **Keyword search** finds it in the 26 sections of the user guide, but in all 275 documents it comes 142nd: rare filler words like "why" and "goes" decide the order, and "alarm" isn't in any document. So we build an **embeddings model** ourselves, live, from the user guide: a list of numbers for each word, learned from the words around it. It works (the closest words to *warm* are *wake* and *sunrise*), but 1,794 words is far too little text, and our question's most important word is one it has never seen. A real embeddings model turns a whole document into 1,536 numbers. **Cosine similarity** compares two lists of numbers, and with it the Warm Wake document comes first. Last, a **vector database**, ChromaDB, stores the vectors once and filters them, so a customer never sees an internal engineering note. It finds the right document, but the customer wanted an answer, which is Module 6.
+> A customer asks: *"Why is the heating already on before my alarm goes off?"* The answer is in Dormouse's documentation, in a document called "Understand Warm Wake", and we want a search that finds it. **Keyword search** finds it in the 26 sections of the user guide, but in all 275 documents it comes 142nd: rare filler words like "why" and "goes" decide the order, and "alarm" isn't in any document. So we build **embeddings** ourselves from the user guide: a list of numbers for each word, made from the words around it. The easy way is to **count** them. It works (the closest words to *warm* are *wake* and *sunrise*), but each word gets 235 numbers, 90% of them zero. An **embeddings model**, word2vec, learns 20 numbers per word instead, live, in about 11 seconds. But 1,794 words is far too little text, and our question's most important word is one neither method has seen. A real embeddings model turns a whole document into 1,536 numbers. **Cosine similarity** compares two lists of numbers, and with it the Warm Wake document comes first. Last, a **vector database**, ChromaDB, stores the vectors once and filters them, so a customer never sees an internal engineering note. It finds the right document, but the customer wanted an answer, which is Module 6.
 
 ## Learning goals
 
 - Explain how **keyword search** works: splitting text into words, an **inverted index**, and how **BM25** scores a document, with rare words counting for more.
-- Explain what an **embedding** is, by training a small one, **word2vec**, in plain Python.
+- Explain what an **embedding** is, by building one from **counts** of neighbouring words.
+- Explain how an **embeddings model** learns shorter vectors, by training a small one, **word2vec**, in plain Python.
 - Turn a whole document into a vector, by **averaging** word vectors and with an **embeddings model**.
 - Compare vectors with **cosine similarity**, and use it to **search by meaning**.
 - Store vectors in a **vector database**, embed only what has changed, and **filter** by **metadata** such as who a document is for.
@@ -18,7 +19,7 @@ A question and the document that answers it often share almost no words. "Why is
 
 An **embedding** is a list of numbers (a **vector**) that stands for a piece of text. An embeddings model is trained so that texts that mean similar things get vectors pointing in similar directions. Searching by meaning is then just arithmetic: turn the question into a vector, and find the documents whose vectors are closest.
 
-You have seen this before. In Module 1, the neural language model learned a vector of 16 numbers for each token, as a side effect of predicting the next one, and arranged them so that *mouse* and *queen* (characters who say things) ended up close together. In this module we build vectors like that on purpose, then use a model that does it for whole documents.
+You have seen this before. In Module 1, the neural language model learned a vector of 16 numbers for each token, as a side effect of predicting the next one, and arranged them so that *mouse* and *queen* (characters who say things) ended up close together. In this module we build vectors like that on purpose, first by counting and then by training, then use a model that does it for whole documents.
 
 ## The data
 
@@ -27,7 +28,7 @@ Everything runs on the documentation for **Dormouse**, a smart thermostat with a
 | File | What | Size |
 |------|------|------|
 | `data/docs/*.md` | Dormouse's documentation, copied from Module 6 by `data/copy_docs.py`: support, troubleshooting, app, installation, specification, policy, error-code and release-note documents for customers, and internal documents for staff | 275 documents, about 150,000 words |
-| `data/docs/user-guide.md` | Written by hand: the user guide. The small library in demos 1 and 4, and the training text in demo 2 | 1 document, 26 sections, 1,794 words |
+| `data/docs/user-guide.md` | Written by hand: the user guide. The small library in demos 1 and 5, and the text demos 2 and 3 build word vectors from | 1 document, 26 sections, 1,794 words |
 | `data/questions.json` | 20 questions in customers' own words, each with the documents that answer it, for the playgrounds | 20 questions |
 
 Each document starts with a few lines of **metadata**, facts about the document rather than its text:
@@ -60,14 +61,15 @@ uv run python demo/01_keyword_search.py
 | Demo | What it is | Writes to `demo/output/` |
 |------|------------|--------------------------|
 | `01_keyword_search.py` | BM25 keyword search, in plain Python | `01_keyword_search.json`: every section and document, ranked |
-| `02_word_vectors.py` | Train word vectors on the user guide, in plain Python | `02_word_vectors.txt`: one word per line, then its 20 numbers |
-| `03_document_vectors.py` | A question and two documents as vectors, two ways (run demo 2 first) | `03_document_vectors.json`: every vector in full |
-| `04_similarity_search.py` | Embed everything and search by cosine similarity | `04_similarity_search.json`: every section and document, ranked |
-| `05_vector_database.py` | Store the vectors in ChromaDB, and filter | `chroma/`, the database; `05_vector_database.json` |
+| `02_count_vectors.py` | Build word vectors by counting neighbours in the user guide | `02_count_vectors.json`: every word's neighbours and their counts |
+| `03_word_vectors.py` | Train word vectors on the user guide, in plain Python | `03_word_vectors.txt`: one word per line, then its 20 numbers |
+| `04_document_vectors.py` | A question and two documents as vectors, two ways (run demo 3 first) | `04_document_vectors.json`: every vector in full |
+| `05_similarity_search.py` | Embed everything and search by cosine similarity | `05_similarity_search.json`: every section and document, ranked |
+| `06_vector_database.py` | Store the vectors in ChromaDB, and filter | `chroma/`, the database; `06_vector_database.json` |
 
-Demos 3 to 5 call OpenAI's embeddings API. Embedding all 275 documents is 179,993 tokens, which costs less than half a cent at $0.02 per million tokens ([OpenRouter's price list](https://openrouter.ai/api/v1/embeddings/models), checked 18 November 2026).
+Demos 4 to 6 call OpenAI's embeddings API. Embedding all 275 documents is 179,993 tokens, which costs less than half a cent at $0.02 per million tokens ([OpenRouter's price list](https://openrouter.ai/api/v1/embeddings/models), checked 18 November 2026).
 
-Every demo gives the same results each time. Demo 2 starts from random numbers, but the seed is fixed (`SEED = 1`). Change it and you get different neighbours. The API can return very slightly different vectors from one call to the next, so similarities can differ in the third decimal place.
+Every demo gives the same results each time. Demo 3 starts from random numbers, but the seed is fixed (`SEED = 1`). Change it and you get different neighbours. The API can return very slightly different vectors from one call to the next, so similarities can differ in the third decimal place.
 
 ---
 
@@ -145,11 +147,56 @@ In all 275 documents it fails. "Understand Warm Wake" comes **142nd**. The winne
 
 **Why this breaks:** keyword search matches **words, not meaning**. The document that answers the question doesn't use the question's words. Every extra document that happens to share a rare word is another chance to push the right one down, so a search that worked on 26 sections fails on 275 documents.
 
-## 2. Build an embeddings model
+## 2. Embeddings by counting
 
-**Demo:** `demo/02_word_vectors.py`
+**Demo:** `demo/02_count_vectors.py`
 
-We need numbers that capture what a word *means*, not how it's spelt. **word2vec** (Mikolov and others, 2013) learns them from one idea: **words used in the same places mean similar things**. "Warm" and "sunrise" keep turning up near "wake" in the user guide, so they should get similar numbers.
+We need numbers that capture what a word *means*, not how it's spelt. Every embedding rests on one idea: **words used in the same places mean similar things**. The linguist Zellig Harris argued it in 1954. "Warm" and "sunrise" keep turning up near "wake" in the user guide, so they should get similar numbers.
+
+The simplest way to turn that idea into numbers is to count. It's Module 1's word-pair counting, turned into vectors, in three steps.
+
+1. **Choose the words.** Split the guide into words, as in section 1, and keep every word that appears at least twice (`MIN_COUNT`). That's 235 different words, which make up 1,585 of the guide's 1,794 words.
+
+2. **Count the neighbours.** Make a table with one row for each of the 235 words, and one column for each of the same words. Go through the guide word by word, and for every word up to 3 places away (`WINDOW`), add one to that word's column in this word's row:
+
+   ```python
+   vectors = [[0] * len(vocabulary) for _ in vocabulary]
+   for i, word in enumerate(tokens):
+       for j in range(max(0, i - WINDOW), min(len(tokens), i + WINDOW + 1)):
+           if j != i:
+               vectors[word][tokens[j]] += 1
+   ```
+
+3. **Each row is a word's vector.** It has 235 numbers: how often each word in the vocabulary turned up near this one. These are the biggest numbers in *warm*'s row:
+
+   ```text
+   warm: wake 10, warm 4, is 4, the 3, heating 3, when 2, to 2, sunrise 2, ...
+   ```
+
+Two words that keep the same company now have similar rows. There are no random numbers and no training: counting the whole guide takes a fraction of a second.
+
+The demo prints the five closest words to a few others. ("Closest" is measured by cosine similarity, which section 5 explains.)
+
+```text
+=== Counted in the user guide: 1,794 words, 235 different words ===
+  warm       wake, sunrise, early, heat, is
+  password   link, schedules, your, choose, and
+  heating    thermostat, when, temperature, and, dial
+  alarm      never seen
+```
+
+Nobody told it what any word means, yet *warm* is closest to *wake*, *sunrise*, *early* and *heat*, and *heating* to *thermostat* and *temperature*. Those are the words the guide uses together. Open `demo/output/02_count_vectors.json` to see every word's neighbours and their counts.
+
+**Why this breaks:**
+
+- **Long, and mostly zeros.** A vector has one number for every word in the vocabulary. Here that's 235 numbers, and 90.3% of all the numbers in the table are zero: *warm* has only 24 that aren't. All the documentation has 1,899 words that appear at least twice, so its vectors would have 1,899 numbers each, and a vocabulary for all of English runs to hundreds of thousands.
+- **Common words get in the way.** *is*, *the* and *and* turn up near nearly everything, so they fill every row. *warm*'s row counts *is* as often as *warm* itself, and *and* comes among the five closest words to both *password* and *heating*.
+
+## 3. Build an embeddings model
+
+**Demo:** `demo/03_word_vectors.py`
+
+Counting gives every word one number per vocabulary word, mostly zeros. **word2vec** (Mikolov and others, 2013) gets the same idea into a short list instead: here 20 numbers per word, all of them used, learned rather than counted.
 
 ### How to build one
 
@@ -157,7 +204,7 @@ Nobody writes down what words mean. Instead you set the model a guessing game th
 
 We build one live, in plain Python, from the user guide, in five steps.
 
-1. **Choose the words.** Split the guide into words, as in section 1, and keep every word that appears at least twice (`MIN_COUNT`). That's 235 different words, which make up 1,585 of the guide's 1,794 words. A word seen only once can't teach the model anything.
+1. **Choose the words.** The same 235 words as section 2: every word in the guide that appears at least twice (`MIN_COUNT`). A word seen only once can't teach the model anything.
 
 2. **Start with random numbers.** Give every word a list of 20 random numbers (`SIZE`). This is its **vector**: the embedding we're building. Each word also gets a second list, used when it's another word's neighbour, which starts at zero.
 
@@ -186,7 +233,7 @@ We build one live, in plain Python, from the user guide, in five steps.
 
 The lists from step 2 are now the embeddings. This recipe is **skip-gram with negative sampling**: "skip-gram" for guessing a word's neighbours, "negative sampling" for the random words. Module 1's network learned its embeddings as a side effect of predicting the next token. This model has no other job.
 
-The demo prints the five closest words to a few others. ("Closest" is measured by cosine similarity, which section 4 explains.)
+The demo prints the five closest words to the same words as demo 2:
 
 ```text
 === Trained on the user guide: 1,794 words, 235 different words ===
@@ -196,19 +243,29 @@ The demo prints the five closest words to a few others. ("Closest" is measured b
   alarm      never seen
 ```
 
-Nobody told the model what any word means, yet *warm* is closest to *wake*, *sunrise* and *early*, and *password* to *sign*, *link* and *account*. Those are the words the guide uses together. Open `demo/output/02_word_vectors.txt` to see all 235 words and their numbers.
+Open `demo/output/03_word_vectors.txt` to see all 235 words and their 20 numbers. Set beside counting:
+
+| | Counting (demo 2) | word2vec (demo 3) |
+|---|---|---|
+| *warm* | wake, sunrise, early, heat, is | wake, sunrise, heat, early, power |
+| *password* | link, schedules, your, choose, and | sign, network, link, account, cleaning |
+| *heating* | thermostat, when, temperature, and, dial | hours, switch, early, protection, for |
+| Numbers per word | 235, mostly zeros | 20 |
+| Time | A fraction of a second | About 11 seconds |
+
+On this little text, word2vec's neighbours are no better than counting's: better for *password*, worse for *heating*. What it gains is size: 20 numbers instead of 235, and the gap grows with the vocabulary. The two methods are closer than they look. Levy and Goldberg (2014) showed that word2vec is, in effect, counting neighbours, weighting the counts and squeezing the result into a short list.
 
 **Why this breaks:**
 
 - **Too little text.** *Heating* is closest to *hours*, *switch* and *for*: 1,794 words isn't enough to say much about a word that appears everywhere. Models people use are trained on billions of words.
-- **Words it has never seen.** The model only has numbers for the 235 words that appear at least twice. "Alarm", the word our question turns on, isn't in the guide at all.
+- **Words it has never seen.** Both methods only have numbers for the 235 words that appear at least twice. "Alarm", the word our question turns on, isn't in the guide at all.
 - **One vector per word.** Our question is 11 words, and a document is hundreds. We need one vector for the whole thing.
 
-## 3. Turn a document into numbers
+## 4. Turn a document into numbers
 
-**Demo:** `demo/03_document_vectors.py`
+**Demo:** `demo/04_document_vectors.py`
 
-The simplest way to make one vector from many words: **average** them. Add up the vectors of every word the model knows, and divide by how many there are:
+The simplest way to make one vector from many words: **average** them. Add up the vectors of every word our word2vec model from section 3 knows, and divide by how many there are:
 
 ```python
 known = [word_vectors[w] for w in words(text) if w in word_vectors]
@@ -247,13 +304,13 @@ One call can embed many texts. The demo turns the question and two documents int
 
 Averaging throws a lot away. Our model kept 6 of the question's 11 words: "is, the, heating, on, before, off", the least telling ones. It also loses the order: "the heating is on before the alarm" and "the alarm is on before the heating" average to the same numbers.
 
-No single number in either list means anything you could name. Open `demo/output/03_document_vectors.json` to see every number of every vector.
+No single number in either list means anything you could name. Open `demo/output/04_document_vectors.json` to see every number of every vector.
 
 **Why this breaks:** a list of numbers doesn't find anything on its own. Which document is closer to the question, Warm Wake or boiler size? Looking at the first six numbers, you can't tell. We need a way to measure how close two vectors are.
 
-## 4. Find by similarity
+## 5. Find by similarity
 
-**Demo:** `demo/04_similarity_search.py`
+**Demo:** `demo/05_similarity_search.py`
 
 Think of each vector as an arrow pointing somewhere in a space with 1,536 directions. Texts that mean similar things should point the same way. **Cosine similarity** measures how closely two arrows point the same way: 1 means the same direction, 0 means unrelated, and -1 means opposite.
 
@@ -298,9 +355,9 @@ One question isn't proof. The `what-to-embed` playground runs this search for th
 - **It compares the question with every document.** 275 comparisons is nothing, but a company's documents, tickets and emails could run to millions.
 - **It can't filter.** 41 of the documents are internal, written for staff. A search for customers must never return them, and here nothing stops it.
 
-## 5. A vector database
+## 6. A vector database
 
-**Demo:** `demo/05_vector_database.py`
+**Demo:** `demo/06_vector_database.py`
 
 A **vector database** stores vectors, searches them, and keeps facts about each one to filter by. We use **ChromaDB**, which runs inside our script and keeps everything in a folder, `demo/output/chroma/` (9.7 MB for 275 documents).
 
@@ -377,10 +434,11 @@ Without the filter, the closest document is an internal engineering note about a
 | Step | Finds by | Problem |
 |------|----------|---------|
 | 1. Keyword search | Shared words, rare ones counting more | Matches words, not meaning |
-| 2. Build an embeddings model | Words used in the same places | Too little text; one vector per word |
-| 3. Turn a document into numbers | Averaged word vectors, or a model trained on passages | Numbers alone don't find anything |
-| 4. Find by similarity | The angle between two vectors | Embeds and compares everything, every time; can't filter |
-| 5. A vector database | Nearby vectors, filtered, stored once | Finds the document, not the answer, and always returns something |
+| 2. Embeddings by counting | Words used in the same places, counted | One number per vocabulary word, mostly zeros |
+| 3. Build an embeddings model | Words used in the same places, learned in 20 numbers | Too little text; one vector per word |
+| 4. Turn a document into numbers | Averaged word vectors, or a model trained on passages | Numbers alone don't find anything |
+| 5. Find by similarity | The angle between two vectors | Embeds and compares everything, every time; can't filter |
+| 6. A vector database | Nearby vectors, filtered, stored once | Finds the document, not the answer, and always returns something |
 
 ## Playground
 
@@ -388,7 +446,7 @@ Without the filter, the closest document is an internal engineering note about a
 
 ## Further reading and extensions
 
-The final exercise is in [`further-reading/`](further-reading/): papers on keyword ranking, word vectors, sentence embeddings and vector indexes, with a note on what to look for in each and which demo it relates to, plus extension projects to take home.
+The final exercise is in [`further-reading/`](further-reading/): papers on keyword ranking, counted and learned word vectors, sentence embeddings and vector indexes, with a note on what to look for in each and which demo it relates to, plus extension projects to take home.
 
 ## Slides
 

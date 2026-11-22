@@ -270,13 +270,17 @@ SCRIPTS: tuple[ScriptCase, ...] = (
         outputs=("01_keyword_search.json",),
     ),
     ScriptCase(
-        f"{EMBEDDINGS}/demo/04_similarity_search.py",
-        outputs=("04_similarity_search.json",),
+        f"{EMBEDDINGS}/demo/02_count_vectors.py",
+        outputs=("02_count_vectors.json",),
+    ),
+    ScriptCase(
+        f"{EMBEDDINGS}/demo/05_similarity_search.py",
+        outputs=("05_similarity_search.json",),
         keys=("OPENAI_API_KEY",),
     ),
     ScriptCase(
-        f"{EMBEDDINGS}/demo/05_vector_database.py",
-        outputs=("05_vector_database.json",),
+        f"{EMBEDDINGS}/demo/06_vector_database.py",
+        outputs=("06_vector_database.json",),
         keys=("OPENAI_API_KEY",),
     ),
     ScriptCase(
@@ -496,9 +500,9 @@ DEDICATED_SCRIPTS: frozenset[str] = frozenset(
         f"{INTRO}/playground/neural-knobs/complete.py",
         f"{PROVIDERS}/data/build_prices.py",
         f"{PROVIDERS}/demo/01_big_labs.py",
-        # Demo 3 reads the word vectors demo 2 writes, so they run in order below.
-        f"{EMBEDDINGS}/demo/02_word_vectors.py",
-        f"{EMBEDDINGS}/demo/03_document_vectors.py",
+        # Demo 4 reads the word vectors demo 3 writes, so they run in order below.
+        f"{EMBEDDINGS}/demo/03_word_vectors.py",
+        f"{EMBEDDINGS}/demo/04_document_vectors.py",
         # Copies documents from Module 6: checked against them below instead.
         f"{EMBEDDINGS}/data/copy_docs.py",
         # Write the committed knowledge base and its FAQ with a model, so the same applies.
@@ -605,12 +609,12 @@ def test_embeddings_data_is_consistent() -> None:
 @pytest.mark.api
 @pytest.mark.slow
 def test_word_vectors_then_document_vectors(pytestconfig: pytest.Config) -> None:
-    """Demo 3 averages the word vectors demo 2 trains, so run them in order."""
+    """Demo 4 averages the word vectors demo 3 trains, so run them in order."""
     check_requirements(pytestconfig, keys=("OPENAI_API_KEY",))
     demo = REPO_ROOT / EMBEDDINGS / "demo"
-    trained = execute_python_script(demo / "02_word_vectors.py", outputs=("02_word_vectors.txt",))
+    trained = execute_python_script(demo / "03_word_vectors.py", outputs=("03_word_vectors.txt",))
     assert "warm" in trained.stdout
-    execute_python_script(demo / "03_document_vectors.py", outputs=("03_document_vectors.json",))
+    execute_python_script(demo / "04_document_vectors.py", outputs=("04_document_vectors.json",))
 
 
 @pytest.mark.network

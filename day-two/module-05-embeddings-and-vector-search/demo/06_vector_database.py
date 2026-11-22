@@ -1,4 +1,4 @@
-# Run from the module folder: uv run python demo/05_vector_database.py
+# Run from the module folder: uv run python demo/06_vector_database.py
 
 import hashlib
 import json
@@ -103,4 +103,4 @@ for question, label, where in searches:
     show(results)
     found.append({"question": question, "where": where, "found": results})
 
-(OUTPUT / "05_vector_database.json").write_text(json.dumps(found, indent=2))
+(OUTPUT / "06_vector_database.json").write_text(json.dumps(found, indent=2))

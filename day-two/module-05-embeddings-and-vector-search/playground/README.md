@@ -19,7 +19,7 @@ python playground/word-vectors/play.py
 
 | Folder | What it's about | Needs |
 |--------|-----------------|-------|
-| [word-vectors](word-vectors/) | Demo 2's word2vec model with every setting exposed. Feed it more text and watch the neighbours change | Nothing: plain Python, offline |
+| [word-vectors](word-vectors/) | Demo 3's word2vec model with every setting exposed. Feed it more text and watch the neighbours change | Nothing: plain Python, offline |
 | [similarity-explorer](similarity-explorer/) | Type sentences and see how similar their embeddings are. Opposites, translations and error codes all surprise | `OPENAI_API_KEY` |
 | [distance-measures](distance-measures/) | Cosine similarity, dot product and straight-line distance, on word counts and on embeddings | `OPENAI_API_KEY` |
 | [what-to-embed](what-to-embed/) | The whole document, the title, the headings or the opening: which finds the right document? | `OPENAI_API_KEY` |

@@ -1,4 +1,4 @@
-# Word vectors — train demo 2's word2vec model yourself, with every setting exposed.
+# Word vectors — train demo 3's word2vec model yourself, with every setting exposed.
 # Run from the module folder: uv run python playground/word-vectors/play.py
 #                         or: source ../../.venv/bin/activate && python playground/word-vectors/play.py
 #

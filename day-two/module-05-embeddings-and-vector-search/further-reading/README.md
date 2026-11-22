@@ -1,6 +1,6 @@
 # Further reading and extensions
 
-Where did keyword search come from? Why should words used in the same places mean similar things? Why is averaging word vectors such a weak way to make a sentence vector? And how does a vector database avoid comparing the question with every vector?
+Where did keyword search come from? Why should words used in the same places mean similar things, and why did counting and training find such similar neighbours? Why is averaging word vectors such a weak way to make a sentence vector? And how does a vector database avoid comparing the question with every vector?
 
 ## The exercise
 
@@ -23,57 +23,67 @@ Where the "rarity" line in demo 1 comes from. Spärck Jones argued that a match 
 
 BM25 explained by one of the people who created it. It's long, so read section 3.4, "The Eliteness Model and BM25". It explains the two settings at the top of demo 1. `K1` controls **saturation**: the tenth "heating" in a document adds much less than the first. `B` controls how much long documents are held back. Equation 3.15 is, almost exactly, demo 1's `bm25` function. Section 3.6, on BM25F, scores fields such as the title separately, so a match in a document's title could count for more than one in its text.
 
-### Word vectors: where demo 2 comes from
+### Counting: where demo 2 comes from
 
 **Harris, Z. S. (1954). "Distributional Structure." *Word* 10(2–3):146–162. [doi:10.1080/00437956.1954.11659520](https://doi.org/10.1080/00437956.1954.11659520)**
 
-The idea demo 2 is built on, sixty years before word2vec: if two words keep turning up in the same surroundings, they are probably similar in meaning. This is the **distributional hypothesis**. Harris was a linguist with no computer, and the paper has no equations. Look for his argument that difference in meaning goes with difference in distribution. That's why *warm* ended up next to *wake* and *sunrise*: the user guide uses them in the same sentences.
+The idea demos 2 and 3 are built on, sixty years before word2vec: if two words keep turning up in the same surroundings, they are probably similar in meaning. This is the **distributional hypothesis**. Harris was a linguist with no computer, and the paper has no equations. Look for his argument that difference in meaning goes with difference in distribution. Demo 2 is that argument done with arithmetic: a word's surroundings, counted, are its vector. That's why *warm* ended up next to *wake* and *sunrise*.
+
+**Church, K. W. & Hanks, P. (1990). "Word Association Norms, Mutual Information, and Lexicography." *Computational Linguistics* 16(1):22–29. [ACL Anthology](https://aclanthology.org/J90-1003/)**
+
+The fix for demo 2's common words. A raw count rewards words that are near everything, like *is* and *and*. Church and Hanks compared how often two words appear near each other with how often chance alone would put them there, using **mutual information**. A pair that meets far more often than chance is a real association; *the* next to anything isn't. Read the section that defines their "association ratio". Weighting demo 2's counts this way is called **PMI** (pointwise mutual information).
+
+**⭐ Levy, O. & Goldberg, Y. (2014). "Neural Word Embedding as Implicit Matrix Factorization." *NeurIPS 2014*. [Proceedings](https://papers.nips.cc/paper_files/paper/2014/hash/b78666971ceae55a8e87efb7cbfd9ad4-Abstract.html)**
+
+Why demos 2 and 3 found such similar neighbours. They showed that word2vec's skip-gram with negative sampling is, in effect, working on demo 2's table: it counts neighbours, weights the counts by PMI, then squeezes the table into short vectors. Look for where the shift of log *k* comes from: *k* is the number of random words, demo 3's `NEGATIVES`. It means the choice between counting and training is less about what the vectors know and more about how long they are.
+
+### Word vectors: where demo 3 comes from
 
 **⭐ Mikolov, T., Chen, K., Corrado, G. & Dean, J. (2013). "Efficient Estimation of Word Representations in Vector Space." [arXiv:1301.3781](https://arxiv.org/abs/1301.3781)**
 
-word2vec. Module 1's neural model learned 16 numbers for each token as a side effect of predicting the next one. word2vec keeps only that part and trains it fast, on more than a billion words, so words used in similar ways get similar vectors. Look at figure 1: the right-hand architecture, **skip-gram**, is demo 2's model. Then look at table 8, the word relationships, such as *Paris* is to *France* as *Rome* is to *Italy*. Our 1,794 words are far too few for that, which is the point of demo 2's "Why this breaks".
+word2vec. Module 1's neural model learned 16 numbers for each token as a side effect of predicting the next one. word2vec keeps only that part and trains it fast, on more than a billion words, so words used in similar ways get similar vectors. Look at figure 1: the right-hand architecture, **skip-gram**, is demo 3's model. Then look at table 8, the word relationships, such as *Paris* is to *France* as *Rome* is to *Italy*. Our 1,794 words are far too few for that, which is the point of demo 3's "Why this breaks".
 
 **Mikolov, T., Sutskever, I., Chen, K., Corrado, G. & Dean, J. (2013). "Distributed Representations of Words and Phrases and their Compositionality." *NeurIPS 2013*, 3111–3119. [arXiv:1310.4546](https://arxiv.org/abs/1310.4546)**
 
-The follow-up that made word2vec quick, and the source of demo 2's training loop. Instead of asking "which of all the words comes next?", **negative sampling** asks "is this a real neighbour?" for one real word and a few random ones. Read section 2.2. The random words are drawn in proportion to each word's count raised to the power 3/4, which is the `counts[w] ** 0.75` in demo 2's `noise` list. They found 5 to 20 random words works for small data. Demo 2 uses 5.
+The follow-up that made word2vec quick, and the source of demo 3's training loop. Instead of asking "which of all the words comes next?", **negative sampling** asks "is this a real neighbour?" for one real word and a few random ones. Read section 2.2. The random words are drawn in proportion to each word's count raised to the power 3/4, which is the `counts[w] ** 0.75` in demo 3's `noise` list. They found 5 to 20 random words works for small data. Demo 3 uses 5.
 
 **Pennington, J., Socher, R. & Manning, C. D. (2014). "GloVe: Global Vectors for Word Representation." *EMNLP 2014*, 1532–1543. [ACL Anthology](https://aclanthology.org/D14-1162/)**
 
-The same goal by a different route. word2vec learns from one window at a time. GloVe first counts, over the whole text, how often each word appears near each other word, then fits vectors to those counts. Look at table 1, which shows how the *ratio* of two counts separates *ice* from *steam*. It connects to Module 1's counting models, and to the `word-vectors` playground: try more text and see how the neighbours change.
+Demos 2 and 3 joined up. word2vec learns from one window at a time. GloVe first counts, over the whole text, how often each word appears near each other word, exactly as demo 2 does, then fits short vectors to those counts. Look at table 1, which shows how the *ratio* of two counts separates *ice* from *steam*. It connects to the `word-vectors` playground: try more text and see how the neighbours change.
 
-### Document vectors: where demo 3 comes from
+### Document vectors: where demo 4 comes from
 
 **Arora, S., Liang, Y. & Ma, T. (2017). "A Simple but Tough-to-Beat Baseline for Sentence Embeddings." *ICLR 2017*. [OpenReview](https://openreview.net/forum?id=SyK00v5xx)**
 
-Demo 3's averaging, done better. Plain averaging lets common words like "the" and "is" dominate, and those were exactly the words our question kept. Their fix: weight each word by how rare it is, then remove the one direction that every sentence shares. That improved on plain averages by 10% to 30% on tests of how similar two sentences are, and beat much bigger neural networks. Read Algorithm 1, which is only a few lines. It's an extension below.
+Demo 4's averaging, done better. Plain averaging lets common words like "the" and "is" dominate, and those were exactly the words our question kept. Their fix: weight each word by how rare it is, then remove the one direction that every sentence shares. That improved on plain averages by 10% to 30% on tests of how similar two sentences are, and beat much bigger neural networks. Read Algorithm 1, which is only a few lines. It's an extension below.
 
 **⭐ Reimers, N. & Gurevych, I. (2019). "Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks." *EMNLP-IJCNLP 2019*, 3980–3990. [arXiv:1908.10084](https://arxiv.org/abs/1908.10084)**
 
-How to get one vector for a whole sentence that you can compare with cosine similarity. The obvious way, averaging the vectors a language model gives each word, works badly: often worse than averaging old-fashioned word vectors. Their fix is to train the network on pairs of sentences, two copies with the same weights side by side (a **siamese network**), so that sentences with similar meanings end up with similar vectors. Finding the most similar pair among 10,000 sentences went from about 65 hours to about 5 seconds. Read the introduction and look at figure 1. Demo 3's second half is this idea, called through an API.
+How to get one vector for a whole sentence that you can compare with cosine similarity. The obvious way, averaging the vectors a language model gives each word, works badly: often worse than averaging old-fashioned word vectors. Their fix is to train the network on pairs of sentences, two copies with the same weights side by side (a **siamese network**), so that sentences with similar meanings end up with similar vectors. Finding the most similar pair among 10,000 sentences went from about 65 hours to about 5 seconds. Read the introduction and look at figure 1. Demo 4's second half is this idea, called through an API.
 
 **Neelakantan, A. et al. (2022). "Text and Code Embeddings by Contrastive Pre-Training." [arXiv:2201.10005](https://arxiv.org/abs/2201.10005)**
 
-OpenAI's paper on how it trained its earlier embedding models. It doesn't describe `text-embedding-3-small`, but it is the clearest account of the idea behind it: **contrastive** training. Take pairs of texts that belong together (here, neighbouring pieces of text on the internet) and train so that each pair's vectors are close and unrelated texts are far apart. It's demo 2's "pull neighbours closer, push random words away", for whole passages. Look at how the training pairs are made, and at figure 1: bigger models give better embeddings.
+OpenAI's paper on how it trained its earlier embedding models. It doesn't describe `text-embedding-3-small`, but it is the clearest account of the idea behind it: **contrastive** training. Take pairs of texts that belong together (here, neighbouring pieces of text on the internet) and train so that each pair's vectors are close and unrelated texts are far apart. It's demo 3's "pull neighbours closer, push random words away", for whole passages. Look at how the training pairs are made, and at figure 1: bigger models give better embeddings.
 
-### Similarity: where demo 4 comes from
+### Similarity: where demo 5 comes from
 
 **Salton, G., Wong, A. & Yang, C. S. (1975). "A vector space model for automatic indexing." *Communications of the ACM* 18(11):613–620. [doi:10.1145/361219.361220](https://doi.org/10.1145/361219.361220)**
 
-Documents as vectors, fifty years before ours. Each document is a list of numbers with one place for every word in the vocabulary, weighted by how often the word appears and how rare it is (they cite Spärck Jones). Two documents are similar when the angle between their vectors is small: that is cosine similarity, the same calculation as in demo 4. Look at figure 1, where three words are the three axes of the space. The difference from demo 4 is what the numbers mean. Here each number belongs to one word, so two texts with no words in common can never be similar. In an embedding, no number belongs to any one word. The `distance-measures` playground builds both kinds.
+Documents as vectors, fifty years before ours. Each document is a list of numbers with one place for every word in the vocabulary, weighted by how often the word appears and how rare it is (they cite Spärck Jones). Two documents are similar when the angle between their vectors is small: that is cosine similarity, the same calculation as in demo 5. Look at figure 1, where three words are the three axes of the space. The difference from demo 5 is what the numbers mean. Here each number belongs to one word, so two texts with no words in common can never be similar. In an embedding, no number belongs to any one word. The `distance-measures` playground builds both kinds.
 
 **Karpukhin, V., Oğuz, B., Min, S., Lewis, P., Wu, L., Edunov, S., Chen, D. & Yih, W. (2020). "Dense Passage Retrieval for Open-Domain Question Answering." *EMNLP 2020*, 6769–6781. [arXiv:2004.04906](https://arxiv.org/abs/2004.04906)**
 
-Demo 1 against demo 4, on Wikipedia. Embeddings are **dense** vectors: every number carries some meaning. Keyword search uses **sparse** ones: one number per vocabulary word, nearly all zero. Their dense retriever found a passage containing the answer in its top 20 far more often than BM25, by 9 to 19 points. Look at table 2, and at the rows "BM25 + DPR", which add the two scores together. On some datasets that helps; on Natural Questions it does worse than vectors alone (76.6 against 78.4).
+Demo 1 against demo 5, on Wikipedia. Embeddings are **dense** vectors: every number carries some meaning. Keyword search uses **sparse** ones: one number per vocabulary word, nearly all zero. Their dense retriever found a passage containing the answer in its top 20 far more often than BM25, by 9 to 19 points. Look at table 2, and at the rows "BM25 + DPR", which add the two scores together. On some datasets that helps; on Natural Questions it does worse than vectors alone (76.6 against 78.4).
 
 **Muennighoff, N., Tazi, N., Magne, L. & Reimers, N. (2023). "MTEB: Massive Text Embedding Benchmark." *EACL 2023*, 2014–2037. [arXiv:2210.07316](https://arxiv.org/abs/2210.07316)**
 
 We used `text-embedding-3-small` without comparing it with anything. MTEB tests embedding models on 8 kinds of task, 58 datasets and 112 languages, and finds that no model is best at everything. Look at how a model's place changes from one kind of task to another. Its public leaderboard (below) is where most people go to choose a model. Connects to the `other-languages` playground.
 
-### Vector databases: where demo 5 comes from
+### Vector databases: where demo 6 comes from
 
 **⭐ Malkov, Y. A. & Yashunin, D. A. (2020). "Efficient and Robust Approximate Nearest Neighbor Search Using Hierarchical Navigable Small World Graphs." *IEEE Transactions on Pattern Analysis and Machine Intelligence* 42(4):824–836. [arXiv:1603.09320](https://arxiv.org/abs/1603.09320)**
 
-How Chroma searches without comparing the question with every vector. **HNSW** links each vector to a few of its neighbours, in layers. A search starts on a top layer with few vectors and long links, and zooms in layer by layer. It is **approximate**: it can miss the true nearest neighbour, in exchange for being much faster. Look at figure 1 and algorithm 2. In demo 5, `configuration={"hnsw": {"space": "cosine"}}` is the setting for this index, and Chroma's `max_neighbors` and `ef_search` settings are the paper's `M` and `ef`.
+How Chroma searches without comparing the question with every vector. **HNSW** links each vector to a few of its neighbours, in layers. A search starts on a top layer with few vectors and long links, and zooms in layer by layer. It is **approximate**: it can miss the true nearest neighbour, in exchange for being much faster. Look at figure 1 and algorithm 2. In demo 6, `configuration={"hnsw": {"space": "cosine"}}` is the setting for this index, and Chroma's `max_neighbors` and `ef_search` settings are the paper's `M` and `ef`.
 
 **Johnson, J., Douze, M. & Jégou, H. (2021). "Billion-scale similarity search with GPUs." *IEEE Transactions on Big Data* 7(3):535–547. [arXiv:1702.08734](https://arxiv.org/abs/1702.08734)**
 
@@ -111,7 +121,7 @@ A single vector of a fixed size can only express so many different "top k" resul
 
 **Lewis, P. et al. (2020). "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks." *NeurIPS 2020*. [arXiv:2005.11401](https://arxiv.org/abs/2005.11401)**
 
-The paper that named **RAG**: a language model that searches a vector index of Wikipedia (using the DPR retriever, above) and writes its answer from what it finds. Look at figure 1. Demo 5 found the right document and stopped; RAG answers from it. That's Module 6.
+The paper that named **RAG**: a language model that searches a vector index of Wikipedia (using the DPR retriever, above) and writes its answer from what it finds. Look at figure 1. Demo 6 found the right document and stopped; RAG answers from it. That's Module 6.
 
 ---
 
@@ -119,11 +129,11 @@ The paper that named **RAG**: a language model that searches a vector index of W
 
 - **Manning, C. D., Raghavan, P. & Schütze, H. (2008). *Introduction to Information Retrieval*. Cambridge University Press.** Free online at [nlp.stanford.edu/IR-book](https://nlp.stanford.edu/IR-book/). The chapter *Scoring, term weighting and the vector space model* covers tf-idf and cosine similarity; *Probabilistic information retrieval* ends with BM25; *Evaluation in information retrieval* is how to test a search properly.
 - **Jurafsky, D. & Martin, J. H. *Speech and Language Processing* (3rd edition draft).** Free online at [web.stanford.edu/~jurafsky/slp3](https://web.stanford.edu/~jurafsky/slp3/). The *Embeddings* chapter covers cosine similarity and word2vec, with skip-gram and negative sampling worked through step by step. *Information Retrieval and Retrieval-Augmented Generation* covers tf-idf, BM25, dense retrieval and evaluation, and leads into RAG.
-- **Jay Alammar, "The Illustrated Word2vec."** [Blog post](https://jalammar.github.io/illustrated-word2vec/). Pictures of how word2vec learns its vectors, including negative sampling. Read it alongside demo 2.
+- **Jay Alammar, "The Illustrated Word2vec."** [Blog post](https://jalammar.github.io/illustrated-word2vec/). Pictures of how word2vec learns its vectors, including negative sampling. Read it alongside demo 3.
 - **3Blue1Brown, *Transformers, the tech behind LLMs*.** Free video and text at [3blue1brown.com/lessons/gpt](https://www.3blue1brown.com/lessons/gpt/). The section on the embedding matrix shows how directions in an embedding space can carry meaning.
 - **Simon Willison (2023). "Embeddings: What they are and why they matter."** [Blog post](https://simonwillison.net/2023/Oct/23/embeddings/). The best plain-language introduction: related articles, search by meaning, word2vec arithmetic, and images and text in the same space.
 - **[OpenAI embeddings guide](https://developers.openai.com/api/docs/guides/embeddings)**: the models, the `dimensions` parameter, and a useful detail: OpenAI's embeddings already have length 1, so a plain dot product gives the same ranking as cosine similarity. The `distance-measures` playground checks that claim, and finds it holds at the top but not quite all the way down.
-- **[Chroma documentation](https://docs.trychroma.com/)**: collections, metadata filters (`where`, and `where_document` for filtering on the text itself), and the HNSW settings behind demo 5.
+- **[Chroma documentation](https://docs.trychroma.com/)**: collections, metadata filters (`where`, and `where_document` for filtering on the text itself), and the HNSW settings behind demo 6.
 - **[MTEB leaderboard](https://huggingface.co/spaces/mteb/leaderboard)**: embedding models compared task by task. Sort by retrieval, then by your language.
 - **[Anthropic: Introducing Contextual Retrieval](https://www.anthropic.com/research/contextual-retrieval)** (2024): search over chunks of documents, which is where Module 6 goes. Their improved embeddings alone cut failed searches by 35%; adding BM25 took that to 49%, and a reranker on top to 67%.
 
@@ -135,9 +145,9 @@ Bigger projects than the playground. ★ is an afternoon, ★★★ is a weekend
 
 **★ A document that doesn't exist.** Before searching, ask a model to write the help article it would like to find for a question. Embed that instead of the question, and search with it (Gao et al. 2023). Run all 20 questions in `data/questions.json` and count how often a right document is in the top five. Does it beat searching with the question itself? Is it worth an extra model call on every search?
 
-**★★ Better averages.** Make demo 3's averaging stronger with Arora et al.'s recipe: weight each word by how rare it is, then remove the shared direction. Train the word vectors on more of the documentation first (plain Python is slow, so start with a few dozen documents and time it). Measure on the 20 questions: how close can a model you trained yourself get to `text-embedding-3-small`?
+**★★ Better averages.** Make demo 4's averaging stronger with Arora et al.'s recipe: weight each word by how rare it is, then remove the shared direction. Train the word vectors on more of the documentation first (plain Python is slow, so start with a few dozen documents and time it). Measure on the 20 questions: how close can a model you trained yourself get to `text-embedding-3-small`?
 
-**★★ Hybrid search.** Run demo 1's BM25 and demo 4's cosine similarity over all 275 documents, and merge the two lists with reciprocal rank fusion (Cormack et al. 2009). Measure on the 20 questions, then write a few questions that quote an error code ("E-104 came up during setup"). Does hybrid search beat vectors alone? On which kind of question?
+**★★ Hybrid search.** Run demo 1's BM25 and demo 5's cosine similarity over all 275 documents, and merge the two lists with reciprocal rank fusion (Cormack et al. 2009). Measure on the 20 questions, then write a few questions that quote an error code ("E-104 came up during setup"). Does hybrid search beat vectors alone? On which kind of question?
 
 **★★ A reranker.** Take Chroma's top 20 and reorder them with something that reads the question and each document together: a small cross-encoder model from Hugging Face, with the `local` extra (Nogueira & Cho 2019), or a language model asked to sort the list. Run the 20 questions again. Does reranking move more right documents into first place? What does it add to each search in time and money?
 

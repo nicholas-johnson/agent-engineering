@@ -164,13 +164,13 @@ before a schedule period. ...`,
     },
   },
 
-  // ---- Section 2: Build an embeddings model ----
+  // ---- Section 2: Embeddings by counting ----
   {
     type: 'title',
     content: {
-      title: '2. Build an embeddings model',
+      title: '2. Embeddings by counting',
       subtitle: 'Words used in the same places',
-      icon: 'brain',
+      icon: 'calculator',
     },
   },
   {
@@ -181,8 +181,82 @@ before a schedule period. ...`,
       points: [
         'A **vector**: a list of numbers that stands for a piece of text',
         'Texts that **mean** similar things get vectors that point the same way',
+        'The idea: words used in **the same places** mean similar things',
         'Module 1: 16 numbers per token, learned as a **side effect**',
-        '**word2vec**: learn them on purpose, from the words around each word',
+      ],
+      credit: 'Harris (1954). "Distributional Structure." Word 10(2–3):146–162',
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'Count the neighbours',
+      code: `vectors = [[0] * len(vocabulary) for _ in vocabulary]
+for i, word in enumerate(tokens):
+    for j in range(max(0, i - WINDOW), min(len(tokens), i + WINDOW + 1)):
+        if j != i:
+            vectors[word][tokens[j]] += 1`,
+      highlights: [
+        '1. Keep the words that appear at least twice: **235**',
+        '2. For each word, count every word up to **3 places away**',
+        "3. Each **row** is a word's vector: 235 numbers",
+        'Module 1 counted word pairs. This counts **neighbours**',
+      ],
+    },
+  },
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Embeddings by counting',
+      subtitle: 'Switch to terminal: python demo/02_count_vectors.py',
+      icon: 'rocket',
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'Counted, not learned',
+      code: `=== Counted in the user guide: 1,794 words, 235 different words ===
+  warm       wake, sunrise, early, heat, is
+  password   link, schedules, your, choose, and
+  heating    thermostat, when, temperature, and, dial
+  alarm      never seen`,
+      highlights: [
+        "*warm*'s row: *wake* 10, *is* 4, *the* 3, *heating* 3, *sunrise* 2, ...",
+        'Nobody told it what any word means',
+        'No training: the whole guide takes **a fraction of a second**',
+      ],
+    },
+  },
+  {
+    type: 'description',
+    content: {
+      title: 'Why this breaks',
+      icon: 'warning',
+      description:
+        'A vector has **one number per word** in the vocabulary: 235 here, and **90% of them are zero**. All the documentation would need 1,899 numbers per word, and English hundreds of thousands. And common words get in the way: *and* is among the closest words to both *password* and *heating*.',
+    },
+  },
+
+  // ---- Section 3: Build an embeddings model ----
+  {
+    type: 'title',
+    content: {
+      title: '3. Build an embeddings model',
+      subtitle: 'Learn 20 numbers instead',
+      icon: 'brain',
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'From counts to a model',
+      icon: 'layers',
+      points: [
+        'Counting: **235 numbers** per word, mostly zeros',
+        '**word2vec**: learn a short list instead, here **20 numbers**',
+        'Still from the words around each word',
+        "Module 1 learned them as a side effect. Here it's **the only job**",
       ],
       credit:
         'Mikolov et al. (2013). "Efficient Estimation of Word Representations in Vector Space." arXiv:1301.3781',
@@ -195,7 +269,7 @@ before a schedule period. ...`,
       icon: 'wrench',
       points: [
         'The game: **are these two words near each other?**',
-        '1. Keep the words that appear at least twice: **235**',
+        '1. Keep the same **235** words',
         '2. Give each word **20 random numbers**: its vector',
         '3. Make examples: real neighbours (1) and random words (0)',
         '4. Guess, compare with the answer, and **nudge the numbers**',
@@ -247,7 +321,7 @@ for other, is_neighbour in samples:
     type: 'title',
     content: {
       title: 'Demo — Build an embeddings model',
-      subtitle: 'Switch to terminal: python demo/02_word_vectors.py',
+      subtitle: 'Switch to terminal: python demo/03_word_vectors.py',
       icon: 'rocket',
     },
   },
@@ -261,10 +335,34 @@ for other, is_neighbour in samples:
   heating    hours, switch, early, protection, for
   alarm      never seen`,
       highlights: [
-        'Nobody told it what any word means',
-        '*warm* → *wake*, *sunrise*, *early*: words the guide **uses together**',
-        'Every word and its 20 numbers: `demo/output/02_word_vectors.txt`',
+        '*warm* → *wake*, *sunrise*, *heat*, *early*: words the guide **uses together**',
+        '*password* → *sign*, *network*, *link*, *account*',
+        'Every word and its 20 numbers: `demo/output/03_word_vectors.txt`',
       ],
+    },
+  },
+  {
+    type: 'comparison',
+    content: {
+      title: 'Counting or word2vec?',
+      left: {
+        label: 'Counting (demo 2)',
+        items: [
+          '*heating* → thermostat, when, temperature',
+          '*password* → link, schedules, your',
+          '**235 numbers**, mostly zeros',
+          'A fraction of a second',
+        ],
+      },
+      right: {
+        label: 'word2vec (demo 3)',
+        items: [
+          '*heating* → hours, switch, early',
+          '*password* → sign, network, link',
+          '**20 numbers**',
+          'About 11 seconds',
+        ],
+      },
     },
   },
   {
@@ -273,15 +371,15 @@ for other, is_neighbour in samples:
       title: 'Why this breaks',
       icon: 'warning',
       description:
-        '*Heating* is closest to *hours*, *switch* and *for*: **1,794 words is far too little text**. The model only knows the **235 words** that appear twice, and **"alarm" isn\'t one of them**. And it gives one vector **per word**: our question is 11 words, and a document is hundreds.',
+        'On this little text, word2vec is **no better at neighbours** than counting: it just uses fewer numbers. *Heating* is closest to *hours*, *switch* and *for*: **1,794 words is far too little text**. Neither method knows **"alarm"**. And both give one vector **per word**: our question is 11 words, and a document is hundreds.',
     },
   },
 
-  // ---- Section 3: Turn a document into numbers ----
+  // ---- Section 4: Turn a document into numbers ----
   {
     type: 'title',
     content: {
-      title: '3. Turn a document into numbers',
+      title: '4. Turn a document into numbers',
       subtitle: 'One vector for a whole text',
       icon: 'hash',
     },
@@ -326,7 +424,7 @@ vectors = [item.embedding
     type: 'title',
     content: {
       title: 'Demo — Turn a document into numbers',
-      subtitle: 'Switch to terminal: python demo/03_document_vectors.py',
+      subtitle: 'Switch to terminal: python demo/04_document_vectors.py',
       icon: 'rocket',
     },
   },
@@ -363,11 +461,11 @@ vectors = [item.embedding
     },
   },
 
-  // ---- Section 4: Find by similarity ----
+  // ---- Section 5: Find by similarity ----
   {
     type: 'title',
     content: {
-      title: '4. Find by similarity',
+      title: '5. Find by similarity',
       subtitle: 'The angle between two vectors',
       icon: 'compass',
     },
@@ -416,7 +514,7 @@ results = sorted(
     type: 'title',
     content: {
       title: 'Demo — Find by similarity',
-      subtitle: 'Switch to terminal: python demo/04_similarity_search.py',
+      subtitle: 'Switch to terminal: python demo/05_similarity_search.py',
       icon: 'rocket',
     },
   },
@@ -464,11 +562,11 @@ results = sorted(
     },
   },
 
-  // ---- Section 5: A vector database ----
+  // ---- Section 6: A vector database ----
   {
     type: 'title',
     content: {
-      title: '5. A vector database',
+      title: '6. A vector database',
       subtitle: 'Store once, search fast, filter',
       icon: 'database',
     },
@@ -533,7 +631,7 @@ collection.query(query_embeddings=[vector], n_results=3,
     type: 'title',
     content: {
       title: 'Demo — A vector database',
-      subtitle: 'Switch to terminal: python demo/05_vector_database.py',
+      subtitle: 'Switch to terminal: python demo/06_vector_database.py',
       icon: 'rocket',
     },
   },
@@ -586,7 +684,8 @@ Q: My thermostat makes a clicking noise  (customers only)
       icon: 'blocks',
       points: [
         '**Keyword search**: shared words, not meaning',
-        '**An embeddings model**: words used together, but too little text',
+        '**Counting**: neighbours counted, but long and mostly zeros',
+        '**An embeddings model**: 20 learned numbers, but too little text',
         '**A document as numbers**: an average, or a model trained on passages',
         '**Similarity search**: the right document first, by meaning',
         '**A vector database**: stored once and filtered, but no answers',
@@ -600,7 +699,7 @@ Q: My thermostat makes a clicking noise  (customers only)
       icon: 'award',
       points: [
         'An **embedding** turns text into a vector: close vectors, similar meaning',
-        'Embeddings are learned from **where words are used**',
+        'Embeddings come from **where words are used**: counted or learned',
         '**Cosine similarity** compares directions, not lengths',
         'A **vector database** stores vectors with metadata to filter on',
         "Similarity **ranks**: it can't say that nothing fits",

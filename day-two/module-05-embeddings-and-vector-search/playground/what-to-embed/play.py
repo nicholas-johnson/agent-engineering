@@ -25,7 +25,7 @@ OUTPUT.mkdir(exist_ok=True)
 EMBEDDING_MODEL = "text-embedding-3-small"
 BATCH = 100
 TOP = 5  # a question is a hit if a right document is in the top 5
-CUSTOMERS_ONLY = False  # True searches only the customer documents, as demo 5's filter does
+CUSTOMERS_ONLY = False  # True searches only the customer documents, as demo 6's filter does
 
 
 def read_documents():

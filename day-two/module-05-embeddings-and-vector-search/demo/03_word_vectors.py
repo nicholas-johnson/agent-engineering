@@ -1,4 +1,4 @@
-# Run from the module folder: uv run python demo/02_word_vectors.py
+# Run from the module folder: uv run python demo/03_word_vectors.py
 
 import math
 import random
@@ -80,6 +80,6 @@ for word in WORDS:
     )
     print(f"  {word:<10} {', '.join(other for _, other in closest[:5])}")
 
-with open(OUTPUT / "02_word_vectors.txt", "w") as file:
+with open(OUTPUT / "03_word_vectors.txt", "w") as file:
     for word, i in index.items():
         file.write(f"{word} {' '.join(f'{x:.4f}' for x in vectors[i])}\n")

@@ -1,4 +1,4 @@
-# Run from the module folder: uv run python demo/03_document_vectors.py
+# Run from the module folder: uv run python demo/04_document_vectors.py
 
 import json
 import re
@@ -15,7 +15,7 @@ DOCS = HERE.parent / "data" / "docs"
 OUTPUT = HERE / "output"
 OUTPUT.mkdir(exist_ok=True)
 
-WORD_VECTORS = OUTPUT / "02_word_vectors.txt"
+WORD_VECTORS = OUTPUT / "03_word_vectors.txt"
 EMBEDDING_MODEL = "text-embedding-3-small"
 QUESTION = "Why is the heating already on before my alarm goes off?"
 DOCUMENTS = ["understand-warm-wake", "enter-your-boiler-size-for-energy-reports"]
@@ -47,7 +47,7 @@ def show(name, vector, decimals):
 
 
 if not WORD_VECTORS.exists():
-    sys.exit("Run demo/02_word_vectors.py first: this demo uses the word vectors it trains.")
+    sys.exit("Run demo/03_word_vectors.py first: this demo uses the word vectors it trains.")
 word_vectors = {}
 for line in WORD_VECTORS.read_text().splitlines():
     word, *numbers = line.split()
@@ -69,4 +69,4 @@ for name, item in zip(texts, response.data):
     show(name, item.embedding, 4)
     written[name][EMBEDDING_MODEL] = item.embedding
 
-(OUTPUT / "03_document_vectors.json").write_text(json.dumps(written, indent=2))
+(OUTPUT / "04_document_vectors.json").write_text(json.dumps(written, indent=2))
