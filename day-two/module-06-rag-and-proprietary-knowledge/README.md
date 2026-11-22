@@ -1,6 +1,6 @@
 # Module 6 — RAG and Proprietary Knowledge
 
-> A customer asks Dormouse's support assistant: _"Why does my Dormouse turn the heating on before the time I set?"_ **Just asking** the model gets a confident answer about thermostats in general, nearly right and partly made up: **hallucination**. Putting **all 275 documents in the prompt** gets the right answer, for 191,548 tokens and 24 seconds a question. **RAG** splits the documents into 1,823 **chunks**, stores them in a **vector database**, ChromaDB, and sends the model only the five nearest the question: 906 tokens and two seconds, with the right chunks for 22 of 24 questions. But not for ours. The customer's words aren't the documentation's, Warm Wake comes sixth, and the model fills the gap with a guess. Putting the search behind an **MCP server** shares it with every application, and lets the model write its own searches, in the documentation's words: Warm Wake comes first and all 24 are found, but every question now takes two model calls. An **FAQ**, the questions each chunk answers, written once ahead of time, finds 23 of 24 with the customer's own words, though questions that sound alike can point at the wrong chunk. Last, the model must **quote its sources**, code checks every quote, and the model says when the documentation doesn't answer: 59 of 60 quotes check out, and all 5 questions the documentation can't answer are turned down. But "I don't know" is only as good as the search, and a real quote can still leave out the fact that mattered. And no search in this module asks who is asking, so internal documents reach customers. That is Module 8.
+> A customer asks Dormouse's support assistant: _"Why does my Dormouse turn the heating on before the time I set?"_ **Just asking** the model gets a confident answer about thermostats in general, nearly right and partly made up: **hallucination**. Putting **all 275 documents in the prompt** gets the right answer, for 191,548 tokens and 24 seconds a question. **RAG** splits the documents into 1,823 **chunks**, stores them in a **vector database**, ChromaDB, and sends the model only the five nearest the question: 906 tokens and two seconds, with the right chunks for 22 of 24 questions. But not for ours. The customer's words aren't the documentation's, Warm Wake comes sixth, and the model fills the gap with a guess. Putting the search behind an **MCP server** shares it with every application, and lets the model write its own searches, in the documentation's words: Warm Wake comes first and all 24 are found, but every question now takes two model calls. An **FAQ**, the questions each chunk answers, written once ahead of time, finds 23 of 24 with the customer's own words, though questions that sound alike can point at the wrong chunk. Last, the model must **quote its sources**, code checks every quote, and the model says when the documentation doesn't answer: all 57 quotes check out, and all 5 questions the documentation can't answer are turned down. But "I don't know" is only as good as the search, and a real quote can still leave out the fact that mattered. And no search in this module asks who is asking, so internal documents reach customers. That is Module 8.
 
 ## Learning goals
 
@@ -275,31 +275,31 @@ End each sentence that relies on the documentation with the id of the section it
 The server offers: search_docs
 
 Q: Why does my Dormouse turn the heating on before the time I set?
-   search_docs("thermostat heating starts early before scheduled time set; schedule preheat smart start learns warm-up time")
-      0.684  user-guide.md#warm-wake
+   search_docs("Thermostat starts heating before scheduled set time preheat early start learning warm-up schedule target temperature")
+      0.683  user-guide.md#warm-wake
       0.629  understand-warm-wake.md#what-warm-wake-does
-      0.621  ios-app-schedule-screen-guide.md#review-your-schedule
-      0.616  set-a-heating-schedule.md#how-schedule-periods-work
-      0.596  set-a-heating-schedule.md#before-you-start
-A: Dormouse’s Warm Wake feature starts heating early so your home reaches the scheduled temperature when the period begins. It learns how long your home takes to heat and may start up to 90 minutes ahead; a sunrise symbol appears while it does this. Warm Wake is on by default, and you can turn it off under Settings > Heating > Warm Wake. [user-guide.md#warm-wake]
-   1,008 tokens in, $0.0002, 4.7 seconds
+      0.627  heating-starts-below-five-degrees.md#if-the-room-is-not-below-five-degrees
+      0.621  set-a-heating-schedule.md#before-you-start
+      0.619  set-a-heating-schedule.md#how-schedule-periods-work
+A: Dormouse’s Warm Wake feature starts heating up to 90 minutes before a scheduled period so your home reaches the target temperature by the time the period begins. It learns how quickly your home heats using recent heating history and your local outside temperature. Warm Wake is on by default; you can turn it off in **Settings > Heating > Warm Wake**. [user-guide.md#warm-wake]
+   1,056 tokens in, $0.0002, 4.7 seconds
 
-The answer was in the chunks the agent found, for 24 questions: 24 (1.2 searches a question)
+The answer was in the chunks the agent found, for 24 questions: 24 (1.1 searches a question)
 ```
 
-Look at what it searched for. The customer wrote "before the time I set". The model wrote "heating starts early", "preheat" and "learns warm-up time": the words a manual uses. That is the gap demo 3 fell into, and the model stepped over it. Warm Wake came **first**, where demo 3 had it sixth, and the answer has the 90 minutes, the sunrise symbol and the place to turn it off. It cites the section it used, once at the end, although we asked for a citation after every sentence.
+Look at what it searched for. The customer wrote "before the time I set". The model wrote "preheat", "early start" and "learning warm-up": the words a manual uses. That is the gap demo 3 fell into, and the model stepped over it. Warm Wake came **first**, where demo 3 had it sixth, and the answer has the 90 minutes, how Warm Wake learns, and the place to turn it off. It cites the section it used, once at the end, although we asked for a citation after every sentence.
 
-|                             | Demo 3: we search                 | Demo 4: the model searches                |
-| --------------------------- | --------------------------------- | ----------------------------------------- |
-| What is searched for        | The customer's words, as they are | Words the model chooses                   |
-| Searches per question       | 1                                 | 1.2: four of the 24 searched twice        |
-| Answer in what was found    | 22 of 24                          | 24 of 24 (23 from the first search alone) |
-| Warm Wake, for our question | 6th                               | 1st                                       |
-| Our question: tokens in     | 906                               | 1,008                                     |
-| Our question: cost          | $0.0001                           | $0.0002                                   |
-| Our question: time          | 2.1 seconds                       | 4.7 seconds                               |
+|                             | Demo 3: we search                 | Demo 4: the model searches          |
+| --------------------------- | --------------------------------- | ----------------------------------- |
+| What is searched for        | The customer's words, as they are | Words the model chooses             |
+| Searches per question       | 1                                 | 1.1: two of the 24 searched twice   |
+| Answer in what was found    | 22 of 24                          | 24 of 24, all from the first search |
+| Warm Wake, for our question | 6th                               | 1st                                 |
+| Our question: tokens in     | 906                               | 1,056                               |
+| Our question: cost          | $0.0001                           | $0.0002                             |
+| Our question: time          | 2.1 seconds                       | 4.7 seconds                         |
 
-Both of demo 3's misses were found: our question, and Q11, _"The heating turns down every time I nip out to the shops"_, where the model searched for "disable or adjust geofencing, Home/Away or presence-based automatic temperature setback". Three of the four second searches were for error codes: the first search found what the code means, and the second went back for what to do about it. The fourth was Q17, about someone trying to get into an account, going back with "account compromised". (Every question's searches and answer are in `demo/output/04_agent.json`.)
+Both of demo 3's misses were found: our question, and Q11, _"The heating turns down every time I nip out to the shops"_, where the model searched for "presence detection away mode geofencing how to disable". Both second searches were for error codes, E-305 and E-217: the first search found what the code means, and the second went back for what to do about it. (Every question's searches and answer are in `demo/output/04_agent.json`.)
 
 ### The same server, another client
 
@@ -339,8 +339,16 @@ In practical terms, this is what MCP gives us:
 
 ### Why this breaks
 
-- **Every question pays for the rewrite.** The model reads the question to write a search, then reads the results to answer, so every question takes at least two model calls instead of one. It is still a fraction of a cent, but our question took 4.7 seconds instead of 2.1. And the work is the same each time: customers ask why the heating comes on early in much the same words every week, and the model works out the manual's words for them again, every time.
-- **Nothing checks what goes back.** The client writes the answer now, so nothing checks that it came from what the search found. And the server searches every document it has, for whoever runs it, including the 41 internal ones. Across the 24 customer questions it handed the model 6 sections from internal documents: a QA report, a support playbook, support notes, a specification and a firmware baseline. None of them ended up in an answer this time, but nothing stopped them. We come back to both at the end of the module.
+**Every question pays for the rewrite.** The model reads the question to write a search, then reads the results to answer, so every question takes at least two model calls instead of one. It is still a fraction of a cent, but our question took 4.7 seconds instead of 2.1. And the work is the same each time: customers ask why the heating comes on early in much the same words every week, and the model works out the manual's words for them again, every time.
+
+**Nothing checks what goes back.** The client writes the answer now, so nothing checks that it came from what the search found. And the server searches every document it has, for whoever runs it, including the 41 internal ones. Across the 24 customer questions it handed the model 3 sections from internal documents: a specification, support notes and a support playbook. One answer cited the specification:
+
+```text
+Q: What's the coldest I can set the thermostat to?
+A: The coldest target temperature you can set is 5°C, in half-degree steps. [thermostat-physical-and-environmental-limits.md#indoor-operating-range]
+```
+
+This time the fact was harmless, and the user guide says the same. Next time it could be a supplier's name, a known fault or another customer's details. We come back to both problems at the end of the module.
 
 Start with the first. Matching the customer's words to the documentation's could be done once, ahead of time, instead of on every question. What if the documentation came with the questions customers actually ask?
 
@@ -389,7 +397,7 @@ Q: Why does my Dormouse turn the heating on before the time I set?
    0.707  radiator-valve-does-not-heat-to-its-own-temperature.md#top  via "Why isn't my Dormouse Radiator Valve heating my radiator to its own temperature?"
    0.693  create-a-smart-home-heating-routine.md#keep-temperature-schedules-on-dormouse  via "How can I keep heating schedules in Dormouse while using smart-home routines?"
    0.684  firmware-4-0-release-notes.md#warm-wake  via "Why does my heating start before my schedule begins?"
-A: This is likely Warm Wake, which starts heating up to 90 minutes before a scheduled period so your home reaches the target temperature by the time it begins. To stop this, turn it off in **Settings > Heating > Warm Wake**.
+A: This may be Warm Wake: it starts heating up to 90 minutes before a scheduled period so your home reaches the target temperature by the time you set. To turn it off, go to **Settings > Heating > Warm Wake**.
 
 The answer was in the top 5 chunks, for 24 questions: searching chunks 22, searching questions 23, searching both 23
 ```
@@ -445,46 +453,45 @@ The demo asks two questions, then all 30 in `data/questions.json`: the 24 the do
 
 ```text
 Q: Why does my Dormouse turn the heating on before the time I set?
-A: The documentation does not explain why Dormouse might turn the heating on before a scheduled time.
+A: The documentation doesn’t explain why Dormouse might turn the heating on before a scheduled time.
 
 Q: How much does a Dormouse thermostat cost?
-A: The documentation does not specify the Dormouse Thermostat’s price.
+A: The documentation does not provide the Dormouse Thermostat’s price.
 
-Of 24 questions the documentation answers: answered right 20, answered wrong 3, said it didn't know 1
+Of 24 questions the documentation answers: answered right 19, answered wrong 4, said it didn't know 1
 Of 5 questions it doesn't: said it didn't know 5
-Quotes found in the chunk they cite: 59 of 60
+Quotes found in the chunk they cite: 57 of 57
 ```
 
-Our question first. Demo 3 searched the same way, missed Warm Wake, and guessed. Told not to, the model now says the documentation doesn't explain it. That is honest, and it is no help to the customer. The price question is better than demo 1, which sent the customer to a website and a sales team it knew nothing about. All five questions the documentation doesn't answer (the price, the founder, the next model, a discount and a phone number) got "the documentation doesn't say". The internal question, about a loud click, got the same.
+Our question first. Demo 3 searched the same way, missed Warm Wake, and guessed. Told not to, the model now says the documentation doesn't explain it. That is honest, and it is no help to the customer. The price question is better than demo 1, which sent the customer to a website and a sales team it knew nothing about. All five questions the documentation doesn't answer (the price, the founder, the next model, a discount and a phone number) got "the documentation doesn't say". For the phone number it added that support is in the app under Help > Contact support, with a checked quote. The internal question, about a loud click, got "the documentation does not explain".
 
-Of the 60 quotes, 59 are in the chunk they cite. The one that isn't, from `demo/output/06_citations.json`:
-
-```text
-Q: The heating turns down every time I nip out to the shops. How do I stop that?
-A: Away mode keeps the home at its configured away temperature until you turn it off. To stop the heating turning down when you go out, turn Away mode off; you can do this from Menu > Away on the thermostat or by tapping Away in the app. ...
-   [use-the-thermostat-menu.md#turn-away-mode-on] "Away mode keeps the home at the away temperature until you turn it off." (NOT IN THAT CHUNK)
-   [use-the-thermostat-menu.md#turn-away-mode-on] "Choose Menu > Away to turn Away mode on." (quote checked)
-   [use-the-thermostat-menu.md#turn-away-mode-on] "You can also turn Away mode on by tapping Away in the app." (quote checked)
-```
-
-The chunk says _"It keeps the home at the away temperature until you turn Away mode off."_ The model tidied the sentence and still called it a quote. The check caught it. This time the change was harmless; a check that looks for the exact words doesn't have to decide.
+Every one of the 57 quotes is in the chunk it cites. That isn't guaranteed: in an earlier run of the same demo, one quote of 60 wasn't. The chunk said _"It keeps the home at the away temperature until you turn Away mode off."_ The model had tidied it into _"Away mode keeps the home at the away temperature until you turn it off"_ and still called it a quote, and the check caught it. A check that looks for the exact words doesn't have to decide whether a change matters.
 
 | Outcome                          | Questions |
 | -------------------------------- | --------- |
-| Answerable: answered right       | 20 of 24  |
-| Answerable: answered wrong       | 3 of 24   |
+| Answerable: answered right       | 19 of 24  |
+| Answerable: answered wrong       | 4 of 24   |
 | Answerable: said it didn't know  | 1 of 24   |
 | Not covered: said it didn't know | 5 of 5    |
 | Internal: kept it internal       | 1 of 1    |
 
-The three counted wrong aren't made up. Each quotes real sentences, and leaves out what the customer needed. Q08 asks about a thermostat for upstairs, and gets "yes", without the limit of four. Q21 gets what E-217 means, but not that the thermostat needs a replacement. Q11 gets how to turn Away mode off by hand, when it's geofencing that turns it on.
+The four counted wrong aren't made up. Two of them quote the very fact they leave out. From `demo/output/06_citations.json`:
+
+```text
+Q: Can I have a separate thermostat for upstairs?
+A: Yes. You can use a separate thermostat to control upstairs as its own zone and schedule. Each thermostat controls its own zone, and separate thermostats can control downstairs and upstairs heating.
+   [thermostat-valve-and-sensor-zone-planning.md#choose-the-zones] "A home can have up to four thermostats, each controlling its own zone with its own schedule." (quote checked)
+   [wired-thermostat-and-wireless-zone-devices.md#zone-planning-and-schedules] "For example, separate thermostats can control downstairs and upstairs heating." (quote checked)
+```
+
+The quote says up to four; the answer doesn't, and the score reads the answer. Q22 is the same: its quote says "Replace both AA batteries", its answer only "the batteries". The other two answer a different question from the one asked. Q21 gets what E-217 means, but not that the thermostat needs a replacement. Q11 gets how to turn Away mode off by hand, when it's geofencing that turns it on.
 
 ### Why this breaks
 
 - **"I don't know" is only as good as the search.** Our question was answered "the documentation doesn't explain" because the search missed Warm Wake. Sections 4 and 5 found it; this demo searches as demo 3 did.
-- **A real quote can still give a poor answer.** The check proves a quote is in the chunk it cites. It doesn't prove the answer is complete, or that the quote supports it. Q08, Q21 and Q11 passed the check and still missed.
+- **A real quote can still give a poor answer.** The check proves a quote is in the chunk it cites. It doesn't prove the answer says what the quote says, or that it answers the question. All four wrong answers passed the check.
 - **We can only check the answers we write.** Behind the MCP server in section 4, the client writes the answer, and nothing checks its quotes.
-- **No search here asks who is asking.** Every search in this module looks at all 275 documents. In section 4, 6 internal sections reached the model for customer questions. Deciding who may see what, and enforcing it in code rather than in a prompt, is Module 8.
+- **No search here asks who is asking.** Every search in this module looks at all 275 documents. In section 4, an answer to a customer cited an internal specification. Deciding who may see what, and enforcing it in code rather than in a prompt, is Module 8.
 
 ---
 

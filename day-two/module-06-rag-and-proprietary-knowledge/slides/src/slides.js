@@ -427,19 +427,19 @@ async with Client(DOCS_SERVER) as docs:
     content: {
       title: 'The model found Warm Wake',
       code: `Q: Why does my Dormouse turn the heating on before the time I set?
-   search_docs("thermostat heating starts early before scheduled
-     time set; schedule preheat smart start learns warm-up time")
-      0.684  user-guide.md#warm-wake
+   search_docs("Thermostat starts heating before scheduled set time
+     preheat early start learning warm-up schedule target temperature")
+      0.683  user-guide.md#warm-wake
       0.629  understand-warm-wake.md#what-warm-wake-does
-      0.621  ios-app-schedule-screen-guide.md#review-your-schedule
-A: Dormouse’s Warm Wake feature starts heating early so your
-   home reaches the scheduled temperature ... may start up to
-   90 minutes ahead ... [user-guide.md#warm-wake]
-   1,008 tokens in, $0.0002, 4.7 seconds`,
+      0.627  heating-starts-below-five-degrees.md#if-the-room-is-...
+A: Dormouse’s Warm Wake feature starts heating up to 90 minutes
+   before a scheduled period ... you can turn it off in
+   **Settings > Heating > Warm Wake**. [user-guide.md#warm-wake]
+   1,056 tokens in, $0.0002, 4.7 seconds`,
       highlights: [
-        "The model wrote **the documentation's words**: *heating starts early, preheat*",
+        "The model wrote **the documentation's words**: *preheat, early start*",
         'Warm Wake came **first**; demo 3 had it sixth',
-        'The right answer: 90 minutes, the sunrise symbol, where to turn it off',
+        'The right answer: 90 minutes, how it learns, where to turn it off',
       ],
     },
   },
@@ -459,10 +459,10 @@ A: Dormouse’s Warm Wake feature starts heating early so your
       right: {
         label: 'Demo 4: the model searches',
         items: [
-          'Words the model chooses: **1.2 searches** a question',
+          'Words the model chooses: **1.1 searches** a question',
           'Answer found for **24 of 24** questions',
           'Warm Wake 1st',
-          '1,008 tokens, 4.7 seconds: **two model calls**',
+          '1,056 tokens, 4.7 seconds: **two model calls**',
         ],
       },
     },
@@ -509,9 +509,9 @@ A: Dormouse’s Warm Wake feature starts heating early so your
     content: {
       title: 'Why this breaks',
       icon: 'warning',
-      description: `**Every question pays for the rewrite.** Two model calls instead of one: our question took 4.7 seconds instead of 2.1. Customers ask about the heating coming on early in the same words every week, and the model works out the manual's words for them again, every time.
+      description: `**Every question pays for the rewrite.** Two model calls instead of one: 4.7 seconds instead of 2.1. Customers ask in the same words every week, and the model works out the manual's words again every time.
 
-        **Nothing checks what goes back.** The client writes the answer. And the server searches every document: across 24 customer questions it handed the model **6 internal sections**.
+        **Nothing checks what goes back.** The client writes the answer. And the server searches every document: across 24 customer questions it handed the model 3 internal sections, and one answer **cited an internal specification**.
 
         Start with the first. What if the documentation came with **the questions customers ask**, written once, ahead of time?`,
     },
@@ -596,8 +596,8 @@ found = search(chunk_store, question_store, vector, "both")`,
    ...
    0.684  firmware-4-0-release-notes.md#warm-wake
             via "Why does my heating start before my schedule begins?"
-A: This is likely Warm Wake, which starts heating up to 90 minutes
-   before a scheduled period ... turn it off in
+A: This may be Warm Wake: it starts heating up to 90 minutes
+   before a scheduled period ... To turn it off, go to
    **Settings > Heating > Warm Wake**.`,
       highlights: [
         "Warm Wake came **fifth**, through a release note's question",
@@ -703,39 +703,37 @@ def check(citations, found):
     content: {
       title: 'Honest, and checked',
       code: `Q: Why does my Dormouse turn the heating on before the time I set?
-A: The documentation does not explain why Dormouse might turn
+A: The documentation doesn’t explain why Dormouse might turn
    the heating on before a scheduled time.
 
 Q: How much does a Dormouse thermostat cost?
-A: The documentation does not specify the Dormouse Thermostat’s price.
+A: The documentation does not provide the Dormouse Thermostat’s price.
 
-Of 24 questions the documentation answers: answered right 20,
-  answered wrong 3, said it didn't know 1
+Of 24 questions the documentation answers: answered right 19,
+  answered wrong 4, said it didn't know 1
 Of 5 questions it doesn't: said it didn't know 5
-Quotes found in the chunk they cite: 59 of 60`,
+Quotes found in the chunk they cite: 57 of 57`,
       highlights: [
         "Demo 3 **guessed** our question. Now: *the documentation doesn't explain*",
         "All **5** questions it can't answer: turned down",
-        '**59 of 60** quotes are really in their chunk',
+        'Every quote is really in its chunk. In an earlier run, one of 60 was **tidied**, and caught',
       ],
     },
   },
   {
     type: 'code',
     content: {
-      title: 'The check caught one',
-      code: `Q: The heating turns down every time I nip out to the shops.
-   How do I stop that?
-   [use-the-thermostat-menu.md#turn-away-mode-on]
-   "Away mode keeps the home at the away temperature until
-    you turn it off." (NOT IN THAT CHUNK)
-
-The chunk: "It keeps the home at the away temperature until
-            you turn Away mode off."`,
+      title: 'The quote has it, the answer doesn’t',
+      code: `Q: Can I have a separate thermostat for upstairs?
+A: Yes. You can use a separate thermostat to control upstairs
+   as its own zone and schedule. ...
+   [thermostat-valve-and-sensor-zone-planning.md#choose-the-zones]
+   "A home can have up to four thermostats, each controlling its
+    own zone with its own schedule." (quote checked)`,
       highlights: [
-        'The model **tidied** the sentence, and still called it a quote',
-        'The check looks for the **exact words**',
-        "The answer is wrong anyway: it's **geofencing** that turns Away mode on",
+        'The quote says **up to four**. The answer leaves it out',
+        'Q22 the same: the quote says *AA batteries*, the answer *the batteries*',
+        "Q11 explains Away mode, when it's **geofencing** that turns it on",
       ],
     },
   },
@@ -746,11 +744,11 @@ The chunk: "It keeps the home at the away temperature until
       icon: 'warning',
       description: `**"I don't know" is only as good as the search.** Our question was turned down because the search missed Warm Wake. Sections 4 and 5 found it.
 
-        **A real quote can still give a poor answer.** All three wrong answers passed the check. Q08 says yes to a thermostat upstairs, without the limit of four.
+        **A real quote can still give a poor answer.** All four wrong answers passed the check.
 
         **We can only check the answers we write.** Behind the MCP server, the client writes them.
 
-        **No search here asks who is asking.** In demo 4, 6 internal sections reached the model. Who may see what, enforced in code: **Module 8**.`,
+        **No search here asks who is asking.** In demo 4, an answer to a customer cited an internal specification. Who may see what, enforced in code: **Module 8**.`,
     },
   },
 
