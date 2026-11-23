@@ -608,7 +608,7 @@ answered to false and say so. Do not guess.`,
         '**Only** the documentation',
         "**Quote** it, with the chunk's id",
         "Say when it **doesn't answer**",
-        'The same search as demo 3: only the instructions and the check change',
+        'The same search as demo 3: it finds the same five chunks',
       ],
     },
   },
@@ -629,6 +629,28 @@ def check(citations, found):
         '**Structured outputs**: the reply is JSON that matches a schema',
         '`answered`: true or false, so code can tell a refusal',
         'A quote counts only if it **is in the chunk it cites**',
+      ],
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'The source, from the store',
+      code: `metadatas=[{"document": ..., "audience": ...,
+            "title": ..., "section": ..., "updated": ...,
+            "checksum": ...}]
+
+results = collection.query(query_embeddings=[vector],
+    n_results=TOP, include=["documents", "metadatas"])
+
+def add_sources(citations, found):
+    sources = {c["id"]: c["source"] for c in found}
+    return [{**c, "source": sources.get(c["chunk"], ...)}
+            for c in citations]`,
+      highlights: [
+        'Each chunk is stored with **where it comes from**: title, section, date',
+        'The search hands back the **metadata** with each chunk',
+        'The model only names a chunk. The **store** says what that chunk is',
       ],
     },
   },
@@ -673,7 +695,7 @@ def check(citations, found):
       points: [
         "A model makes up what it hasn't seen: **hallucination**",
         '**RAG**: retrieve the chunks that matter, then answer from them',
-        'A **vector database** stores chunks once, with metadata to filter by',
+        'A **vector database** stores chunks once, with metadata to filter by and cite',
         'Most misses are **search** misses: measure what was found, not just the answer',
         'Make the model **cite**, and check the citations in code',
       ],
