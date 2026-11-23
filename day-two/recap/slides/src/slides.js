@@ -19,20 +19,6 @@ export const slides = [
   {
     type: 'code',
     content: {
-      title: 'What is a token?',
-      code: `alice was beginning to get
-['al', 'ice', ' was', ' begin', 'ning', ' to', ' get']`,
-      highlights: [
-        'A piece of text: common words are one token, rarer words split into pieces',
-        'Single letters are tokens too, so **any text** can be written',
-        'Module 1 built 500 tokens; real tokenizers have 100,000–200,000',
-        'You pay per token, input **and** output',
-      ],
-    },
-  },
-  {
-    type: 'code',
-    content: {
       title: 'What is a vector?',
       code: `"the": {
   "queen": 0.0396,
@@ -49,14 +35,28 @@ export const slides = [
       ],
     },
   },
+
+  {
+    type: 'code',
+    content: {
+      title: 'What is a token?',
+      code: `alice was beginning to get
+['al', 'ice', ' was', ' begin', 'ning', ' to', ' get']`,
+      highlights: [
+        'A piece of a word: common words are one token, rarer words split into pieces',
+        'Single letters are tokens too, so **any text** can be written',
+
+        'You pay per token, input **and** output',
+      ],
+    },
+  },
   {
     type: 'standard',
     content: {
       title: 'What is a context window?',
       icon: 'eye',
       points: [
-        'The tokens a model can see at once',
-        'Module 1’s neural model saw 3 tokens; `gpt-6-luna` sees 1,050,000',
+        'A Vector of Tokens',
         'Everything you send in one call: instructions, the whole chat, tool results',
         'No memory: if it isn’t in the window, the model doesn’t know it',
         'You pay for every token in it, on every call',
