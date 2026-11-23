@@ -75,7 +75,7 @@ Demo 5 taken all the way. They generated questions and answers for 10 million Wi
 
 **Gao, L., Ma, X., Lin, J. & Callan, J. (2023). "Precise Zero-Shot Dense Retrieval without Relevance Labels." *ACL 2023*, 1762–1777. [arXiv:2212.10496](https://arxiv.org/abs/2212.10496)**
 
-The mirror image of demo 5, and in Module 5's reading list too. Demo 5 makes the documents look more like questions. **HyDE** makes the question look more like a document: it asks a model to write a made-up answer, then searches with that. Look at figure 1. Then compare the bills: demo 5 pays for a model call per ten chunks, once; HyDE pays for one per question, every time, as demo 4's agent does. Which would you rather pay for at 30 questions a day? At 30,000?
+The mirror image of demo 5, and in Module 5's reading list too. Demo 5 makes the documents look more like questions. **HyDE** makes the question look more like a document: it asks a model to write a made-up answer, then searches with that. Look at figure 1. Then compare the bills: demo 5 pays for a model call per document, once; HyDE pays for one per question, every time, as demo 4's agent does. Which would you rather pay for at 30 questions a day? At 30,000?
 
 ### Citations: where demo 6 comes from
 

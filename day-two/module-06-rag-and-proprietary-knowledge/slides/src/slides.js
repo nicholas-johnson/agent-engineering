@@ -527,15 +527,20 @@ A: Dormouse’s Warm Wake feature starts heating up to 90 minutes
     },
   },
   {
-    type: 'standard',
+    type: 'code',
     content: {
-      title: 'Write the questions once',
-      icon: 'pen-tool',
-      points: [
-        'For every chunk, a model writes **the questions it answers**, as a customer would type them',
-        '`data/build_faq.py`: 10 chunks a call, **6,358 questions** for 1,823 chunks',
-        'Done **once**. When a chunk changes, only its questions are written again',
-        'Each question is embedded, and points back to **its chunk**',
+      title: 'Convert each document into an FAQ',
+      code: `INSTRUCTIONS = """You turn documentation into the questions customers ask.
+Convert this Dormouse document into an FAQ: every question
+a customer might ask that it answers.
+Write as many questions as it takes. There is no limit.
+Write them as a customer who has never read the documentation
+would type them into a chat window ...
+Give each question the id of the chunk that answers it."""`,
+      highlights: [
+        '`data/build_faq.py`: **one document a call**, its chunks marked with their ids',
+        '**7,987 questions** for 1,823 chunks: still about **4 a chunk**, and none for 37',
+        'Done **once**. When a document changes, it is converted again',
       ],
     },
   },
@@ -544,14 +549,38 @@ A: Dormouse’s Warm Wake feature starts heating up to 90 minutes
     content: {
       title: 'The questions for Warm Wake',
       code: `user-guide.md#warm-wake:
-   Why does my heating start before a schedule period begins?
-   What does the sunrise symbol on the display mean?
+   What does Warm Wake do?
+   Why does the heating start before the scheduled time?
+   How early can Warm Wake start heating?
+   How does Warm Wake know when to start heating?
+   What does the sunrise symbol mean when Warm Wake is running?
+   Is Warm Wake on by default?
    How do I turn Warm Wake off?
-   How far ahead can Warm Wake start heating?`,
+   What happens to heating times when Warm Wake is off?`,
       highlights: [
-        "The first is **nearly the customer's question**",
+        '**Eight** questions. With a limit of 3 to 5, it wrote four',
+        "The second is **nearly the customer's question**",
         'The section itself never says anything like it',
-        "The customer's words, written down **ahead of time**",
+      ],
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'Chroma metadata',
+      code: `question_store.get(ids=["user-guide.md#warm-wake?1"],
+    include=["embeddings", "documents", "metadatas"])
+
+id:        user-guide.md#warm-wake?1
+embedding: [-0.0479, 0.0298, -0.0241, ...]   1,536 numbers
+document:  Why does the heating start before the scheduled time?
+metadata:  {"chunk": "user-guide.md#warm-wake",
+            "checksum": "e6d70af51bff01e2..."}`,
+      highlights: [
+        'Each record: an **id**, a **vector**, the **text**, and **metadata**, a dictionary of facts about it',
+        '`chunk`: the chunk that answers the question. **That chunk** is what the model gets',
+        '`checksum`: of the chunk and its questions. Change either, and they are embedded again',
+        '`where={"chunk": "user-guide.md#warm-wake"}`: all **8** of its questions',
       ],
     },
   },
@@ -559,18 +588,16 @@ A: Dormouse’s Warm Wake feature starts heating up to 90 minutes
     type: 'code',
     content: {
       title: 'Search the questions too',
-      code: `question_store.upsert(
-    ids=[f"{id}?{n}" for id, n, _ in batch],
-    embeddings=vectors[start : start + STORE_BATCH],
-    documents=[question for _, _, question in batch],
-    metadatas=[{"chunk": id, "checksum": current[id]}
-               for id, _, _ in batch],
+      code: `results = question_store.query(
+    query_embeddings=[vector], n_results=20,
+    include=["distances", "documents", "metadatas"],
 )
-
-found = search(chunk_store, question_store, vector, "both")`,
+for distance, question, metadata in zip(...):
+    chunk = metadata["chunk"]
+    best[chunk] = max(best.get(chunk, 0), 1 - distance)`,
       highlights: [
-        'A second collection, `questions`: each one **points to its chunk**',
         "Search chunks and questions with the **customer's own words**",
+        'Each question found leads, through its metadata, to **its chunk**',
         "Keep each chunk's best match, and send the top 5 **chunks**, as in demo 3",
         '**One model call**: the rewriting was done ahead of time',
       ],
@@ -587,22 +614,22 @@ found = search(chunk_store, question_store, vector, "both")`,
   {
     type: 'code',
     content: {
-      title: 'Found through a question',
+      title: 'Lost among the questions',
       code: `Q: Why does my Dormouse turn the heating on before the time I set?
-   0.728  thermostat-shows-the-wrong-room-temperature.md#top
-            via "Why does my Dormouse Thermostat show the wrong ..."
-   0.728  thermostat-physical-dimensions-and-display-...#product
-            via "What does the Dormouse Thermostat do?"
+   0.771  create-a-smart-home-heating-routine.md#leave-...
+            via "Where do I change my Dormouse heating schedule?"
+   0.771  coordinate-radiator-valves-with-smart-home-routines.md#...
+            via "Where do I change my Dormouse heating schedule?"
    ...
-   0.684  firmware-4-0-release-notes.md#warm-wake
-            via "Why does my heating start before my schedule begins?"
-A: This may be Warm Wake: it starts heating up to 90 minutes
-   before a scheduled period ... To turn it off, go to
-   **Settings > Heating > Warm Wake**.`,
+   0.714  android-app-notifications-screen-guide.md#heating-...
+            via "When does Dormouse send the heating-while-away ..."
+A: Dormouse follows your schedule, where each period’s temperature
+   stays in effect until the next period starts. If heating comes
+   on earlier than you expect, check the current target ...`,
       highlights: [
-        "Warm Wake came **fifth**, through a release note's question",
-        'The right answer: Warm Wake, 90 minutes, where to turn it off',
-        'The four above it share **our words**, not our meaning',
+        'The top two: **the same question**, written for two chunks',
+        "Warm Wake came **eighth** (0.707), through a release note's question",
+        'The answer never mentions Warm Wake: **a guess again**',
       ],
     },
   },
@@ -771,7 +798,7 @@ A: Yes. You can use a separate thermostat to control upstairs
         '**Documents in the prompt**: right, for 191,548 tokens a question',
         "**Retrieve, then answer**: 906 tokens, but the customer's words miss",
         '**An MCP server**: the model writes the search, in two calls a question',
-        '**FAQs**: questions written once, but alike questions mislead',
+        '**FAQs**: questions written once, but more questions crowded out the right one',
         '**Citations**: checked quotes and honest refusals, only as good as the search',
       ],
     },

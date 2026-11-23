@@ -1,6 +1,6 @@
 # Module 6 — RAG and Proprietary Knowledge
 
-> A customer asks Dormouse's support assistant: _"Why does my Dormouse turn the heating on before the time I set?"_ **Just asking** the model gets a confident answer about thermostats in general, nearly right and partly made up: **hallucination**. Putting **all 275 documents in the prompt** gets the right answer, for 191,548 tokens and 24 seconds a question. **RAG** splits the documents into 1,823 **chunks**, stores them in a **vector database**, ChromaDB, and sends the model only the five nearest the question: 906 tokens and two seconds, with the right chunks for 22 of 24 questions. But not for ours. The customer's words aren't the documentation's, Warm Wake comes sixth, and the model fills the gap with a guess. Putting the search behind an **MCP server** shares it with every application, and lets the model write its own searches, in the documentation's words: Warm Wake comes first and all 24 are found, but every question now takes two model calls. An **FAQ**, the questions each chunk answers, written once ahead of time, finds 23 of 24 with the customer's own words, though questions that sound alike can point at the wrong chunk. Last, the model must **quote its sources**, code checks every quote, and the model says when the documentation doesn't answer: all 57 quotes check out, and all 5 questions the documentation can't answer are turned down. But "I don't know" is only as good as the search, and a real quote can still leave out the fact that mattered. And no search in this module asks who is asking, so internal documents reach customers. That is Module 8.
+> A customer asks Dormouse's support assistant: _"Why does my Dormouse turn the heating on before the time I set?"_ **Just asking** the model gets a confident answer about thermostats in general, nearly right and partly made up: **hallucination**. Putting **all 275 documents in the prompt** gets the right answer, for 191,548 tokens and 24 seconds a question. **RAG** splits the documents into 1,823 **chunks**, stores them in a **vector database**, ChromaDB, and sends the model only the five nearest the question: 906 tokens and two seconds, with the right chunks for 22 of 24 questions. But not for ours. The customer's words aren't the documentation's, Warm Wake comes sixth, and the model fills the gap with a guess. Putting the search behind an **MCP server** shares it with every application, and lets the model write its own searches, in the documentation's words: Warm Wake comes first and all 24 are found, but every question now takes two model calls. Converting every document into an **FAQ**, as many questions as a customer might ask, written once ahead of time, gives 7,987 questions but finds no more than the chunks did, 22 of 24: broad questions, written again and again, crowd out the right one. Last, the model must **quote its sources**, code checks every quote, and the model says when the documentation doesn't answer: all 57 quotes check out, and all 5 questions the documentation can't answer are turned down. But "I don't know" is only as good as the search, and a real quote can still leave out the fact that mattered. And no search in this module asks who is asking, so internal documents reach customers. That is Module 8.
 
 ## Learning goals
 
@@ -29,7 +29,7 @@ Everything runs on the documentation for **Dormouse**, the smart thermostat from
 | `data/docs/internal-relay-click-revision-c.md` | Written by hand: an internal engineering note                                                                                                                                                                                | 1 document                         |
 | `data/docs/*.md`                               | The two above, plus 273 written by `gpt-6-luna` with `data/build_docs.py`: support, troubleshooting, app, installation, specification, integration, policy, error-code and release-note documents, and 40 more internal ones | 275 documents, about 154,000 words |
 | `data/questions.json`                          | 30 questions, each with the facts a right answer must contain: 24 the documentation answers, 5 it doesn't, and 1 that only an internal document answers                                                                      | 30 questions                       |
-| `data/faq.json`                                | The questions each chunk answers, written by `gpt-6-luna` with `data/build_faq.py`, for section 5                                                                                                                            | 6,358 questions                    |
+| `data/faq.json`                                | Every document converted into an FAQ by `gpt-6-luna` with `data/build_faq.py`: the questions it answers, each pointing to its chunk, for section 5                                                                            | 7,987 questions                    |
 
 ## Setting up
 
@@ -52,7 +52,7 @@ uv run python demo/01_just_ask.py
 | `05_faq.py`                 | Search the questions each chunk answers, as well as the chunks                             | `05_faq.json`: the chunks found, the answer, and the 24 questions' checks, three ways                                 |
 | `06_citations.py`           | Answer only from the chunks, quote them, check every quote, and say when there's no answer | `06_citations.json`: all 30 answers, their quotes and checks, and how each turned out                                 |
 
-The first run of demo 3 embeds all 1,823 chunks, and the first run of demo 5 embeds all 6,358 questions. Both are stored in ChromaDB, in `demo/output/chroma/`, and later runs only embed what has changed. On a slow connection those first runs take several minutes each, so run demos 3 and 5 once before a session. Model output is random, so your answers will differ from the ones quoted here.
+The first run of demo 3 embeds all 1,823 chunks, and the first run of demo 5 embeds all 7,987 questions. Both are stored in ChromaDB, in `demo/output/chroma/`, and later runs only embed what has changed. On a slow connection those first runs take several minutes each, so run demos 3 and 5 once before a session. Model output is random, so your answers will differ from the ones quoted here.
 
 ## 1. Just ask
 
@@ -356,20 +356,22 @@ Start with the first. Matching the customer's words to the documentation's could
 
 **Demo:** `demo/05_faq.py`
 
-A manual is written in the manual's words. Customers ask in theirs. So turn every chunk into the questions it answers, written the way a customer would type them, and search those as well. It is what a good **FAQ** does, for every section at once.
+A manual is written in the manual's words. Customers ask in theirs. So convert every document into an **FAQ**: the questions it answers, written the way a customer would type them, as many as it takes. Then search those as well.
 
-`data/build_faq.py` did the writing, once. It sends `gpt-6-luna` ten chunks at a time with these instructions:
+`data/build_faq.py` did the writing, once. It sends `gpt-6-luna` one whole document at a time, its chunks marked with their ids, with these instructions:
 
 ```python
 INSTRUCTIONS = """You turn documentation into the questions customers ask.
-For each chunk of Dormouse documentation, write 3 to 5 questions that the chunk answers.
+Convert this Dormouse document into an FAQ: every question a customer might ask that it answers.
+Write as many questions as it takes. There is no limit.
 Write them as a customer who has never read the documentation would type them into a chat window:
-in everyday words, describing what they see or what they want. Plain ASCII."""
+in everyday words, describing what they see or what they want.
+Give each question the id of the chunk that answers it. Plain ASCII."""
 ```
 
-The 1,823 chunks got 6,358 questions, saved in `data/faq.json` with a checksum of the chunk they came from. When a chunk changes, only its questions are written again.
+The 275 documents gave 7,987 questions, saved in `data/faq.json` under the chunk each one points to, with a checksum of that chunk. With no limit, the model still wrote about four a chunk: half the chunks got four or fewer, and the most any got was 27. It wrote none for 37 chunks: 27 from internal test and rollout notes, and 10 introductions and summaries. It takes about five minutes. When a chunk changes, its whole document is converted again.
 
-The demo embeds every question into a second ChromaDB collection, `questions`. Each question's metadata says which chunk it came from:
+The demo embeds every question into a second ChromaDB collection, `questions`. Every record in a Chroma collection has four parts: an **id**, a **vector**, the text (Chroma calls it the **document**), and **metadata**, a small dictionary of facts about the record that we can read back or filter by. Here the metadata says which chunk the question came from:
 
 ```python
 question_store.upsert(
@@ -380,43 +382,58 @@ question_store.upsert(
 )
 ```
 
+Here is one record, read back with `question_store.get(ids=["user-guide.md#warm-wake?1"], include=["embeddings", "documents", "metadatas"])`:
+
+```text
+id:        user-guide.md#warm-wake?1
+embedding: [-0.0479, 0.0298, -0.0241, ...]   1,536 numbers
+document:  Why does the heating start before the scheduled time?
+metadata:  {"chunk": "user-guide.md#warm-wake", "checksum": "e6d70af51bff01e2..."}
+```
+
+`chunk` is how a question the search finds leads back to the chunk the model is sent. `checksum` is a fingerprint of the chunk and its questions together: if either changes, that chunk's questions are embedded again. And metadata can be filtered: `question_store.get(where={"chunk": "user-guide.md#warm-wake"})` returns all eight of that section's questions.
+
 To answer, it searches both collections with the customer's own words, keeps each chunk's best match, and sends the model the top five chunks, exactly as demo 3 did. The model still sees chunks, never the made-up questions. There is one model call, and no rewriting at question time: that was done when the questions were written.
 
 ```text
-1,823 chunks, and 6,358 questions they answer.
+1,823 chunks, and 7,987 questions they answer.
 
 The questions written for user-guide.md#warm-wake:
-   Why does my heating start before a schedule period begins?
-   What does the sunrise symbol on the display mean?
+   What does Warm Wake do?
+   Why does the heating start before the scheduled time?
+   How early can Warm Wake start heating?
+   How does Warm Wake know when to start heating?
+   What does the sunrise symbol mean when Warm Wake is running?
+   Is Warm Wake on by default?
    How do I turn Warm Wake off?
-   How far ahead can Warm Wake start heating?
+   What happens to heating times when Warm Wake is off?
 
 Q: Why does my Dormouse turn the heating on before the time I set?
-   0.728  thermostat-shows-the-wrong-room-temperature.md#top  via "Why does my Dormouse Thermostat show the wrong room temperature?"
-   0.728  thermostat-physical-dimensions-and-display-specification.md#product  via "What does the Dormouse Thermostat do?"
-   0.707  radiator-valve-does-not-heat-to-its-own-temperature.md#top  via "Why isn't my Dormouse Radiator Valve heating my radiator to its own temperature?"
-   0.693  create-a-smart-home-heating-routine.md#keep-temperature-schedules-on-dormouse  via "How can I keep heating schedules in Dormouse while using smart-home routines?"
-   0.684  firmware-4-0-release-notes.md#warm-wake  via "Why does my heating start before my schedule begins?"
-A: This may be Warm Wake: it starts heating up to 90 minutes before a scheduled period so your home reaches the target temperature by the time you set. To turn it off, go to **Settings > Heating > Warm Wake**.
+   0.771  create-a-smart-home-heating-routine.md#leave-temperature-control-to-dormouse  via "Where do I change my Dormouse heating schedule?"
+   0.771  coordinate-radiator-valves-with-smart-home-routines.md#keep-the-thermostat-schedule-in-view  via "Where do I change my Dormouse heating schedule?"
+   0.749  household-notification-preferences-support-notes.md#away-and-heating-notifications  via "When does Dormouse notify me that the heating has been on while everyone is away?"
+   0.732  accessibility-policy.md#choosing-a-control-method  via "What are the different ways I can control my Dormouse heating?"
+   0.714  android-app-notifications-screen-guide.md#heating-while-everyone-is-away  via "When does Dormouse send the heating-while-away notification?"
+A: Dormouse follows your schedule, where each period’s temperature stays in effect until the next period starts. If heating comes on earlier than you expect, check the current target temperature and schedule in the app or web dashboard; a manual temperature change lasts until the next scheduled period. Away mode can also maintain its configured temperature, and frost protection may turn heating on if the room drops below 5°C—even if heating is off or Away mode is on.
 
-The answer was in the top 5 chunks, for 24 questions: searching chunks 22, searching questions 23, searching both 23
+The answer was in the top 5 chunks, for 24 questions: searching chunks 22, searching questions 22, searching both 22
 ```
 
-The first question written for the user guide's Warm Wake section is nearly the customer's question: _"Why does my heating start before a schedule period begins?"_ The section itself never says anything like it. A Warm Wake chunk came in fifth, through the firmware 4.0 release notes' question _"Why does my heating start before my schedule begins?"_, and the answer is right: Warm Wake, 90 minutes, and where to turn it off. But look at what came first: two questions about other problems that start like ours, _"Why does my Dormouse Thermostat show the wrong room temperature?"_ and _"Why isn't my Dormouse Radiator Valve heating..."_, then _"What does the Dormouse Thermostat do?"_, a question about everything, and one about schedules and smart-home routines. They share our question's words, "why", "Dormouse", "heating", more than its meaning.
+The second question written for the user guide's Warm Wake section is nearly the customer's question: _"Why does the heating start before the scheduled time?"_ The section itself never says anything like it. But it didn't help. All five chunks were found through questions about schedules, notifications and ways to control the heating, and the top two through the same question, _"Where do I change my Dormouse heating schedule?"_, written for two different chunks. The best Warm Wake question, the firmware 4.0 release notes' _"Why does my heating turn on before the scheduled period starts?"_, scored 0.707 and came eighth. With no Warm Wake chunk to read, the model guessed again: schedules, manual changes, Away mode and frost protection, and no Warm Wake.
 
 |                          | Demo 3: chunks | Demo 4: the model searches | Demo 5: chunks and questions |
 | ------------------------ | -------------- | -------------------------- | ---------------------------- |
-| Answer in what was found | 22 of 24       | 24 of 24                   | 23 of 24                     |
-| Missed                   | Q01, Q11       | none                       | Q06                          |
+| Answer in what was found | 22 of 24       | 24 of 24                   | 22 of 24                     |
+| Missed                   | Q01, Q11       | none                       | Q01, Q11                     |
 | Model calls per question | 1              | 2 or more                  | 1                            |
-| Written ahead of time    | nothing        | nothing                    | 6,358 questions              |
+| Written ahead of time    | nothing        | nothing                    | 7,987 questions              |
 
-Searching the questions found both of demo 3's misses, our question and Q11 (geofencing), with the customer's own words. Searching the questions alone also found 23, with the same miss. (Every question's top five, and the question each chunk matched through, are in `demo/output/05_faq.json`.)
+Searching the questions, alone or with the chunks, found the same 22 as the chunks alone, and missed the same two: our question and Q11 (geofencing). An earlier FAQ, limited to 3 to 5 questions a chunk, had 6,358 questions, found both, and missed only Q06. (Every question's top five, and the question each chunk matched through, are in `demo/output/05_faq.json`.)
 
 ### Why this breaks
 
-- **Questions that sound alike.** A question is short, so a few shared words count for a lot. Q06, _"How many people in my family can control the heating?"_, matched _"How many thermostats and heating zones can I have in my home?"_ first, and none of the five chunks it found says how many people a household can have. "How many" and "heating" were enough. Searching the chunks alone had found it. And for our question, the right chunk came fifth, behind four that only share its words.
-- **Finding the chunk isn't checking the answer.** Every count so far asks whether the right chunk was found. None asks whether the answer came from it. Demo 3's first sentence was in none of its chunks. This answer happens to be right, but nothing in it says where it came from, and a customer can't tell a fact from a guess.
+- **More questions, more alike.** With no limit, the model wrote broad questions as well as specific ones, like _"What are the different ways I can control my Dormouse heating?"_ And 275 documents that overlap a lot gave the same questions again and again: 2,712 of the 7,987 are word for word the same as another (with the limit, 1,578 of 6,358 were). A question is short, so one about schedules and heating is close to every other question about schedules and heating, and now there are more of them to crowd out the right one. More questions aren't better questions.
+- **Finding the chunk isn't checking the answer.** Every count so far asks whether the right chunk was found. None asks whether the answer came from it. Demo 3's first sentence was in none of its chunks. This answer never mentions Warm Wake, but nothing in it says it is a guess, and a customer can't tell a fact from a guess.
 
 What if the model had to show where each sentence came from, and we checked?
 
@@ -503,7 +520,7 @@ The quote says up to four; the answer doesn't, and the score reads the answer. Q
 | 2. Put the documents in the prompt | Every document, every time                     | 191,548 tokens and 24 seconds a question, and a real company's documents won't fit     |
 | 3. Retrieve, then answer           | The 5 chunks nearest the customer's words      | The customer's words aren't the documentation's: it misses, then guesses               |
 | 4. Share it: an MCP server         | The chunks the model searches for              | Two model calls a question; nothing checks the answer, or who is asking                |
-| 5. FAQs                            | Chunks found through the questions they answer | Questions that sound alike point at the wrong chunk; the answer isn't checked          |
+| 5. FAQs                            | Chunks found through the questions they answer | Repeated, broad questions crowd out the right chunk; the answer isn't checked          |
 | 6. Citations                       | Quotes from the chunks, checked in code        | Refuses when the search misses; real quotes, incomplete answers; no idea who is asking |
 
 ## Playground

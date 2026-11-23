@@ -1,9 +1,9 @@
 # Run from the module folder: uv run python data/build_faq.py
 #
-# Builds data/faq.json: for every chunk of the knowledge base, the questions a customer might
-# ask that the chunk answers, written by gpt-6-luna. Demo 5 searches these questions.
-# It saves as it goes and only writes questions for chunks that are new or have changed,
-# so it can be stopped and run again. Deleting faq.json and rerunning gives new questions.
+# Builds data/faq.json: each document of the knowledge base converted into an FAQ by gpt-6-luna,
+# as many questions as a customer might ask, each pointing to the chunk that answers it.
+# Demo 5 searches these questions. It saves as it goes and only converts documents that are new
+# or have changed, so it can be stopped and run again. Deleting faq.json and rerunning gives new questions.
 
 import hashlib
 import json
@@ -20,31 +20,32 @@ HERE = Path(__file__).parent
 DOCS = HERE / "docs"
 FAQ = HERE / "faq.json"
 MODEL = "gpt-6-luna"
-CHUNKS_PER_CALL = 10
 
 INSTRUCTIONS = """You turn documentation into the questions customers ask.
-For each chunk of Dormouse documentation, write 3 to 5 questions that the chunk answers.
+Convert this Dormouse document into an FAQ: every question a customer might ask that it answers.
+Write as many questions as it takes. There is no limit.
 Write them as a customer who has never read the documentation would type them into a chat window:
-in everyday words, describing what they see or what they want. Plain ASCII."""
+in everyday words, describing what they see or what they want.
+Give each question the id of the chunk that answers it. Plain ASCII."""
 
 SCHEMA = {
     "type": "object",
     "properties": {
-        "chunks": {
+        "faq": {
             "type": "array",
             "items": {
                 "type": "object",
-                "properties": {"id": {"type": "string"}, "questions": {"type": "array", "items": {"type": "string"}}},
-                "required": ["id", "questions"],
+                "properties": {"question": {"type": "string"}, "chunk": {"type": "string"}},
+                "required": ["question", "chunk"],
                 "additionalProperties": False,
             },
         }
     },
-    "required": ["chunks"],
+    "required": ["faq"],
     "additionalProperties": False,
 }
 
-client = OpenAI(timeout=120)  # so a dropped connection fails and is retried, rather than hanging
+client = OpenAI(timeout=300)  # so a dropped connection fails and is retried, rather than hanging
 
 
 def load_documents(folder):
@@ -86,48 +87,51 @@ def split_into_chunks(document):
     return chunks
 
 
-def write_questions(batch):
+def write_faq(chunks):
+    # The whole document, one chunk after another, each marked with its id.
     response = client.responses.create(
         model=MODEL,
         reasoning={"effort": "none"},
         instructions=INSTRUCTIONS,
-        input="\n\n".join(f'<chunk id="{c["id"]}">\n{c["text"]}\n</chunk>' for c in batch),
+        input="\n\n".join(f'<chunk id="{c["id"]}">\n{c["text"]}\n</chunk>' for c in chunks),
         text={"format": {"type": "json_schema", "name": "faq", "schema": SCHEMA, "strict": True}},
     )
     # Occasionally the reply has a second JSON object after the first, so read only the first.
     reply, _ = json.JSONDecoder().raw_decode(response.output_text)
-    return reply["chunks"]
+    return chunks, reply["faq"]
 
 
 def plain_ascii(text):
     for fancy, plain in {
-        "\u2018": "'",
-        "\u2019": "'",
-        "\u201c": '"',
-        "\u201d": '"',
-        "\u2013": "-",
-        "\u2014": "-",
+        "‘": "'",
+        "’": "'",
+        "“": '"',
+        "”": '"',
+        "–": "-",
+        "—": "-",
     }.items():
         text = text.replace(fancy, plain)
     return text.encode("ascii", "ignore").decode()
 
 
-chunks = [chunk for document in load_documents(DOCS) for chunk in split_into_chunks(document)]
-checksums = {c["id"]: hashlib.sha256(c["text"].encode()).hexdigest() for c in chunks}
+documents = {d["name"]: split_into_chunks(d) for d in load_documents(DOCS)}
+checksums = {c["id"]: hashlib.sha256(c["text"].encode()).hexdigest() for chunks in documents.values() for c in chunks}
 
-# Keep the questions for chunks that haven't changed; write the rest.
+# Keep the questions for documents whose chunks haven't changed; convert the rest.
 faq = json.loads(FAQ.read_text()) if FAQ.exists() else {}
 faq = {id: entry for id, entry in faq.items() if checksums.get(id) == entry["checksum"]}
-todo = [c for c in chunks if c["id"] not in faq]
-batches = [todo[i : i + CHUNKS_PER_CALL] for i in range(0, len(todo), CHUNKS_PER_CALL)]
+todo = [chunks for chunks in documents.values() if any(c["id"] not in faq for c in chunks)]
 
 with ThreadPoolExecutor(max_workers=8) as pool:
-    for future in as_completed([pool.submit(write_questions, b) for b in batches]):
-        for item in future.result():
-            if item["id"] in checksums:
-                questions = [plain_ascii(q) for q in item["questions"]]
-                faq[item["id"]] = {"checksum": checksums[item["id"]], "questions": questions}
+    for future in as_completed([pool.submit(write_faq, chunks) for chunks in todo]):
+        chunks, questions = future.result()
+        # Every chunk gets an entry, even one with no questions, so the document isn't converted again.
+        for chunk in chunks:
+            faq[chunk["id"]] = {"checksum": checksums[chunk["id"]], "questions": []}
+        for item in questions:
+            if item["chunk"] in {c["id"] for c in chunks}:
+                faq[item["chunk"]]["questions"].append(plain_ascii(item["question"]))
         FAQ.write_text(json.dumps(dict(sorted(faq.items())), indent=2) + "\n")
-        print(f"Questions for {len(faq):,} of {len(chunks):,} chunks", end="\r")
+        print(f"Questions for {len(faq):,} of {len(checksums):,} chunks", end="\r")
 print()
 print(f"data/faq.json has {sum(len(e['questions']) for e in faq.values()):,} questions for {len(faq):,} chunks")

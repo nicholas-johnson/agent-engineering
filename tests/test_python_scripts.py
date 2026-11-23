@@ -794,11 +794,13 @@ def test_knowledge_base_is_consistent() -> None:
     holders = [name for name, text in documents.items() if "click" in text.lower()]
     assert holders and all("audience: internal" in documents[name] for name in holders)
 
-    # data/build_faq.py wrote questions for (nearly) every chunk, and each has some.
+    # data/build_faq.py converted every document, so (nearly) every chunk has an entry, and nearly all
+    # have questions. A few, like an internal note's scope, answer nothing a customer would ask.
     faq = json.loads((module / "faq.json").read_text(encoding="utf-8"))
     assert len(faq) > 1700
-    assert all(entry["questions"] and len(entry["checksum"]) == 64 for entry in faq.values())
-    assert "user-guide.md#warm-wake" in faq
+    assert all(len(entry["checksum"]) == 64 for entry in faq.values())
+    assert sum(bool(entry["questions"]) for entry in faq.values()) > 0.95 * len(faq)
+    assert faq["user-guide.md#warm-wake"]["questions"]
 
 
 @pytest.mark.offline

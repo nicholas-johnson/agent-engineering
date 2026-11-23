@@ -109,19 +109,19 @@ def update(chunk_store, chunks):
 
 
 def update_questions(question_store, faq, chunks):
-    # Embed the questions for chunks that are new or have changed. data/build_faq.py wrote them.
-    current = {c["id"]: checksum(c["text"]) for c in chunks}
+    # Embed the questions for chunks whose text or questions are new or have changed. data/build_faq.py wrote them.
+    texts = {c["id"]: c["text"] for c in chunks}
+    current = {
+        id: checksum(texts[id] + "\n".join(entry["questions"]))
+        for id, entry in faq.items()
+        if id in texts and checksum(texts[id]) == entry["checksum"]
+    }
     stored = question_store.get(include=["metadatas"])
     stale = [id for id, m in zip(stored["ids"], stored["metadatas"]) if current.get(m["chunk"]) != m["checksum"]]
     if stale:
         question_store.delete(ids=stale)
     done = {m["chunk"] for m in stored["metadatas"] if current.get(m["chunk"]) == m["checksum"]}
-    todo = [
-        (id, n, question)
-        for id, entry in faq.items()
-        if id not in done and current.get(id) == entry["checksum"]
-        for n, question in enumerate(entry["questions"])
-    ]
+    todo = [(id, n, question) for id in current if id not in done for n, question in enumerate(faq[id]["questions"])]
     vectors = embed([q for _, _, q in todo])
     for start in range(0, len(todo), STORE_BATCH):
         batch = todo[start : start + STORE_BATCH]
