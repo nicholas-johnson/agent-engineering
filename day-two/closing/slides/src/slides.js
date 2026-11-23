@@ -31,23 +31,7 @@ Vector   0.511  TS-1042  Log in with the new password after a password reset`,
       ],
     },
   },
-  {
-    type: 'code',
-    content: {
-      title: 'Which search is best?',
-      code: `A right script in the top 5, for 20 requests
 
-                          Keyword   Vector   Hybrid
-14 in everyday words            6       12        9
-6 quoting an error code         6        6        6
-All 20                         12       18       15`,
-      highlights: [
-        '**Hybrid search** did worse than vectors alone, on our requests',
-        'It helps with exact terms the embeddings don’t know: part numbers, ticket IDs',
-        'So **measure**, with your own requests and known answers',
-      ],
-    },
-  },
   {
     type: 'standard',
     content: {
@@ -62,20 +46,7 @@ All 20                         12       18       15`,
       ],
     },
   },
-  {
-    type: 'standard',
-    content: {
-      title: 'What is a company brain?',
-      icon: 'brain',
-      points: [
-        'Files an AI tool reads first: product, customers, voice, decisions',
-        'Without it: a polished prototype in 30 seconds, all of it invented',
-        'A **coding agent** builds it, and makes product decisions on its own',
-        '**Plan first**: the right feature, and 61 changed lines nobody had read',
-        '**Skills** automate the review. It missed the bug: people still read',
-      ],
-    },
-  },
+
   {
     type: 'description',
     content: {
@@ -102,74 +73,7 @@ Written as a record         7/20     0/20       9/20`,
       ],
     },
   },
-  {
-    type: 'standard',
-    content: {
-      title: 'What is the lethal trifecta?',
-      icon: 'warning',
-      points: [
-        '**Private data**: Sam’s home and household',
-        '**Untrusted content**: a device name somebody else wrote',
-        '**A way out**: a tool that invites any email address',
-        'All three: an injection can steal. Remove one, or confirm the way out',
-      ],
-      credit:
-        'Simon Willison (2025). "The lethal trifecta for AI agents: private data, untrusted content, and external communication."',
-    },
-  },
-  {
-    type: 'standard',
-    content: {
-      title: 'Before you ship',
-      icon: 'shield',
-      points: [
-        '**Access**: identity from the sign-in, permissions checked in code',
-        '**Untrusted text**: find it, mark it, measure attacks as rates',
-        '**Actions**: tiers, a person confirms the risky ones, all logged',
-        '**Data**: know what the provider keeps; redact, retain, erase',
-        '**Deployment**: the user’s own permissions, and limits on spend',
-      ],
-    },
-  },
-  {
-    type: 'cards',
-    content: {
-      title: 'Two days',
-      cards: [
-        {
-          heading: 'Day One: the agent',
-          points: [
-            '**1.** A language model from scratch',
-            '**2.** A chatbot',
-            '**3.** Tools and MCP',
-            '**4.** Choosing a provider',
-          ],
-        },
-        {
-          heading: 'Day Two: putting it to work',
-          points: [
-            '**5.** Search by meaning',
-            '**6.** RAG on your own documents',
-            '**7.** AI-assisted development',
-            '**8.** Security and deployment',
-          ],
-        },
-      ],
-    },
-  },
-  {
-    type: 'standard',
-    content: {
-      title: 'Where next',
-      icon: 'map',
-      points: [
-        'Every module has a **playground**: settings to change, scripts to run',
-        'And **further reading**, with ⭐ on the best places to start',
-        'The final exercise: read one, link it to a demo, start an extension',
-        'Then try one idea on your own documents, code or customers',
-      ],
-    },
-  },
+
   {
     type: 'title',
     content: {
