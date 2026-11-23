@@ -395,7 +395,7 @@ def learned_rate(heat_ups):
   {
     type: 'standard',
     content: {
-      title: 'Several at once',
+      title: 'Multitask mode',
       icon: 'layers',
       points: [
         '`/multitask`: two tickets, **two agents**, in parallel',
