@@ -24,41 +24,12 @@ export const slides = [
         'A customer writes in: *why does my Dormouse turn the heating on before the time I set?* The answer is in our documentation. The model has never read our documentation. **How do we get it to answer from our documents, and only from them?**',
     },
   },
-  {
-    type: 'code',
-    content: {
-      title: 'The data',
-      code: `---
-title: Dormouse Thermostat User Guide
-product: thermostat
-type: guide
-audience: customer
-firmware: 4.1
-updated: 2026-08-17
----
-
-# Dormouse Thermostat User Guide
-
-## Schedules
-
-### Warm Wake
-
-Warm Wake makes sure the home has already reached the target
-temperature when a schedule period starts ...`,
-      highlights: [
-        '**Dormouse**: the thermostat whose documents Module 5 searched',
-        'A user guide written by hand, plus **274 documents** written by `gpt-6-luna`',
-        'Support, installation, apps, specs, policies, release notes, and **41 internal** documents',
-        '**30 questions**, each with the facts a right answer must contain',
-      ],
-    },
-  },
 
   // ---- Section 1: Just ask ----
   {
     type: 'title',
     content: {
-      title: '1. Just ask',
+      title: '1. Just ask the model',
       subtitle: 'What does the model already know?',
       icon: 'message-square',
     },
@@ -97,10 +68,9 @@ Q: My thermostat is showing E-305. What should I do?
 A: ... try restarting the thermostat by turning it off at the breaker
    for 30 seconds and switching it back on ...`,
       highlights: [
-        'The right **idea**, the wrong **details**: the feature is called Warm Wake',
-        'E-305 means the boiler is not responding: check its pressure, not the breaker',
         'Confident and plausible: this is **hallucination**',
         'It has never seen our documents, and it does not say so',
+        "LLMs are people pleasers. They have been trained to continue the conversation, even if they don't know the answer.",
       ],
     },
   },
@@ -120,10 +90,10 @@ A: ... try restarting the thermostat by turning it off at the breaker
       title: 'The context window',
       icon: 'layers',
       points: [
-        'Everything the model reads in one call: instructions, documents, question',
+        'Put all your docs in the prompt',
         '`gpt-6-luna`: **1,050,000 tokens**, about 800,000 words',
         'Priced per token read: **$0.10 per million** input tokens',
-        'Small first: the user guide. Then large: all 275 documents',
+        'Now each question costs you 10 cents',
       ],
     },
   },
@@ -181,7 +151,7 @@ A: That's likely Warm Wake ... You can turn it off in
   {
     type: 'title',
     content: {
-      title: '3. Retrieve, then answer',
+      title: '3. RAG: Retrieval Augmented Generation',
       subtitle: 'Send only the part that matters',
       icon: 'search',
     },
@@ -196,7 +166,7 @@ A: That's likely Warm Wake ... You can turn it off in
         '**Embed** every chunk and store it in a **vector database**: ChromaDB',
         '**Retrieve** the 5 chunks nearest the question',
         '**Generate** the answer from those chunks alone',
-        'Retrieve, then generate: **RAG**',
+        'This is called Retrieval Augmented Generation (RAG)',
       ],
     },
   },
@@ -259,10 +229,11 @@ collection = database.get_or_create_collection(
   {
     type: 'standard',
     content: {
-      title: 'Not every vector is compared',
+      title: 'How it works',
       icon: 'route',
       points: [
-        '**HNSW**: each vector is linked to its near neighbours',
+        'Not every vector is compared',
+        '**HNSW**: Hierarchical Navigable Small World. Each vector is linked to its near neighbours',
         'A search **hops** from vector to vector towards the question',
         'Millions of vectors in milliseconds',
         '**Approximate**: very occasionally it misses a slightly closer one. Here, the same top 5 as comparing all 1,823',
@@ -509,11 +480,7 @@ A: Dormouse’s Warm Wake feature starts heating up to 90 minutes
     content: {
       title: 'Why this breaks',
       icon: 'warning',
-      description: `**Every question pays for the rewrite.** Two model calls instead of one: 4.7 seconds instead of 2.1. Customers ask in the same words every week, and the model works out the manual's words again every time.
-
-        **Nothing checks what goes back.** The client writes the answer. And the server searches every document: across 24 customer questions it handed the model 3 internal sections, and one answer **cited an internal specification**.
-
-        Start with the first. What if the documentation came with **the questions customers ask**, written once, ahead of time?`,
+      description: `Questions do not always have the highest vector similarity to answers. The user may not know what to ask.`,
     },
   },
 
@@ -521,7 +488,7 @@ A: Dormouse’s Warm Wake feature starts heating up to 90 minutes
   {
     type: 'title',
     content: {
-      title: '5. FAQs',
+      title: '5. Text Augmentation via FAQ Generation',
       subtitle: 'The questions customers ask',
       icon: 'help-circle',
     },
@@ -606,40 +573,15 @@ A: This may be Warm Wake: it starts heating up to 90 minutes
       ],
     },
   },
-  {
-    type: 'three-way',
-    content: {
-      title: 'Answer in what was found',
-      columns: [
-        {
-          label: 'Demo 3: chunks',
-          items: ['**22 of 24**', 'Missed Q01 and Q11', '1 model call'],
-        },
-        {
-          label: 'Demo 4: the model searches',
-          items: ['**24 of 24**', 'Missed none', '2 or more model calls'],
-        },
-        {
-          label: 'Demo 5: chunks and questions',
-          items: [
-            '**23 of 24**',
-            'Missed Q06',
-            '1 model call, 6,358 questions written ahead',
-          ],
-        },
-      ],
-    },
-  },
+
   {
     type: 'description',
     content: {
       title: 'Why this breaks',
       icon: 'warning',
-      description: `**Questions that sound alike.** Q06, *"How many people in my family can control the heating?"*, matched *"How many thermostats and heating zones can I have in my home?"*. "How many" and "heating" were enough. Searching the chunks alone had found it.
-
-        **Finding the chunk isn't checking the answer.** Every count so far asks whether the right chunk was found, not whether the answer came from it. Demo 3's first sentence was in none of its chunks.
-
-        What if the model had to **show where each sentence came from**, and we checked?`,
+      description: `We have an answer, but can we prove it? What if the user wants to read more?
+      
+      Where are the Citations?`,
     },
   },
 
@@ -696,59 +638,6 @@ def check(citations, found):
       title: 'Demo — Citations',
       subtitle: 'Switch to terminal: python demo/06_citations.py',
       icon: 'rocket',
-    },
-  },
-  {
-    type: 'code',
-    content: {
-      title: 'Honest, and checked',
-      code: `Q: Why does my Dormouse turn the heating on before the time I set?
-A: The documentation doesn’t explain why Dormouse might turn
-   the heating on before a scheduled time.
-
-Q: How much does a Dormouse thermostat cost?
-A: The documentation does not provide the Dormouse Thermostat’s price.
-
-Of 24 questions the documentation answers: answered right 19,
-  answered wrong 4, said it didn't know 1
-Of 5 questions it doesn't: said it didn't know 5
-Quotes found in the chunk they cite: 57 of 57`,
-      highlights: [
-        "Demo 3 **guessed** our question. Now: *the documentation doesn't explain*",
-        "All **5** questions it can't answer: turned down",
-        'Every quote is really in its chunk. In an earlier run, one of 60 was **tidied**, and caught',
-      ],
-    },
-  },
-  {
-    type: 'code',
-    content: {
-      title: 'The quote has it, the answer doesn’t',
-      code: `Q: Can I have a separate thermostat for upstairs?
-A: Yes. You can use a separate thermostat to control upstairs
-   as its own zone and schedule. ...
-   [thermostat-valve-and-sensor-zone-planning.md#choose-the-zones]
-   "A home can have up to four thermostats, each controlling its
-    own zone with its own schedule." (quote checked)`,
-      highlights: [
-        'The quote says **up to four**. The answer leaves it out',
-        'Q22 the same: the quote says *AA batteries*, the answer *the batteries*',
-        "Q11 explains Away mode, when it's **geofencing** that turns it on",
-      ],
-    },
-  },
-  {
-    type: 'description',
-    content: {
-      title: 'Why this breaks',
-      icon: 'warning',
-      description: `**"I don't know" is only as good as the search.** Our question was turned down because the search missed Warm Wake. Sections 4 and 5 found it.
-
-        **A real quote can still give a poor answer.** All four wrong answers passed the check.
-
-        **We can only check the answers we write.** Behind the MCP server, the client writes them.
-
-        **No search here asks who is asking.** In demo 4, an answer to a customer cited an internal specification. Who may see what, enforced in code: **Module 8**.`,
     },
   },
 
