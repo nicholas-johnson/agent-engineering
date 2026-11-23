@@ -94,6 +94,7 @@ A **tool module** (Module 7) is a survey of real products, such as Lovable, Clau
 - The demo handoff slide says where to switch to, with the run sheet as its subtitle: `Switch to Cursor: demo/04_cursor.md`.
 - Don't quote a live run in the README: it is different every time. Say what to build, the kind of prompts to use, and what to look for.
 - A playground folder can be an exercise in a product: a README with the steps and the files to drop in, without a `play.py`. Give it a script only when there is something to run.
+- Add **projects to build** to the playground too: things to make of your own in each product, unrelated to the module's data. One folder each, with only a README: what to build, which product, the first prompts, what to watch for, **Try this** and **Questions**.
 - Products change faster than anything else in the course. Put the date the facts were checked in the README and on the slides that give prices.
 
 ## The module README

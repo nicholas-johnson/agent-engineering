@@ -410,7 +410,7 @@ This course is a real example. Its repository has a `CLAUDE.md`, 24 lines, which
 
 ## Playground
 
-The [playground](playground/) has exercises in the tools: write an agent file and a skill, add hooks that run the tests after every edit, give Cursor the company's rules, hunt a second bug with Debug mode, add a tool to the company-brain server, and give the same ticket to two tools. It also has [projects to build](playground/README.md#projects-to-build) of your own in each tool, from a pub quiz in Lovable to an MCP server for your team.
+The [playground](playground/) has exercises in the tools: write an agent file and a skill, add hooks that run the tests after every edit, give Cursor the company's rules, hunt a second bug with Debug mode, add a tool to the company-brain server, and give the same ticket to two tools. And it has [fourteen projects to build](playground/README.md#projects-to-build) of your own, one folder each with no code to run, from a pub quiz in Lovable to a browser extension in Claude Code, a first open-source contribution in Cursor, and an MCP server for your team.
 
 ## Further reading and extensions
 
