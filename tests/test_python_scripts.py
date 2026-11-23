@@ -622,15 +622,16 @@ def test_build_tokens_matches_committed_data(tmp_path: Path) -> None:
 
 @pytest.mark.offline
 def test_count_vectors_line_matches_the_slide() -> None:
-    """Demo 2 puts 16 words on a line, and the "word line" slide shows the same numbers."""
+    """Demo 2 puts 16 words on a line, and the "word line" slide shows the same numbers. It also writes every word's place."""
     demo = REPO_ROOT / EMBEDDINGS / "demo"
     execute_python_script(demo / "02_count_vectors.py", outputs=("02_count_vectors.json", "02_word_line.json"))
     line = json.loads((demo / "output" / "02_word_line.json").read_text(encoding="utf-8"))
     slides = (REPO_ROOT / EMBEDDINGS / "slides" / "src" / "slides.js").read_text(encoding="utf-8")
     block = re.search(r"type: 'word-line',.*?words: \{(.*?)\}", slides, re.DOTALL)[1]
     on_slide = {word: float(number) for word, number in re.findall(r"(\w+): (-?[\d.]+)", block)}
-    assert len(line) == 16
-    assert on_slide == line
+    assert len(line["picked"]) == 16
+    assert on_slide == line["picked"]
+    assert len(line["all"]) == 235
 
 
 @pytest.mark.offline

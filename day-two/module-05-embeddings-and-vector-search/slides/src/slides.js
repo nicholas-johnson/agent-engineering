@@ -197,7 +197,7 @@ for i, word in enumerate(tokens):
     type: 'word-line',
     content: {
       title: 'The counts on a line',
-      // From demo/output/02_word_line.json, written by demo/02_count_vectors.py.
+      // From "picked" in demo/output/02_word_line.json, written by demo/02_count_vectors.py.
       words: {
         sunrise: -0.43,
         wake: -0.39,

@@ -61,7 +61,7 @@ uv run python demo/01_keyword_search.py
 | Demo | What it is | Writes to `demo/output/` |
 |------|------------|--------------------------|
 | `01_keyword_search.py` | BM25 keyword search, in plain Python | `01_keyword_search.json`: every section and document, ranked; `01_index.json`: the index of all 275 documents |
-| `02_count_vectors.py` | Build word vectors by counting neighbours in the user guide, then put 16 words on a line | `02_count_vectors.json`: every word's neighbours and their counts; `02_word_line.json`: the 16 words' places on the line |
+| `02_count_vectors.py` | Build word vectors by counting neighbours in the user guide, then put 16 words on a line | `02_count_vectors.json`: every word's neighbours and their counts; `02_word_line.json`: the 16 words' places on their line, and every word's place on a line of all 235 |
 | `03_word_map.py` | Give words two numbers each, a map, and group them by direction | `03_word_map.json`: every word's two numbers, length and angle, and the 16 words' groups |
 | `04_sentence_vectors.py` | Add up the map's word vectors into one per sentence, and search with them (run demo 3 first) | `04_sentence_vectors.json`: three pairs of sentences, the question's two numbers and lost words, and every section and document, ranked |
 | `05_word_vectors.py` | Train word vectors on the user guide, in plain Python, and search with their sums | `05_word_vectors.txt`: one word per line, then its 20 numbers; `05_question.json`: every section and document, ranked |
@@ -242,6 +242,8 @@ positions = [(p + dot(s, positions) / total) / 2 for p, s, total in zip(position
 ```
 
 Warm Wake's words end up together at one end, with *frost* and *heat*, and the words for signing in at the other. One number loses a lot, though, and a different choice of words would give a different line. *boiler* lands nearer *password* than *heat*. That isn't the line's fault: in the full rows of 235 numbers, *boiler* is also closer to *password* (a cosine similarity of 0.45) than to *heat* (0.36).
+
+The demo also puts all 235 words on a line. That's too many to print, so open `demo/output/02_word_line.json` to see them, under `all`. With every word pulling, the 16 lose their order: *warm* (−0.003) and *wake* (0.03) end up in the middle with everything else, and *password* (−0.032) falls between *frost* and *heat*.
 
 The pull has to come from *similar company*, not from turning up together. Pull the words together by how often they're neighbours, and the line falls apart into three clumps: among these 16 words there are only 13 neighbouring pairs, and *radiator*, *router* and *account* are never near any of the others.
 
