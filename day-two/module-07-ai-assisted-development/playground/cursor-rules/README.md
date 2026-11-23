@@ -30,8 +30,6 @@ Before you add the rules, ask in Ask mode:
 
 Then add them, start a new conversation, and ask again. Then, in Agent mode, paste `data/tickets/DOR-233.md` and read the labels it writes.
 
-_Output to come: recorded answers from Cursor, with and without the rules._
-
 ## Things to notice
 
 - **Which rule was used?** Did it pick up `voice.mdc` for the labels without being told? Look for the voice's rules in what it wrote: sentence case, the 24-hour clock, none of the banned words.

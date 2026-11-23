@@ -1,6 +1,6 @@
 # Run sheet: cloud agents
 
-The live demo for section 5. A cloud agent takes a task, works on its own computer in the cloud, and hands back a branch or a pull request. Record the run beforehand: each task takes from a few minutes to half an hour, and you can't speed it up on stage.
+The live demo for section 5. A cloud agent takes a task, works on its own computer in the cloud, and hands back a branch or a pull request. Start the tasks before the session: each takes from a few minutes to half an hour, and you can't speed it up on stage.
 
 You need the project in a GitHub repository, and an account with each service you show. Checked against each service's documentation on 23 November 2026.
 

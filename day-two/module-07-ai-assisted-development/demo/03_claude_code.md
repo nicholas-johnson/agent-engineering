@@ -1,6 +1,6 @@
 # Run sheet: Claude Code
 
-The live demo for section 3. Claude Code is a coding agent that runs in your terminal, in the folder you start it in. Record the run beforehand: agents do something different every time.
+The live demo for section 3. Claude Code is a coding agent that runs in your terminal, in the folder you start it in. Try it once before the session: agents do something different every time.
 
 You need Claude Code and a Claude plan that includes it (Pro or above), or an API key. Checked against Claude Code's documentation on 23 November 2026.
 

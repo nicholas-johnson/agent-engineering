@@ -32,8 +32,6 @@ The **description** is what Claude reads when it decides which agent to use, so 
 
 `old-homes` is there because of a real kind of bug. Every home in `homes/` keeps the settings it saved. A change that adds `boost_minutes` and reads `settings["boost_minutes"]` works in every test, which use the new defaults, and crashes for every customer who saved before it.
 
-_Output to come: a recorded Claude Code run of the four agents on DOR-233._
-
 ## Things to notice
 
 - **Did they really run at once?** Claude Code starts subagents in the background. Watch the order their reports come back in.

@@ -23,8 +23,6 @@ diff -ru --exclude=.git ~/dormouse-first ~/dormouse-second
 
 DOR-233 is small, but it leaves real choices open: what the setting is called in the code, whether it's stored as minutes or as a name, how the three choices are drawn on the page, which tests change, and what an existing customer without the setting gets. Two tools, or one tool twice, rarely make all the same ones.
 
-_Output to come: a recorded comparison of two tools on DOR-233._
-
 ## Things to notice
 
 - **Same tests passing, different code.** Both will probably finish with every test passing. Passing tests say each one did what it meant to, not that they meant the same thing.

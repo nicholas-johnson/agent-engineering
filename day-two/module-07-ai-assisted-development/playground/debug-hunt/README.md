@@ -44,8 +44,6 @@ Reproducing it shows the page with nothing selected, which a browser draws as Mo
 
 Paste the bug report into Debug mode. It should list a few hypotheses, add logging, ask you to run the command and reload the page, then read what the logging caught.
 
-_Output to come: a recorded Debug mode session._
-
 ## Things to notice
 
 - **The code isn't wrong for any value it allows.** `settings.check` only accepts "Monday" or "Sunday". The bug is in what was saved before that check existed. Does Debug mode find the value, or the line?

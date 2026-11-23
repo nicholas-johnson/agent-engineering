@@ -50,7 +50,7 @@ code edit -> exit 0
 
 With a test broken on purpose, `run-tests.sh` printed the failure and exited 2; with the tests passing it printed nothing and exited 0.
 
-_Output to come: a recorded Claude Code run of DOR-232 with both hooks on._
+In Claude Code, paste DOR-232 and add: "Build this. If you need to change a test, tell me which one and why first." Watch for the moment the hook blocks its first edit to `tests/`, and what it says next.
 
 ## Things to notice
 

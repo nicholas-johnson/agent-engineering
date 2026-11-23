@@ -1,8 +1,8 @@
 # Run sheet: Cursor
 
-The live demo for section 4. Cursor is a code editor built around an agent, with a mode for each kind of job: Ask, Agent, Plan and Debug, plus `/multitask` to run several agents at once. Record the run beforehand: agents do something different every time.
+The live demo for section 4. Cursor is a code editor built around an agent, with a mode for each kind of job: Ask, Agent, Plan and Debug, plus `/multitask` to run several agents at once. Try it once before the session: agents do something different every time.
 
-You need Cursor and an account. The free plan is limited, so record on a paid one. Checked against Cursor's documentation on 23 November 2026.
+You need Cursor and an account. The free plan is limited, so use a paid one for the whole run. Checked against Cursor's documentation on 23 November 2026.
 
 ## Set up
 

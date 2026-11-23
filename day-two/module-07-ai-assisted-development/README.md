@@ -56,7 +56,7 @@ The other sections are live runs in the tools themselves. Each has a run sheet: 
 | 5. Cloud agents | [`demo/05_cloud_agents.md`](demo/05_cloud_agents.md) | The project on GitHub, and an account with each service |
 | 6. The company brain | [`demo/06_company_brain.md`](demo/06_company_brain.md) | Claude Code, Cursor or the Claude desktop app |
 
-Record each live run beforehand: an app takes minutes to build, and agents do something different every time. Where a recording isn't quoted in this README yet, it says _Output to come_.
+Agents do something different every time, so instead of quoting one run, each section says what to build, the kind of prompts to use, and what to look for. Try each one before the session: an app takes minutes to build, and a cloud agent longer.
 
 ## 1. Just build it
 
@@ -127,7 +127,14 @@ Around the chat:
 
 Prices on 23 November 2026: free with 5 credits a day (30 a month); Pro from $25 a month for 100 credits.
 
-_Output to come: a recorded run of `demo/02_lovable.md`, with screenshots of the board before and after the Instructions._
+**Try it.** Build the feedback board from the run sheet, or something small from your own work: a sign-up form, an internal tool, a dashboard over a spreadsheet. Describe who uses it and what they do, not the screens, and start in Plan mode:
+
+- Plan: "Build a feedback board for customers of Dormouse, a smart thermostat. Customers sign in, post a problem, and vote for other people's posts. Our support team can mark a post as answered, with a reply."
+- Build, one change at a time: "Only support staff can mark a post answered." "Sort posts by votes, and newest first when two are tied."
+- With the brain in Instructions: "Rewrite every piece of text on the board in our voice."
+- Chat: "Who can see a customer's email address?" "What happens if someone votes twice?"
+
+Look for what it decided that you didn't say: the pages, the colours, who can see what. Then run the deep security scan and read what it finds.
 
 **Known for / watch out for:** the fastest way from a paragraph to a hosted app with a database and sign-in, for people who don't write code, and a real React app you can take away. But it's Lovable's choice of stack, not your product's code; credits run out quickly on a big build; and publishing is one click whether or not the app is safe. In February 2026 an app showcased by Lovable [leaked 18,697 user records](https://www.theregister.com/2026/02/27/lovable_app_vulnerabilities), and Lovable says fixing what its scan finds is up to the app's owner. Module 8 picks this up.
 
@@ -193,7 +200,16 @@ A **connector** is an MCP server (Module 3) that gives Claude Code tools from an
 
 Prices on 23 November 2026: Claude Code comes with Claude Pro, $17 a month billed annually or $20 monthly, and above. The free plan doesn't include it.
 
-_Output to come: a recorded run of `demo/03_claude_code.md`: DOR-232 built, the three reviewers' reports, and the release notes from the skill._
+**Try it.** On a copy of the Dormouse project, as in the run sheet. Talk to it the way you'd brief a colleague: say what you want, how to check it, and what not to touch.
+
+- "What does this project do, and how do I run it?"
+- Paste DOR-232, then: "Build this. Run the tests before you finish, and tell me which files you changed."
+- Shift+Tab to plan mode, paste DOR-233: "Plan this. Ask me about anything the ticket doesn't say."
+- After a change: "Check the change against this ticket with the ticket-checker, test-reviewer and customer-text agents, all at the same time."
+- "Write the release notes for this change." Then `/test-plan`.
+- From a script: `claude -p "Run the tests and tell me how many pass."`
+
+Look for: it reads `AGENTS.md` before anything else; it asks before editing in manual mode; three subagents running at once, each coming back with a short report; the skill picked from its description.
 
 **Known for / watch out for:** a strong agent that works anywhere a terminal does, with the most ways to shape it: agent files, skills, hooks, connectors, plan mode, and `claude -p` for scripts and CI. But it acts on your real files and runs real commands, so the permission mode matters, and a long session can use a lot of your plan's allowance. It reads `AGENTS.md` only if there is no `CLAUDE.md`, unless `CLAUDE.md` imports it. And there's no editor: you read its changes with `git diff` or your own.
 
@@ -246,7 +262,15 @@ Cursor reads `AGENTS.md` in the project, its own **rules** in `.cursor/rules/` (
 
 Prices on 23 November 2026: free with limited use of Cursor's own and Grok models; Plus $8 a month; Premium $30, which adds cloud agents and other companies' models at their API prices. SpaceX bought Cursor in August, and OpenAI said it would stop supplying its models; on 16 November a Cursor forum post said access had been extended to 25 November.
 
-_Output to come: recorded runs of each mode in `demo/04_cursor.md`, including Debug mode's hypotheses and fix for DOR-234._
+**Try it.** One job per mode, on a copy of the Dormouse project:
+
+- Ask: "How does Warm Wake decide when to switch the heating on?" "Where would a setting for how long Boost lasts go?"
+- Agent: paste DOR-232 and let it build.
+- Plan: paste DOR-231, then: "Ask me anything the ticket doesn't say before you plan." Edit one step of the plan before you build it.
+- Debug: paste DOR-234. When it asks you to reproduce the bug, run `python -m dormouse homes/flat-3b.json`.
+- In the Agents Window: `/multitask`, then DOR-232 and DOR-233.
+
+Look for: Debug mode's hypotheses before any fix, and whether the logging finds `learned_rate`. After the fix, Flat 3B's heating should come on at 06:36 and 14 Mill Lane's still at 05:00. With `/multitask`, see how two agents changing `settings.py` at once were combined.
 
 **Known for / watch out for:** an agent next to the code you're reading, with a mode for each job: Ask to learn the code safely, Plan to agree before building, Debug to work from evidence, and `/multitask` for parallel work. But changes arrive fast and need reading in the editor before you keep them; parallel agents can change the same files; and its prices and model supply have changed more than any other tool's this year.
 
@@ -268,7 +292,13 @@ Google's **Jules** became read-only on 11 November 2026 and closes on 31 Decembe
 
 The run sheet puts the project on GitHub, with DOR-232 to DOR-234 as issues, and gives one to each agent. Then it closes the loop: `/install-github-app` adds Anthropic's GitHub Action to the repository, and a comment starting `@claude` on any pull request gets it reviewed.
 
-_Output to come: recorded runs of `demo/05_cloud_agents.md`, with links to the pull requests._
+**Try it.** Put the project on GitHub with the tickets as issues, and give each cloud agent one. Nobody will be there to answer its questions, so write the task as a complete ticket, and say how to check it:
+
+- "Fix DOR-234. Add a test that would have caught it. Run `python -m unittest` before you finish; every test must pass."
+- Assign DOR-233 to Copilot, then on its pull request: "@copilot Name the choices 30 minutes, 1 hour and 2 hours, as the ticket says."
+- On any pull request: "@claude Review this against the issue it fixes."
+
+Look for: how long each took; whether it ran the tests, and says so; what it wrote in the pull request description; and what you'd have to check before merging.
 
 **Known for / watch out for:** work that happens while you do something else, several tasks at once, and results that arrive where your team already reviews code. But nobody is watching it work, so the pull request is the only place to catch a mistake, and review becomes the bottleneck. It runs with whatever the cloud machine can reach, so check what secrets and internet access you give it (Module 8). And setup matters: an agent that can't install the project or run its tests will hand back code it never ran.
 
@@ -324,7 +354,13 @@ Modules 3 and 6 built servers like this and wrote their own client. Here the cli
 
 Then ask each one something only the brain knows: "What have we decided about where settings go, and why?", "Build DOR-233", or "Write a reply to a customer whose heating comes on at 5:40 for a 7:00 period." The [brain-tools](playground/brain-tools/) playground calls the same three tools without a model, so you can see exactly what comes back.
 
-_Output to come: recorded runs of `demo/06_company_brain.md` in Claude Code, Cursor and the Claude app._
+**Try it.** Attach the server, then ask things only the brain knows:
+
+- Claude Code: "What have we decided about where settings go, and why?" Then: "Build DOR-233. Read our decisions and voice first."
+- Cursor, in Ask mode: "What did customers say about the heating coming on early?"
+- The Claude app: "Write a two-line reply to a customer who asks why their heating comes on at 5:40 for a 7:00 period."
+
+Look for: which tool it calls, and whether it asks first; whether DOR-233's labels and placement change once it has read the decisions and the voice; and the same answers in three different tools.
 
 **Known for / watch out for:** one source of truth that every tool reads, kept up to date in one place, for developers and for the people in support, product and marketing who never open a code editor. But a local server only reaches tools on your own computer: Lovable and the cloud agents need it on the internet, at a URL, with sign-in in front of it, which is Module 8. A tool's description decides when a model uses it, so it needs writing as carefully as the brain itself. And anything the brain says is now said to every tool: a mistake in `decisions.md` spreads everywhere at once.
 

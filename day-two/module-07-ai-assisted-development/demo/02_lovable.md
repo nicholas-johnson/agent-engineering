@@ -1,6 +1,6 @@
 # Run sheet: Lovable
 
-The live demo for section 2. Lovable builds a whole web app from a description, with a database and sign-in, and hosts it. Record the run beforehand: a build takes a few minutes, and the app is different every time.
+The live demo for section 2. Lovable builds a whole web app from a description, with a database and sign-in, and hosts it. Try it once before the session: a build takes a few minutes, and the app is different every time.
 
 You need a Lovable account. The free plan gives 5 credits a day, which is enough for steps 1 to 3. Checked against Lovable's documentation on 23 November 2026.
 
