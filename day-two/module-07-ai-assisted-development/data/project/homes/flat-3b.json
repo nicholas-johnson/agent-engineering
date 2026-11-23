@@ -1,0 +1,13 @@
+{
+  "name": "Flat 3B",
+  "room": 18.0,
+  "next_period": {"start": "2026-11-24T07:00", "target": 20.0},
+  "heat_ups": [[2.5, 30], [3.0, 35], [2.0, 25]],
+  "settings": {
+    "boost_temperature": 21.0,
+    "warm_wake": true,
+    "week_starts_on": "Monday",
+    "away_temperature": 16.0,
+    "geofencing": false
+  }
+}

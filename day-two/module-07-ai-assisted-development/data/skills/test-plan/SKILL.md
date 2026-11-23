@@ -5,7 +5,7 @@ description: Write a manual test plan for a change, for QA to follow in the app 
 
 # Write a test plan
 
-You are given a ticket and the change that implements it. Write a test plan that a tester can follow in the app and the web dashboard, without reading code.
+Work from the ticket and the change that implements it. If you weren't given them, ask which ticket it is, and read the change with `git diff`. Write a test plan that a tester can follow in the app and the web dashboard, without reading code.
 
 - One numbered test per line of behaviour, each with **Steps** and **Expected result**.
 - Cover every acceptance criterion, and say which one each test covers.

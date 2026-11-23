@@ -47,24 +47,24 @@ Skill: support-reply
 
 Request: Reply to this customer: Is it normal for the heating to switch on at 5:30 for a 7:00 period? My neighbour has the same thermostat and hers doesn't.
 
-Hi, yes—if the heating comes on before your schedule, that’s Warm Wake, and it’s working as it should.
+Hi, yes—if the heating switches on before your schedule, that’s Warm Wake, and it’s working as it should.
 
-Warm Wake learns how long your home takes to heat up and starts early so it’s warm when the period begins. Yours is starting up to 90 minutes early.
+Warm Wake learns how long your home takes to heat up and starts heating early so it’s warm when the period begins. The start time can differ between homes.
 
-You can change this in Settings > Schedule > How early. Choose 30, 60 or 90 minutes; the default is 60 minutes. To stop it starting early, turn Warm Wake off in Settings > Schedule. The heating will then start at the scheduled time.
+Change it in Settings > Schedule > How early: choose 30, 60 or 90 minutes. The default is 60 minutes, so it won’t start more than 60 minutes early. To stop it starting early, turn Warm Wake off in Settings > Schedule; the heating will then start when each period begins.
 
 Dormouse support
 
-(93 words, written to playground/write-a-skill/output/support-reply.md)
+(100 words, written to playground/write-a-skill/output/support-reply.md)
 ```
 
-Set `SKILL = DATA / "skills" / "social-post"` and `REQUEST = "Write the social posts."`, and the same script runs a module skill instead. The replies change from run to run.
+Set `SKILL = DATA / "skills" / "release-notes"` and `REQUEST = "Write the release notes."`, and the same script runs a module skill instead. The replies change from run to run.
 
 ## Things to notice
 
-- **It followed the order.** Answer, what it does, how to change it, how to turn it off, then the sign-off, in 93 words. The skill's numbered steps are the reply's paragraphs.
-- **It ignored the neighbour.** The customer's real puzzle is why her neighbour's thermostat doesn't do it. The answer is in the brain (Warm Wake learns each home's heat-up rate) but the skill never says to answer every question the customer asks, so it didn't.
-- **"Up to 90 minutes" isn't quite right.** 05:30 for a 07:00 period is exactly 90 minutes, so the reply is right for this customer. But it says "Yours is starting up to 90 minutes early" as a fact about their home, and after the update their default will be 60. The skill didn't say what to assume about a customer's settings.
+- **It followed the order.** Answer, what it does, how to change it, how to turn it off, then the sign-off, in 100 words. The skill's numbered steps are the reply's paragraphs.
+- **It half-answered the neighbour.** The customer's real puzzle is why her neighbour's thermostat doesn't do it. "The start time can differ between homes" is true, but it doesn't say why: Warm Wake learns each home's heat-up rate, which is in the brain. The skill never says to answer every question the customer asks.
+- **"It won't start more than 60 minutes early" contradicts the customer.** Their heating comes on at 05:30 for 07:00, which is 90 minutes. The reply describes the default after the update as if it were their setting now. The skill didn't say what to assume about a customer's own settings.
 - **The times disappeared.** The skill says to use the 24-hour clock "even when the customer used something else". The reply avoided the problem by not mentioning a time at all. A rule that's never triggered is never tested.
 - **The menu path is the model's own.** "Settings > Schedule > How early" is a fair guess from the ticket, which only says How early is in Settings > Schedule. A support reply sends a customer to a real screen, so it's worth checking.
 
@@ -72,7 +72,7 @@ Set `SKILL = DATA / "skills" / "social-post"` and `REQUEST = "Write the social p
 
 1. **Answer the neighbour.** Add a step to `SKILL.md` that makes sure every question in the message gets an answer. Run it again. Does the reply explain why homes differ, and does it stay under 120 words?
 2. **A real fault.** Change `REQUEST` to F07 from `data/feedback.json`: "Display says E-305, boiler pressure looks fine at 1.2 bar. What next?". Does step 5 stop it explaining Warm Wake?
-3. **Check the voice.** Copy the reply into [voice-check](../voice-check/). Does it pass both ways?
+3. **Check the voice.** Compare the reply with the "Words we don't use" list in `data/brain/voice.md`. Then add a step to the skill that checks its own reply against that list before it finishes. Does it catch anything?
 4. **Write your own.** Copy `support-reply/` to a new folder, say `landlord-faq/`, and write a skill that answers F19 (the landlord whose tenant thinks the heating is faulty). Write the description first: when should a tool pick this skill and not `support-reply`?
 5. **Description only.** Give the model just the `name` and `description` of every skill in `data/skills/` and this folder, and a request like "Can you tell customers about this?". Ask it which skill to use. That's what Claude Code does before it reads a skill's instructions. Is your description good enough to be picked?
 6. **A skill with a script.** Real skills can carry files next to `SKILL.md`, such as a checklist or a script. Add a `banned.txt` of words to your skill's folder, and change `load_skill` to append any `.txt` files in the folder to the instructions.
@@ -93,5 +93,5 @@ For discussion. There are no right answers.
 
 ## Rabbit holes
 
-- **Use it in Claude Code.** Copy `support-reply/` into a project's `.claude/skills/` folder, as `demo/LIVE.md` does with the review skill. Paste in a customer message and ask Claude Code to answer it, without naming the skill. Does it pick yours?
+- **Use it in Claude Code or Cursor.** Copy `support-reply/` into a project's `.claude/skills/` folder, as `demo/03_claude_code.md` does with the module's skills (Cursor reads that folder too). Paste in a customer message and ask Claude Code to answer it, without naming the skill. Does it pick yours?
 - **A skill library.** Write three more skills a Dormouse support team would use (refund questions, installer questions, landlord questions), with descriptions that don't overlap. Then write ten customer messages and check whether a model, given only the descriptions, picks the right skill for each.

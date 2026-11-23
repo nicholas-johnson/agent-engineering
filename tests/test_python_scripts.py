@@ -393,74 +393,19 @@ SCRIPTS: tuple[ScriptCase, ...] = (
         keys=("OPENAI_API_KEY",),
     ),
     ScriptCase(
-        f"{AI_DEV}/demo/02_company_brain.py",
-        outputs=("02_spec.md", "02_prototype.html"),
-        keys=("OPENAI_API_KEY",),
-    ),
-    ScriptCase(
-        f"{AI_DEV}/demo/03_coding_agent.py",
-        outputs=("03_changes.diff", "03_transcript.json"),
-        keys=("OPENAI_API_KEY",),
-        timeout=600,
-    ),
-    ScriptCase(
-        f"{AI_DEV}/demo/04_plan_first.py",
-        stdin="y\n",
-        outputs=("04_plan.md", "04_changes.diff", "04_transcript.json"),
-        keys=("OPENAI_API_KEY",),
-        timeout=600,
-    ),
-    ScriptCase(
-        f"{AI_DEV}/demo/05_skills.py",
-        outputs=("05_review.md", "05_test-plan.md", "05_change-summary.md"),
-        keys=("OPENAI_API_KEY",),
-    ),
-    ScriptCase(
-        f"{AI_DEV}/demo/06_out_the_door.py",
-        outputs=("06_launch/release-notes.md", "06_launch/social-post.md", "06_launch/sales-sheet.md"),
-        keys=("OPENAI_API_KEY",),
-    ),
-    ScriptCase(
-        f"{AI_DEV}/playground/brain-pieces/play.py",
-        outputs=("nothing.txt", "product-decisions-design-voice.txt"),
-        keys=("OPENAI_API_KEY",),
-    ),
-    # Says yes to every change the agent asks to make.
-    ScriptCase(
-        f"{AI_DEV}/playground/permissions/play.py",
-        stdin="y\n" * 60,
-        outputs=("changes.diff", "transcript.json"),
-        keys=("OPENAI_API_KEY",),
-        timeout=600,
-    ),
-    ScriptCase(
-        f"{AI_DEV}/playground/test-first/play.py",
-        outputs=("tests.diff", "changes.diff", "transcript.json"),
-        keys=("OPENAI_API_KEY",),
-        timeout=600,
-    ),
-    # The Claude review needs ANTHROPIC_API_KEY too, and is skipped without it.
-    ScriptCase(
-        f"{AI_DEV}/playground/second-opinion/play.py",
-        outputs=("gpt-6-luna-none.md", "gpt-6-luna-high.md"),
-        keys=("OPENAI_API_KEY",),
-        timeout=600,
-    ),
-    ScriptCase(
         f"{AI_DEV}/playground/write-a-skill/play.py",
         outputs=("support-reply.md",),
         keys=("OPENAI_API_KEY",),
     ),
+    # Copies the project into output/ and adds a saved home that shows a bug.
     ScriptCase(
-        f"{AI_DEV}/playground/feedback-themes/play.py",
-        outputs=("themes.json",),
-        keys=("OPENAI_API_KEY",),
+        f"{AI_DEV}/playground/debug-hunt/play.py",
+        outputs=("project/homes/house-7.json",),
     ),
+    # Starts server.py and calls each tool, with no API key.
     ScriptCase(
-        f"{AI_DEV}/playground/voice-check/play.py",
-        stdin="\n",
-        outputs=("check.json",),
-        keys=("OPENAI_API_KEY",),
+        f"{AI_DEV}/playground/brain-tools/play.py",
+        outputs=("calls.json",),
     ),
     # --- Security and Commercial Deployment ---
     ScriptCase(
@@ -805,7 +750,7 @@ def test_knowledge_base_is_consistent() -> None:
 
 @pytest.mark.offline
 def test_dormouse_project_tests_pass() -> None:
-    """The codebase the coding agents start from must pass its own tests, or the demos mean nothing."""
+    """The codebase the tools work on must pass its own tests, or the demos mean nothing."""
     project = REPO_ROOT / AI_DEV / "data" / "project"
     result = subprocess.run(
         [sys.executable, "-m", "unittest"], cwd=project, capture_output=True, text=True, timeout=60
@@ -815,15 +760,30 @@ def test_dormouse_project_tests_pass() -> None:
 
 
 @pytest.mark.offline
+def test_dormouse_project_still_has_the_debug_mode_bug(tmp_path: Path) -> None:
+    """Cursor's Debug mode demo (DOR-234) needs the heat-up rate bug, which the tests don't catch."""
+    project = tmp_path / "project"
+    shutil.copytree(REPO_ROOT / AI_DEV / "data" / "project", project, ignore=shutil.ignore_patterns("__pycache__"))
+    for home, expected in [("flat-3b", "on at 05:30, 90 minutes early"), ("house-14", "on at 05:00, 90 minutes early")]:
+        result = subprocess.run(
+            [sys.executable, "-m", "dormouse", f"homes/{home}.json"],
+            cwd=project, capture_output=True, text=True, timeout=60,
+        )
+        assert result.returncode == 0, result.stderr
+        assert expected in result.stdout
+        assert (project / "homes" / f"{home}.html").is_file()
+
+
+@pytest.mark.offline
 def test_ai_dev_data_is_consistent() -> None:
-    """The skills load, the saved change applies to the project, and the ticket matches the feedback."""
+    """The skills and agent files load, the saved change fits the project, and the tickets fit the feedback."""
     module = REPO_ROOT / AI_DEV / "data"
-    for skill in sorted((module / "skills").glob("*/SKILL.md")):
-        _, front, body = skill.read_text().split("---", 2)
+    for path in [*module.glob("skills/*/SKILL.md"), *module.glob("agents/*.md")]:
+        _, front, body = path.read_text().split("---", 2)
         fields = dict(line.split(": ", 1) for line in front.strip().splitlines())
-        assert fields["name"] == skill.parent.name
+        assert fields["name"] == (path.parent.name if path.name == "SKILL.md" else path.stem)
         assert fields["description"] and body.strip()
-    for path in [*module.glob("brain/*.md"), *module.glob("skills/*/SKILL.md"), module / "tickets" / "DOR-231.md"]:
+    for path in [*module.glob("brain/*.md"), *module.glob("skills/*/SKILL.md"), *module.glob("agents/*.md"), *module.glob("tickets/*.md")]:
         assert path.read_text().isascii(), f"{path} is not plain ASCII"
     # The saved change must start from the committed project.
     diff = (module / "changes" / "DOR-231.diff").read_text()

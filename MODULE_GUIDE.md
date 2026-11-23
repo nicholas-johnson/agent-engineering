@@ -86,6 +86,16 @@ Most modules tell a story where each step breaks and leads to the next. A **surv
 - Facts that go stale (models, prices) live in a data file with a "checked on" date and a script to refresh it (`data/build_prices.py`), and the README says when they were checked.
 - If some output couldn't be produced (a missing key, say), write _Output to come_ in its place and say why. Never fill the gap with invented output.
 
+### Tool modules
+
+A **tool module** (Module 7) is a survey of real products, such as Lovable, Claude Code and Cursor, where the demo is the product itself. The differences from other surveys:
+
+- A section whose demo happens in a product has a **run sheet** instead of a script: `demo/NN_tool.md`, numbered like a demo, with the setup, what to type, and what to point out. Keep Python demos for what Python does best, such as a baseline or a server the products connect to.
+- The demo handoff slide says where to switch to, with the run sheet as its subtitle: `Switch to Cursor: demo/04_cursor.md`.
+- Record each live run beforehand, and quote it in the README. Until it is recorded, write _Output to come_.
+- A playground folder can be an exercise in a product: a README with the steps and the files to drop in, without a `play.py`. Give it a script only when there is something to run.
+- Products change faster than anything else in the course. Put the date the facts were checked in the README and on the slides that give prices.
+
 ## The module README
 
 Written for someone reading on their own after the session. In order:

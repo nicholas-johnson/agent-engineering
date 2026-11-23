@@ -4,6 +4,16 @@ import math
 from datetime import timedelta
 
 MAX_MINUTES_EARLY = 90
+DEFAULT_DEGREES_PER_HOUR = 3  # for a new home, until it has heated up a few times
+
+
+def learned_rate(heat_ups):
+    """How fast the home warms, in degrees an hour, from its recent heat-ups: (degrees gained, minutes taken) pairs."""
+    if not heat_ups:
+        return DEFAULT_DEGREES_PER_HOUR
+    degrees = sum(gained for gained, _ in heat_ups)
+    minutes = sum(taken for _, taken in heat_ups)
+    return degrees / minutes
 
 
 def minutes_to_heat(room, target, degrees_per_hour):

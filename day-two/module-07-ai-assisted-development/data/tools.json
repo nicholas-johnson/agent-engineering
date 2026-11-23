@@ -1,6 +1,6 @@
 {
   "checked_on": "2026-11-20",
-  "note": "Plans, prices and even ownership of these tools change monthly; recheck every row before teaching.",
+  "note": "Plans, prices and even ownership of these tools change monthly; recheck every row before teaching. Lovable, Cursor, Claude Code, OpenAI Codex, Copilot in the cloud, Devin and Jules were rechecked on 2026-11-23.",
   "kinds": [
     {
       "kind": "Build an app from a prompt",
@@ -12,7 +12,7 @@
           "url": "https://lovable.dev",
           "what": "A chat-based app builder that generates a full-stack web app (usually React with a Supabase backend) from a description and hosts it for you.",
           "known_for": [
-            "fast path from idea to hosted prototype",
+            "fast path from idea to hosted app, with Plan, Build and Chat modes and a built-in backend",
             "built-in Quick and Deep security scans",
             "persistent Instructions (previously called Knowledge) at workspace, project and personal level"
           ],
@@ -28,7 +28,9 @@
             "https://docs.lovable.dev/features/security",
             "https://docs.lovable.dev/features/knowledge",
             "https://www.theregister.com/2026/02/27/lovable_app_vulnerabilities",
-            "https://thenextweb.com/news/lovable-vibe-coding-security-crisis-exposed"
+            "https://thenextweb.com/news/lovable-vibe-coding-security-crisis-exposed",
+            "https://docs.lovable.dev/features/plan-mode",
+            "https://docs.lovable.dev/introduction/subscription-plans"
           ]
         },
         {
@@ -146,21 +148,24 @@
           "what": "A VS Code-style editor built around an AI agent that edits files across your project, with a Plan Mode and support for AGENTS.md and Agent Skills.",
           "known_for": [
             "widely used agent-first editor",
-            "Plan Mode (Shift+Tab) to review a plan before code is written",
-            "reads AGENTS.md and SKILL.md skills"
+            "Ask, Agent, Plan and Debug modes (Shift+Tab), and /multitask for parallel agents",
+            "reads AGENTS.md, .cursor/rules and SKILL.md skills"
           ],
           "watch_out_for": [
             "SpaceX closed its $60bn purchase on 14 August 2026, so ownership and model supply have changed",
-            "OpenAI announced it would stop supplying its models to Cursor from 12 November 2026",
+            "OpenAI said it would stop supplying its models to Cursor, proposing 12 November 2026; a Cursor forum post on 16 November said access was extended to 25 November",
             "usage pools reset weekly, and third-party models are billed separately at API rates"
           ],
-          "price": "from $8 a month (Plus; the pricing page says Plus includes only Grok models), Premium $30",
+          "price": "free with limited use of Cursor and Grok models; Plus $8 a month; Premium $30, which adds cloud agents",
           "sources": [
             "https://cursor.com/pricing",
             "https://cursor.com/docs/agent/modes",
             "https://cursor.com/docs/context/rules",
             "https://thenextweb.com/news/spacex-cursor-acquisition-completed-gpu-fleet",
-            "https://openai.com/index/our-decision-on-cursor-following-its-acquisition-by-spacex/"
+            "https://openai.com/index/our-decision-on-cursor-following-its-acquisition-by-spacex/",
+            "https://cursor.com/docs/agent/debug-mode",
+            "https://cursor.com/help/account-and-billing/pricing",
+            "https://help.openai.com/en/articles/20001506-using-openai-models-in-cursor"
           ]
         },
         {
@@ -369,12 +374,12 @@
           ]
         },
         {
-          "name": "GitHub Copilot cloud agent",
+          "name": "Copilot in the cloud (formerly Copilot cloud agent)",
           "maker": "GitHub (Microsoft)",
           "url": "https://github.com/features/copilot",
-          "what": "A background agent that researches a repository, plans changes, implements them in a cloud environment and opens a pull request.",
+          "what": "GitHub's cloud agent: it researches a repository, plans changes, implements them in a cloud environment and opens a pull request. Renamed, with a new experience, on 28 October 2026.",
           "known_for": [
-            "starts from issues, the Agents tab, Slack or Teams",
+            "starts from github.com/copilot, the Agents tab, an issue assigned to Copilot, or @copilot in a pull request",
             "runs inside GitHub with your branch protections",
             "can fix failed Actions runs"
           ],
@@ -386,7 +391,8 @@
           "price": "paid Copilot plans, from $10 a month (Pro)",
           "sources": [
             "https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-cloud-agent",
-            "https://github.com/features/copilot/plans"
+            "https://github.com/features/copilot/plans",
+            "https://docs.github.com/en/copilot/how-tos/use-copilot-agents/cloud-agent/use-cloud-agent-on-github"
           ]
         },
         {
@@ -421,13 +427,14 @@
             "daily task limits by plan"
           ],
           "watch_out_for": [
+            "read-only after 11 November 2026, and closing on 31 December 2026; Google points users to Antigravity",
             "limited to 15 tasks a day on the base tier",
-            "the page gives no prices and no status, and Google has been moving its coding tools to Antigravity",
             "GitHub only"
           ],
           "price": "free base tier (15 tasks a day); higher limits with Google AI Pro and Ultra",
           "sources": [
-            "https://jules.google"
+            "https://jules.google",
+            "https://jules.google/docs/changelog/2026-10-29/"
           ]
         },
         {

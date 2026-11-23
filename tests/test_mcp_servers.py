@@ -15,6 +15,7 @@ from tests.conftest import REPO_ROOT, check_requirements, find_module
 
 TOOLS = find_module("tools")
 RAG = find_module("rag-and-proprietary-knowledge")
+AI_DEV = find_module("ai-assisted-development")
 SECURITY = find_module("security-and-deployment")
 DORMOUSE_SERVER = f"{SECURITY}/demo/06_dormouse_server.py"
 
@@ -31,6 +32,8 @@ SERVER_TOOLS: dict[str, set[str]] = {
     },
     f"{TOOLS}/playground/weather-server/server.py": {"find_place", "get_weather"},
     f"{RAG}/demo/04_docs_server.py": {"search_docs"},
+    f"{AI_DEV}/demo/06_brain_server.py": {"read_brain", "get_ticket", "search_feedback"},
+    f"{AI_DEV}/playground/brain-tools/server.py": {"read_brain", "get_ticket", "search_feedback"},
 }
 
 # Module 8's server needs the signed-in person's token, so it has its own test below.
@@ -139,5 +142,25 @@ def test_dormouse_server_gives_each_role_its_own_tools() -> None:
             assert names == {"search_docs", "get_customer", "offer_replacement"}
             customer = json.loads((await priya.call_tool("get_customer", {"customer_id": "C-1001"})).content[0].text)
             assert customer["home"]["id"] == "H-1042"
+
+    asyncio.run(check())
+
+
+@pytest.mark.offline
+def test_brain_server_answers() -> None:
+    """Module 7's company brain: each tool answers from data/, and says what exists when asked for nothing."""
+
+    async def check() -> None:
+        async with Client(_server_params(f"{AI_DEV}/demo/06_brain_server.py")) as client:
+            decisions = (await client.call_tool("read_brain", {"topic": "decisions"})).content[0].text
+            assert "live under Schedule" in decisions
+            missing = (await client.call_tool("read_brain", {"topic": "pricing"})).content[0].text
+            assert "decisions" in missing
+            ticket = (await client.call_tool("get_ticket", {"ticket_id": "dor-231"})).content[0].text
+            assert "How early" in ticket
+            unknown = (await client.call_tool("get_ticket", {"ticket_id": "DOR-1"})).content[0].text
+            assert "DOR-234" in unknown
+            found = json.loads((await client.call_tool("search_feedback", {"words": "early"})).content[0].text)
+            assert found and all("early" in item["text"].lower() for item in found)
 
     asyncio.run(check())

@@ -11,7 +11,7 @@ export const slides = [
     type: 'title',
     content: {
       title: 'Module 7 — AI-Assisted Development',
-      subtitle: 'One feature, from customer feedback to launch',
+      subtitle: 'The tools teams build software with, one at a time',
       icon: 'bot',
     },
   },
@@ -21,26 +21,29 @@ export const slides = [
       title: 'The question',
       icon: 'question',
       description:
-        'Dormouse customers keep asking why their heating comes on early. Product wants to let them choose how early Warm Wake starts. Every step of shipping that now has an AI tool: working out what to build, prototyping, coding, reviewing, testing, telling customers. **Which tools help, and how do you use them so the result is something you would ship?**',
+        'There is a new AI tool for building software every week, and the ones you know change every month. **What is each of the main ones good at, how do you use it, and what should you watch out for?**',
     },
   },
   {
     type: 'code',
     content: {
       title: 'The data',
-      code: `F01  app review    Heating comes on at 5:40 when my schedule says 7.
-                   Have checked the schedule three times.
-F02  support chat  My boiler fires up over an hour before the time
-                   I set. Is the clock on the thermostat wrong?
-F16  support chat  Where is the setting that stops the heating coming
-                   on before my schedule? I looked under Schedule ...
-F22  email         Can I choose how early it warms the house? 90 minutes
-                   is far too long for a small flat like mine ...`,
+      code: `project/                   the Dormouse web dashboard
+  dormouse/settings.py     every setting, and what it allows
+  dormouse/warm_wake.py    when Warm Wake switches the heating on
+  dormouse/pages.py        the settings page
+  homes/flat-3b.json       a saved home: python -m dormouse
+  tests/                   16 tests
+  AGENTS.md  CLAUDE.md     how agents should work here
+
+tickets/  DOR-231  choose how early Warm Wake starts
+          DOR-232  let the week start on Saturday
+          DOR-233  choose how long Boost lasts
+          DOR-234  bug: 90 minutes early in small homes`,
       highlights: [
-        '**30 pieces of feedback** from September and October: **14** about the heating coming on early',
-        "Most customers don't know it's a feature: **Warm Wake**",
-        "A small stand-in for the dashboard's code, with **16 tests**",
-        'One feature, **DOR-231**, followed all the way to launch',
+        'A small stand-in for real code, with **real tests**',
+        'Four tickets, a stand-in for **Jira**',
+        'One **real bug** the tests miss',
       ],
     },
   },
@@ -50,21 +53,8 @@ F22  email         Can I choose how early it warms the house? 90 minutes
     type: 'title',
     content: {
       title: '1. Just build it',
-      subtitle: 'From a sentence to something you can click',
+      subtitle: 'A prompt, a few lines of Python, a page',
       icon: 'zap',
-    },
-  },
-  {
-    type: 'standard',
-    content: {
-      title: 'App builders',
-      icon: 'sparkles',
-      points: [
-        'Describe an app in a sentence; get a working one in minutes',
-        '**Lovable**, v0, Bolt, Replit, Figma Make, Google AI Studio',
-        'Good for: testing an idea with customers before anyone builds it properly',
-        'Underneath: a request to a model, asking for a whole app',
-      ],
     },
   },
   {
@@ -83,7 +73,7 @@ with client.responses.stream(model=MODEL, instructions=INSTRUCTIONS,
             written += len(event.delta)
             print(f"Building... {written:,} characters", end="\\r")`,
       highlights: [
-        "The same request in every section's demo",
+        'Underneath every app builder: **a request** for a whole app',
         'Streamed, so a long file shows progress as it arrives',
       ],
     },
@@ -106,21 +96,461 @@ with client.responses.stream(model=MODEL, instructions=INSTRUCTIONS,
     },
   },
   {
-    type: 'description',
+    type: 'comparison',
     content: {
-      title: 'Why this breaks',
-      icon: 'warning',
-      description:
-        "Nothing on it is ours. A slider to **2 hours early**, where Warm Wake has never gone past 90 minutes. A screen of its own, *A softer start*. A **Save changes** button, where our app saves as you go. **6:30 AM**, where we use the 24-hour clock. Copy like an advert: *Wake up to a home that's already just right.* We told it none of that. And a prototype this polished gets treated as if its details were decisions.",
+      title: 'A prompt in Python',
+      left: {
+        label: 'Known for',
+        items: [
+          'A clickable page in **30 seconds**',
+          'Cheap, and entirely yours: any model, a few lines',
+        ],
+      },
+      right: {
+        label: 'Watch out for',
+        items: [
+          'One page: no database, no sign-in, no hosting',
+          'Everything on it **invented**: a slider to 2 hours, *6:30 AM*',
+          'Polished guesses get treated as decisions',
+        ],
+      },
     },
   },
 
-  // ---- Section 2: The company brain ----
+  // ---- Section 2: Lovable ----
   {
     type: 'title',
     content: {
-      title: '2. The company brain',
-      subtitle: 'Write down what the company knows, once',
+      title: '2. Lovable',
+      subtitle: 'From a paragraph to a hosted app',
+      icon: 'sparkles',
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'App builders',
+      icon: 'blocks',
+      points: [
+        'Describe an app in a chat; it **writes, runs and hosts** it',
+        'A live preview next to the chat',
+        '**Lovable**, v0, Bolt.new, Replit Agent, Figma Make, Google AI Studio',
+        'For people who want something clickable, not code',
+      ],
+    },
+  },
+  {
+    type: 'rules',
+    content: {
+      title: 'Three modes',
+      rules: [
+        {
+          rule: 'Plan',
+          example: 'Asks questions, writes a plan you edit and approve',
+          icon: 'map',
+        },
+        {
+          rule: 'Build',
+          example: 'The default: builds, fixes, reads the logs',
+          icon: 'wrench',
+        },
+        {
+          rule: 'Chat',
+          example: 'Answers questions; never changes the code',
+          icon: 'message-square',
+        },
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Around the chat',
+      icon: 'layers',
+      points: [
+        '**Built-in backend**: database, sign-in, storage, on by default',
+        '**Instructions**: what it reads before every message',
+        '**Preview toolbar**: point at an element, edit text in place',
+        '**Security scan**: quick on every publish, deep when asked',
+        '**Publish** to a URL; **GitHub sync** both ways',
+      ],
+      credit: 'Free: 5 credits a day. Pro: from $25 a month. Checked 23 November 2026',
+    },
+  },
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Lovable',
+      subtitle: 'Switch to Lovable: demo/02_lovable.md',
+      icon: 'rocket',
+    },
+  },
+  {
+    type: 'comparison',
+    content: {
+      title: 'Lovable',
+      left: {
+        label: 'Known for',
+        items: [
+          'A hosted app with a **database and sign-in**, from a paragraph',
+          'Plan first, then build, without writing code',
+          'A real React app you can take to GitHub',
+        ],
+      },
+      right: {
+        label: 'Watch out for',
+        items: [
+          "Lovable's stack, not your product's code",
+          'Credits run out on a big build',
+          'Publishing is one click, **safe or not**: Module 8',
+        ],
+      },
+    },
+  },
+
+  // ---- Section 3: Claude Code ----
+  {
+    type: 'title',
+    content: {
+      title: '3. Claude Code',
+      subtitle: 'A coding agent in your terminal',
+      icon: 'terminal',
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'The tool loop, again',
+      code: `TOOLS = [read_file, edit_file, search, run_command]
+
+while True:
+    response = model(instructions, conversation, tools=TOOLS)
+    calls = [item for item in response.output
+             if item.type == "function_call"]
+    if not calls:
+        break                            # the job is done
+    for call in calls:
+        conversation.append(run(call))   # read, edit, test...`,
+      highlights: [
+        "Module 3's loop, with tools for **code**",
+        'Reads `CLAUDE.md` first. Ours imports `AGENTS.md`',
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Using it',
+      icon: 'terminal',
+      points: [
+        '`claude` in a project folder, then say what you want',
+        '**Shift+Tab**: manual, accept edits, **plan**, auto',
+        '`/` for commands: `/clear`, `/mcp`, `/permissions`, skills',
+        '`claude -p "..."`: the same agent with **no person**',
+        'Also in VS Code, JetBrains, the Claude app, and the cloud',
+      ],
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'An agent file',
+      code: `---
+name: ticket-checker
+description: Checks a change against its ticket's acceptance
+  criteria, one by one. Use after a change is made, before
+  it is committed.
+tools: Read, Grep, Glob, Bash
+model: sonnet
+---
+
+You check a change against the ticket it is for.
+1. Read the change: run git diff and git status...
+2. Go through the acceptance criteria one at a time...`,
+      highlights: [
+        'In `.claude/agents/`: the team shares it',
+        'A **subagent** gets its own context, and reports back a summary',
+        'Several run **at once**, in the background',
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Skills and connectors',
+      icon: 'puzzle',
+      points: [
+        '**Skill**: a folder with a `SKILL.md`, in `.claude/skills/`',
+        'Used when the description matches the job, or as `/release-notes`',
+        'An open format: Cursor, Codex and Copilot read it too',
+        '**Connector**: an MCP server (Module 3) for another service',
+        'GitHub, Linear, Google Drive... listed in `/mcp`',
+      ],
+      credit:
+        'Claude Pro and above: from $17 a month, billed annually. Checked 23 November 2026',
+    },
+  },
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Claude Code',
+      subtitle: 'Switch to terminal: demo/03_claude_code.md',
+      icon: 'rocket',
+    },
+  },
+  {
+    type: 'comparison',
+    content: {
+      title: 'Claude Code',
+      left: {
+        label: 'Known for',
+        items: [
+          'A strong agent anywhere a terminal runs',
+          'The most ways to shape it: **agent files**, skills, hooks, connectors',
+          '`claude -p` for scripts and CI',
+        ],
+      },
+      right: {
+        label: 'Watch out for',
+        items: [
+          'It acts on **real files** and runs real commands',
+          'No editor: read its changes with `git diff`',
+          'Long sessions use a lot of your allowance',
+        ],
+      },
+    },
+  },
+
+  // ---- Section 4: Cursor ----
+  {
+    type: 'title',
+    content: {
+      title: '4. Cursor',
+      subtitle: 'An editor with a mode for each job',
+      icon: 'code',
+    },
+  },
+  {
+    type: 'rules',
+    content: {
+      title: 'Four modes',
+      rules: [
+        {
+          rule: 'Ask',
+          example: 'How does this work? Reads, never edits',
+          icon: 'question',
+        },
+        {
+          rule: 'Agent',
+          example: 'The default: build, fix, refactor',
+          icon: 'robot',
+        },
+        {
+          rule: 'Plan',
+          example: 'Questions, an editable plan, then build',
+          icon: 'map',
+        },
+        {
+          rule: 'Debug',
+          example: 'Hypotheses and logs, then a small fix',
+          icon: 'search',
+        },
+      ],
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'A real bug: DOR-234',
+      code: `$ python -m dormouse homes/flat-3b.json
+Flat 3B: the room is at 18 degrees. The next period starts
+at 07:00, at 20 degrees.
+Warm Wake switches the heating on at 05:30, 90 minutes early.
+
+def learned_rate(heat_ups):
+    """How fast the home warms, in degrees an hour..."""
+    ...
+    return degrees / minutes`,
+      highlights: [
+        'Flat 3B needs **24 minutes**: it should be 06:36',
+        'Degrees a **minute**, 60 times too small',
+        'All **16 tests pass**: none check it',
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Debug mode',
+      icon: 'search',
+      points: [
+        'Lists a few **hypotheses** for the cause',
+        'Adds **logging** to the code',
+        'Asks you to **reproduce** the bug',
+        'Reads what the logs caught, then makes a **small fix**',
+        'You check it; it takes the logging out again',
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'Several at once',
+      icon: 'layers',
+      points: [
+        '`/multitask`: two tickets, **two agents**, in parallel',
+        '**Build in Parallel**: a plan’s independent steps at once',
+        'Reads `AGENTS.md`, its own **rules** in `.cursor/rules/`, and skills',
+        'MCP servers in `.cursor/mcp.json`',
+      ],
+      credit: 'Free: limited. Plus $8, Premium $30 a month. Checked 23 November 2026',
+    },
+  },
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Cursor',
+      subtitle: 'Switch to Cursor: demo/04_cursor.md',
+      icon: 'rocket',
+    },
+  },
+  {
+    type: 'comparison',
+    content: {
+      title: 'Cursor',
+      left: {
+        label: 'Known for',
+        items: [
+          'An agent **next to the code** you are reading',
+          'A mode for each job: Ask, Agent, Plan, **Debug**',
+          '`/multitask` for parallel work',
+        ],
+      },
+      right: {
+        label: 'Watch out for',
+        items: [
+          'Changes arrive fast: **read them** before you keep them',
+          'Parallel agents can change the same files',
+          'Owner, prices and model supply all changed this year',
+        ],
+      },
+    },
+  },
+
+  // ---- Section 5: Cloud agents ----
+  {
+    type: 'title',
+    content: {
+      title: '5. Cloud agents',
+      subtitle: 'Hand over a ticket, get back a pull request',
+      icon: 'globe',
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'A cloud agent',
+      icon: 'server',
+      points: [
+        'The same loop, on **someone else’s computer**',
+        'A fresh copy of your repository: it needs **GitHub** (or similar)',
+        'Close the tab; come back to a **pull request**',
+        'Reads the same files: `AGENTS.md`, `CLAUDE.md`',
+      ],
+    },
+  },
+  {
+    type: 'cards',
+    content: {
+      title: 'Four of them',
+      cards: [
+        {
+          heading: 'Claude Code on the web',
+          points: [
+            'claude.ai/code, `claude --cloud`',
+            'A branch, then a pull request',
+            'Claude Pro and above',
+          ],
+        },
+        {
+          heading: 'Copilot in the cloud',
+          points: [
+            'Assign an issue to Copilot',
+            'One pull request per task',
+            'Paid Copilot plans, from $10',
+          ],
+        },
+        {
+          heading: 'Codex cloud',
+          points: [
+            'The Codex app: Work in → Cloud',
+            'A diff, to open as a pull request',
+            'ChatGPT Plus and above',
+          ],
+        },
+        {
+          heading: 'Cursor Cloud Agents',
+          points: [
+            'cursor.com/agents, `@cursor`',
+            'A pull request, with screenshots',
+            'Cursor Premium and above',
+          ],
+        },
+      ],
+    },
+  },
+  {
+    type: 'standard',
+    content: {
+      title: 'A review nobody has to start',
+      icon: 'git-branch',
+      points: [
+        '`/install-github-app` in Claude Code adds a **GitHub Action**',
+        'Comment `@claude` on any pull request',
+        'One agent wrote it, another reviews it',
+        'A person still decides whether to **merge**',
+      ],
+      credit:
+        'Also Devin. Google is closing Jules on 31 December 2026. Checked 23 November 2026',
+    },
+  },
+  {
+    type: 'title',
+    content: {
+      title: 'Demo — Cloud agents',
+      subtitle: 'Switch to GitHub: demo/05_cloud_agents.md',
+      icon: 'rocket',
+    },
+  },
+  {
+    type: 'comparison',
+    content: {
+      title: 'Cloud agents',
+      left: {
+        label: 'Known for',
+        items: [
+          'Work that happens **while you do something else**',
+          'Several tasks at once',
+          'Results arrive where you **already review** code',
+        ],
+      },
+      right: {
+        label: 'Watch out for',
+        items: [
+          'Nobody is watching: the pull request is the only check',
+          '**Review** becomes the bottleneck',
+          'What the cloud machine can reach: secrets, internet (Module 8)',
+        ],
+      },
+    },
+  },
+
+  // ---- Section 6: The company brain ----
+  {
+    type: 'title',
+    content: {
+      title: '6. The company brain',
+      subtitle: 'One MCP server, every tool',
       icon: 'brain',
     },
   },
@@ -138,42 +568,68 @@ with client.responses.stream(model=MODEL, instructions=INSTRUCTIONS,
 
 # decisions.md
 ## 2026-05: Settings about when the heating runs live under Schedule
-## 2026-02: Give customers a choice of three, not a number
-## 2025-11: Defaults should use less gas, not more`,
+## 2026-02: Give customers a choice of three, not a number`,
       highlights: [
-        '**1,287 words**: short enough to read, and to keep up to date',
-        'Decisions with their **reasons**, so a model can apply them to new cases',
+        'What the company knows, **written down once**',
+        'Asked cold, every tool writes the most likely answer for **a company like yours**',
       ],
     },
   },
   {
     type: 'standard',
     content: {
-      title: 'Where each tool reads it',
-      icon: 'layers',
+      title: 'Five tools, five copies',
+      icon: 'refresh-cw',
       points: [
-        '**AGENTS.md** in the code: Codex, Cursor, Copilot, Devin, Jules and more',
-        '**CLAUDE.md** for Claude Code. Ours is one line: `@AGENTS.md`',
-        'Lovable **Instructions**, Cursor **rules**, Claude and ChatGPT **Projects**',
-        'Things that change every day, like tickets: connect them with **MCP** (Module 3)',
-        'At scale, this is **RAG** (Module 6)',
+        'Lovable **Instructions**',
+        '`CLAUDE.md`, `AGENTS.md`, Cursor **rules**',
+        'Claude and ChatGPT **Projects**',
+        'Each pasted in by someone, once: they **drift apart**',
+        "Tickets and feedback change daily: they don't belong in a file",
       ],
     },
   },
   {
     type: 'code',
     content: {
-      title: 'The same request, with the brain',
-      code: `brain = "\\n\\n".join(path.read_text()
-                     for path in sorted((DATA / "brain").glob("*.md")))
+      title: 'The brain as an MCP server',
+      code: `server = MCPServer("dormouse-brain")
 
-spec = ask(f"{SPEC_INSTRUCTIONS}\\n\\n{brain}\\n\\n{feedback}",
-           f"The request: {REQUEST}")
-html = ask(f"{PROTOTYPE_INSTRUCTIONS}\\n\\n{brain}\\n\\n{spec}",
-           REQUEST)`,
+@server.tool()
+def read_brain(topic: str) -> str:
+    """Read one part of Dormouse's company brain. ...
+    Read decisions before making any product decision,
+    and voice before writing anything a customer will read."""
+
+@server.tool()
+def get_ticket(ticket_id: str) -> str: ...
+
+@server.tool()
+def search_feedback(words: str) -> str: ...`,
       highlights: [
-        "First a product manager's **spec**, from the brain and the feedback",
-        'Then the **prototype**, from the brain and the spec',
+        'Three tools, under **50 lines**',
+        'The docstring says **when** to use it',
+      ],
+    },
+  },
+  {
+    type: 'code',
+    content: {
+      title: 'Attach it',
+      code: `# Claude Code
+claude mcp add --transport stdio dormouse-brain -- \\
+  uv run --directory <module> python demo/06_brain_server.py
+
+# Cursor: .cursor/mcp.json
+{ "mcpServers": { "dormouse-brain": {
+    "type": "stdio", "command": "uv",
+    "args": ["run", "--directory", "<module>",
+             "python", "demo/06_brain_server.py"] } } }
+
+# The Claude app: the same entry in claude_desktop_config.json`,
+      highlights: [
+        'Each tool **starts** the server itself',
+        'The same brain for developers, support and marketing',
       ],
     },
   },
@@ -181,526 +637,30 @@ html = ask(f"{PROTOTYPE_INSTRUCTIONS}\\n\\n{brain}\\n\\n{spec}",
     type: 'title',
     content: {
       title: 'Demo — The company brain',
-      subtitle: 'Switch to terminal: python demo/02_company_brain.py',
-      icon: 'rocket',
-    },
-  },
-  {
-    type: 'image',
-    content: {
-      title: 'With the brain',
-      src: '/prototype-02.png',
-      alt: 'A Dormouse settings screen under Schedule with Up to 30, 60 or 90 minutes',
-      credit: 'demo/output/02_prototype.html, one run: spec and prototype in 23 seconds',
-    },
-  },
-  {
-    type: 'comparison',
-    content: {
-      title: 'Results',
-      left: {
-        label: 'The request alone',
-        items: [
-          'A screen of its own, *A softer start*',
-          'A slider, *At wake-up* to *2 hours early*',
-          'A Save button, and *6:30 AM*',
-          'Dark green',
-        ],
-      },
-      right: {
-        label: 'With the brain',
-        items: [
-          'Settings > Schedule',
-          'Up to **30, 60 or 90** minutes, 60 chosen',
-          'Saved automatically',
-          'Dormouse cream, night blue and ember orange',
-        ],
-      },
-    },
-  },
-  {
-    type: 'description',
-    content: {
-      title: 'Why this breaks',
-      icon: 'warning',
-      description:
-        "The spec quotes the feedback by id and picks three choices with 60 as the default: the answer product agreed, from the decisions alone. But the prototype is still a guess: it dropped the switch that turns Warm Wake off, which its own spec says must stay. And it isn't the product. The real settings live in **code**, with its own structure and tests. Changing that means read, decide, edit, test and fix: **many steps**.",
-    },
-  },
-
-  // ---- Section 3: The coding agent ----
-  {
-    type: 'title',
-    content: {
-      title: '3. The coding agent',
-      subtitle: "Day One's tool loop, pointed at code",
-      icon: 'robot',
-    },
-  },
-  {
-    type: 'code',
-    content: {
-      title: 'Four tools and a loop',
-      code: `TOOLS = [
-    tool("list_files", "List every file in the project."),
-    tool("read_file", "Read a file.", path=...),
-    tool("write_file", "Replace a file with new content.", path=..., content=...),
-    tool("run_tests", "Run the project's tests."),
-]
-
-for step in range(MAX_STEPS):
-    response = client.responses.create(model=MODEL, instructions=instructions,
-                                       input=conversation, tools=TOOLS)
-    conversation += response.output
-    calls = [item for item in response.output if item.type == "function_call"]
-    if not calls:
-        return response.output_text
-    ...`,
-      highlights: [
-        '**Read**, **write**, **run the tests**: that is a coding agent',
-        "Reads the project's `AGENTS.md` first, like the real tools",
-        'Works on a copy of the project, so every run starts clean',
-      ],
-    },
-  },
-  {
-    type: 'tool-loop',
-    content: {
-      title: 'The coding agent, a step at a time',
-      steps: [
-        {
-          caption: 'One line, as a developer would type it',
-          at: 'ask',
-          message: {
-            kind: 'you',
-            text: 'Let customers choose how early Warm Wake starts the heating.',
-          },
-        },
-        {
-          caption: 'First it **reads** the code: `read_file("dormouse/settings.py")`',
-          at: 'call',
-        },
-        {
-          caption: 'Our code reads the file, and it goes back to the model',
-          at: 'back',
-        },
-        {
-          caption: 'Eight files read, six written, then it **runs the tests**',
-          at: 'call',
-          message: { kind: 'call', label: 'The model: please run', text: 'run_tests()' },
-        },
-        {
-          caption: 'One of its new tests fails',
-          at: 'run',
-          message: {
-            kind: 'result',
-            label: 'Our code runs it',
-            text: '→ FAILED (failures=1)',
-          },
-        },
-        {
-          caption: 'It rewrites **the test**, and runs them again',
-          at: 'back',
-        },
-        {
-          caption: '18 tool calls, 56 seconds: **done**',
-          at: 'answer',
-          message: {
-            kind: 'answer',
-            text: 'Added a Warm Wake lead-time setting ... All 19 tests pass.',
-          },
-        },
-      ],
-    },
-  },
-  {
-    type: 'code',
-    content: {
-      title: 'All 18 tool calls',
-      code: `list_files
-read_file   dormouse/settings.py      write_file  dormouse/settings.py
-read_file   dormouse/warm_wake.py     write_file  dormouse/warm_wake.py
-read_file   dormouse/pages.py         write_file  dormouse/pages.py
-read_file   tests/test_settings.py    write_file  tests/test_settings.py
-read_file   tests/test_warm_wake.py   write_file  tests/test_warm_wake.py
-read_file   tests/test_pages.py       write_file  tests/test_pages.py
-read_file   README.md                 run_tests   → FAILED (failures=1)
-read_file   AGENTS.md                 write_file  tests/test_pages.py
-                                      run_tests   → OK`,
-      highlights: [
-        'Reads everything first, including `AGENTS.md`',
-        'When a test fails, it changes **the test**',
-      ],
-    },
-  },
-  {
-    type: 'standard',
-    content: {
-      title: 'Where the loop runs',
-      icon: 'terminal',
-      points: [
-        '**AI editors**, next to your code: Cursor, Copilot in VS Code, Devin Desktop, Kiro, Antigravity',
-        '**Terminal agents**, in your project: Claude Code, Codex, Antigravity CLI',
-        '**Cloud agents**: give it a ticket, get a pull request. Copilot cloud agent, Codex, Devin, Jules',
-        '**Open source**, with any model: Aider, Cline, OpenCode',
-      ],
-    },
-  },
-  {
-    type: 'title',
-    content: {
-      title: 'Demo — The coding agent',
-      subtitle: 'Switch to terminal: python demo/03_coding_agent.py',
+      subtitle: 'Switch to terminal: demo/06_company_brain.md',
       icon: 'rocket',
     },
   },
   {
     type: 'comparison',
     content: {
-      title: 'Why this breaks',
+      title: 'The company brain',
       left: {
-        label: 'What the agent decided',
+        label: 'Known for',
         items: [
-          'Six choices, **15 to 90** minutes',
-          'Default: **90** minutes',
-          'Under **Heating**',
-          'Called *Warm Wake lead time*',
-          'Shown when Warm Wake is off',
+          '**One source of truth** that every tool reads',
+          'Kept up to date in one place',
+          'For people who never open a code editor, too',
         ],
       },
       right: {
-        label: "What we'd already decided",
+        label: 'Watch out for',
         items: [
-          'Three choices (decisions.md)',
-          'Default: 60 minutes (DOR-231)',
-          'Under Schedule (decisions.md)',
-          'Plain words (voice.md)',
-          'Hidden when Warm Wake is off (design.md)',
+          'Local only: Lovable and cloud agents need it **deployed** (Module 8)',
+          'Tool descriptions need writing as carefully as the brain',
+          'A mistake in it spreads to **every tool** at once',
         ],
       },
-    },
-  },
-  {
-    type: 'description',
-    content: {
-      title: 'All 19 tests pass',
-      icon: 'warning',
-      description:
-        'The agent wrote the tests to match its own decisions, so passing tests say the code does what **the agent** meant, not what **we** meant. The detail was in the ticket and the brain. It got one line, and a person who knew that little would have asked. Nothing asked it to.',
-    },
-  },
-
-  // ---- Section 4: Plan, review, then implement ----
-  {
-    type: 'title',
-    content: {
-      title: '4. Plan, review, then implement',
-      subtitle: 'Agree the plan before the code',
-      icon: 'clipboard-list',
-    },
-  },
-  {
-    type: 'standard',
-    content: {
-      title: 'Plan mode',
-      icon: 'map',
-      points: [
-        'Give it the **agreed ticket**, with acceptance criteria, not one line',
-        'First a **plan**, with tools that can only look',
-        'A person reads it, and pushes back: the **cheapest** moment to fix anything',
-        'Then it builds exactly that',
-        'Claude Code, Cursor, Codex, Copilot: **plan mode**, usually Shift+Tab',
-        'Kiro, GitHub Spec Kit: **spec-driven**, requirements, then design, then tasks',
-      ],
-    },
-  },
-  {
-    type: 'code',
-    content: {
-      title: 'Plan first, in code',
-      code: `plan, _ = run_agent(f"{ticket}\\n\\n{PLAN}", instructions,
-                    TOOLS[:2])   # list_files and read_file only
-print(plan)
-
-if input("Go ahead with this plan? (y/n) ").strip().lower() != "y":
-    sys.exit()
-
-summary, conversation = run_agent(
-    f"{ticket}\\n\\n# Your plan\\n\\n{plan}\\n\\n{BUILD}", instructions, TOOLS)`,
-      highlights: [
-        "Planning **can't change anything**: it has no write tool",
-        'Nothing is written until a person types **y**',
-      ],
-    },
-  },
-  {
-    type: 'title',
-    content: {
-      title: 'Demo — Plan first',
-      subtitle: 'Switch to terminal: python demo/04_plan_first.py',
-      icon: 'rocket',
-    },
-  },
-  {
-    type: 'code',
-    content: {
-      title: 'The plan',
-      code: `1. dormouse/settings.py — Add a how_early setting with a default of 60
-   and allow only 30, 60 or 90.
-   Tests: ... the default and allowed values, and rejection of others.
-
-2. dormouse/warm_wake.py — Use how_early as the maximum number of minutes
-   Warm Wake can start before a schedule period ...
-   Tests: Update the existing 90-minute cap test ... to reflect the new
-   default of 60, and add coverage for all three choices.
-
-3. dormouse/pages.py — Move the Warm Wake row from Heating to Schedule,
-   add How early there, and show How early only when Warm Wake is on.
-
-Uncertainties: The ticket doesn't specify the exact customer-facing label ...`,
-      highlights: [
-        'Every file, every test it will change, and **why**',
-        "And what it isn't sure about",
-      ],
-    },
-  },
-  {
-    type: 'comparison',
-    content: {
-      title: 'Results',
-      left: {
-        label: 'One line',
-        items: [
-          '15 to 90 minutes, default 90',
-          'Under Heating',
-          'Shown when Warm Wake is off',
-          '31 lines added, 3 removed',
-          '19 tests pass, 56 seconds',
-        ],
-      },
-      right: {
-        label: 'The ticket, and a plan',
-        items: [
-          '**30, 60 or 90** minutes, default **60**',
-          'Under **Schedule**',
-          '**Hidden** when Warm Wake is off',
-          '51 lines added, 10 removed',
-          '21 tests pass, 53 seconds',
-        ],
-      },
-    },
-  },
-  {
-    type: 'code',
-    content: {
-      title: 'Why this breaks',
-      code: `# A home's settings, saved before firmware 4.2
-saved_before_4_2 = {"boost_temperature": 21.0, "warm_wake": True,
-                    "week_starts_on": "Monday", "away_temperature": 16.0,
-                    "geofencing": False}
-
-heating_start(datetime(2026, 11, 20, 7, 0), 10, 21, 2, saved_before_4_2)
-# KeyError: 'how_early'`,
-      highlights: [
-        'You approved a plan. Have you read the **61 changed lines**?',
-        "Every existing customer's saved settings have no `how_early`",
-        "The agent's tests only use the new defaults, so they all pass",
-        "Merging code you haven't read because it passes: **vibe coding**",
-      ],
-    },
-  },
-
-  // ---- Section 5: Review and automate ----
-  {
-    type: 'title',
-    content: {
-      title: '5. Review and automate',
-      subtitle: 'A second opinion, and the jobs you repeat',
-      icon: 'check-square',
-    },
-  },
-  {
-    type: 'standard',
-    content: {
-      title: 'Reviewing AI-written code',
-      icon: 'eye',
-      points: [
-        "The same job as reviewing anyone's, done more often",
-        'Check it against the **ticket**, not against itself',
-        'Look hard at any **test that changed**',
-        "Ask what the tests **don't** cover",
-        'Some of this can be automated, and the steps you repeat are worth writing down',
-      ],
-    },
-  },
-  {
-    type: 'code',
-    content: {
-      title: 'A skill',
-      code: `---
-name: review
-description: Review a code change against its ticket and the
-  project's rules. Use when asked to review a diff or a pull request.
----
-
-# Review a change
-
-Check, in this order:
-
-1. Does the change do everything the ticket's acceptance criteria ask?
-2. Does it do anything the ticket didn't ask for?
-3. Were any existing tests changed or deleted? ...`,
-      highlights: [
-        'A folder with a **SKILL.md**: a name, a description, instructions',
-        'The agent loads it when the **description** matches the job',
-        'Claude Code, Codex, Copilot, Cursor and others read the same format',
-        'Ours: review, test plan, change summary',
-      ],
-    },
-  },
-  {
-    type: 'title',
-    content: {
-      title: 'Demo — Skills',
-      subtitle: 'Switch to terminal: python demo/05_skills.py',
-      icon: 'rocket',
-    },
-  },
-  {
-    type: 'code',
-    content: {
-      title: 'The review',
-      code: `Verdict: Request changes.
-
-Must fix:
-- dormouse/settings.py: check accepts values such as 60.0 for how_early.
-- dormouse/pages.py: The new "How early" setting has no row in the page
-  when Warm Wake is off. This conflicts with AGENTS.md ...
-
-Acceptance criteria:
-- Any other value for How early is rejected. — Not met (60.0 is accepted).
-- A new customer, and an existing customer who has never changed it,
-  gets 60 minutes. — Met (default is 60).`,
-      highlights: [
-        '**Caught**: `60.0` gets through',
-        '**False alarm**: hiding How early is what the ticket asked for',
-        '**Missed**: existing customers marked *Met*. They crash',
-        "The test plan's test 3 would catch it: *an existing customer who has never changed it*",
-      ],
-    },
-  },
-  {
-    type: 'description',
-    content: {
-      title: 'A second opinion, not a sign-off',
-      icon: 'eye',
-      description:
-        "Three skills, 7 seconds. An AI review is quick, tireless and good at anything you can list. It shares the author's blind spots, especially when the same model wrote the code: both reasoned from the new defaults. A different model, or a reviewer told to look for one kind of problem, helps. The person who knows that saved settings exist still catches this one.",
-    },
-  },
-  {
-    type: 'code',
-    content: {
-      title: 'Without a person',
-      code: `# From a script, or a step in the build pipeline
-claude -p "Review the change in git diff against DOR-231"
-codex exec "Write a test plan for DOR-231"
-
-# On every pull request, in GitHub Actions
-- uses: anthropics/claude-code-action@v1
-- uses: openai/codex-action@v1`,
-      highlights: [
-        'Review every pull request',
-        'Explain why a build failed',
-        'Write test plans and plain-English change summaries',
-        'Update the ticket',
-      ],
-    },
-  },
-  {
-    type: 'description',
-    content: {
-      title: 'Why this breaks',
-      icon: 'warning',
-      description:
-        "This is where the code is done. But a feature isn't shipped when it's merged. Customers need telling, the help centre is now wrong, support need to know what changed, and sales will be asked about it. That is a lot of writing, by people who weren't in the room.",
-    },
-  },
-
-  // ---- Section 6: Out the door ----
-  {
-    type: 'title',
-    content: {
-      title: '6. Out the door',
-      subtitle: 'The same brain, for marketing and sales',
-      icon: 'mail',
-    },
-  },
-  {
-    type: 'standard',
-    content: {
-      title: 'The launch kit',
-      icon: 'package',
-      points: [
-        'Five more skills: **release notes**, **help article**, **launch email**, **social posts**, **sales sheet**',
-        'The same ticket, the same change, the same brain',
-        'Then a **check** on everything that goes out, from rules in the brain',
-      ],
-    },
-  },
-  {
-    type: 'code',
-    content: {
-      title: 'The check',
-      code: `def check(text):
-    """Problems a person would otherwise have to spot."""
-    problems = [f'"{word}"' for word in banned_words()
-                if re.search(rf"\\b{re.escape(word)}\\b", text, re.IGNORECASE)]
-    problems += [f'a savings figure, "{m}"'
-                 for m in re.findall(r"\\d+ ?%|\\d+ per ?cent", text)]
-    return problems`,
-      highlights: [
-        "`banned_words()` reads the list under *Words we don't use* in voice.md",
-        'Savings figures, because of the decision *No savings figures in marketing*',
-      ],
-    },
-  },
-  {
-    type: 'title',
-    content: {
-      title: 'Demo — Out the door',
-      subtitle: 'Switch to terminal: python demo/06_out_the_door.py',
-      icon: 'rocket',
-    },
-  },
-  {
-    type: 'code',
-    content: {
-      title: 'Results',
-      code: `  release-notes.md     voice check passed
-  help-article.md      voice check passed
-  launch-email.md      voice check passed
-  social-post.md       voice check passed
-  sales-sheet.md       voice check passed
-
-Short
-Warm Wake now starts the heating no more than 30, 60 or 90 minutes
-before a schedule period. The default is 60 minutes. Choose how early
-it starts in Settings > Schedule.`,
-      highlights: [
-        'All five in about **10 seconds**',
-        'Email subject: *Choose how early Warm Wake starts*',
-        "The sales sheet's *What not to say* comes straight from decisions.md",
-      ],
-    },
-  },
-  {
-    type: 'description',
-    content: {
-      title: 'Where this stops',
-      icon: 'warning',
-      description:
-        "The check only catches what somebody wrote down as a rule. The sales sheet said *shorter lead time*, the agent's jargon, and passed. On one run the social post came back twice, run together, and passed too. And it all describes the change as written, crash included. A person still reads it before it goes out, but they are **editing**, not starting from a blank page.",
     },
   },
 
@@ -709,7 +669,7 @@ it starts in Settings > Schedule.`,
     type: 'title',
     content: {
       title: 'Wrap-up',
-      subtitle: 'Choosing tools, and what lasts',
+      subtitle: 'Choosing tools',
       icon: 'star',
     },
   },
@@ -738,7 +698,7 @@ it starts in Settings > Schedule.`,
           heading: 'Coding agents',
           points: [
             'Claude Code, Codex, Antigravity CLI',
-            'Copilot cloud agent, Devin, Jules',
+            'Copilot in the cloud, Devin',
             'Aider, Cline, OpenCode',
           ],
         },
@@ -759,23 +719,23 @@ it starts in Settings > Schedule.`,
       title: 'What they share',
       rules: [
         {
-          rule: 'A brain file',
-          example: '`AGENTS.md`, `CLAUDE.md`, rules, Projects',
-          icon: 'brain',
+          rule: 'Instruction files',
+          example: '`AGENTS.md`, `CLAUDE.md`, rules',
+          icon: 'file-text',
         },
         {
           rule: 'Plan first',
-          example: 'Plan mode in Claude Code, Cursor, Codex and Copilot',
+          example: 'Plan mode in Claude Code, Cursor, Codex, Copilot and Lovable',
           icon: 'map',
         },
         {
-          rule: 'Skills',
-          example: '`SKILL.md`, read by Claude Code, Codex, Copilot and Cursor',
+          rule: 'Skills and MCP',
+          example: 'The same `SKILL.md` and the same server, in every tool',
           icon: 'puzzle',
         },
         {
           rule: 'No person needed',
-          example: '`claude -p`, `codex exec`, GitHub Actions, cloud agents',
+          example: '`claude -p`, `codex exec`, cloud agents, GitHub Actions',
           icon: 'robot',
         },
       ],
@@ -788,12 +748,12 @@ it starts in Settings > Schedule.`,
       icon: 'calendar',
       points: [
         'SpaceX bought **Cursor** (August). OpenAI said it would stop supplying it models',
-        'Google replaced Gemini CLI with **Antigravity CLI** (June)',
+        'Google replaced Gemini CLI with **Antigravity CLI**, and is closing **Jules**',
         'Windsurf became **Devin Desktop** (June)',
-        'GitHub Copilot moved to **usage-based** billing (June)',
+        'Copilot moved to **usage-based** billing; its cloud agent became **Copilot in the cloud**',
         'Security incidents in apps built with Lovable: more in **Module 8**',
       ],
-      credit: 'Checked on 20 November 2026. Sources in data/tools.json and the README',
+      credit: 'Checked on 23 November 2026. Sources in data/tools.json and the README',
     },
   },
   {
@@ -802,10 +762,11 @@ it starts in Settings > Schedule.`,
       title: 'How this course was built',
       icon: 'book',
       points: [
-        "`CLAUDE.md`, 24 lines, imports `MODULE_GUIDE.md`, 185 lines: the course's **brain**",
+        "`CLAUDE.md` imports `MODULE_GUIDE.md`: the course's **brain**",
         "Every module's outline agreed **before** anything was built: plan first",
         'A **skill** makes the promotional clips',
         'A **test** checks every module against the guide',
+        'Agents working in their own **git worktrees**, side by side',
       ],
     },
   },
@@ -815,34 +776,34 @@ it starts in Settings > Schedule.`,
       title: 'Summary',
       rules: [
         {
-          rule: '1. Just build it',
-          example: 'Polished in 30 seconds, and all invented',
+          rule: '1. A prompt in Python',
+          example: 'A page in 30 seconds; everything on it invented',
           icon: 'zap',
         },
         {
-          rule: '2. The company brain',
-          example: 'Ours, but still a guess at a screen',
+          rule: '2. Lovable',
+          example: 'A hosted app from a paragraph; its stack, not your code',
+          icon: 'sparkles',
+        },
+        {
+          rule: '3. Claude Code',
+          example: 'A terminal agent you can shape; it acts on real files',
+          icon: 'terminal',
+        },
+        {
+          rule: '4. Cursor',
+          example: 'A mode for each job; changes need reading',
+          icon: 'code',
+        },
+        {
+          rule: '5. Cloud agents',
+          example: 'Done while you are away; review is the bottleneck',
+          icon: 'globe',
+        },
+        {
+          rule: '6. The company brain',
+          example: 'One source of truth; local until deployed',
           icon: 'brain',
-        },
-        {
-          rule: '3. The coding agent',
-          example: 'Tests pass; it made the decisions itself',
-          icon: 'robot',
-        },
-        {
-          rule: '4. Plan first',
-          example: 'The right feature; 61 unread lines, with a bug',
-          icon: 'clipboard-list',
-        },
-        {
-          rule: '5. Review and automate',
-          example: 'Quick second opinion; it missed the bug',
-          icon: 'check-square',
-        },
-        {
-          rule: '6. Out the door',
-          example: "Five pieces in 10 seconds; checks catch only what's written down",
-          icon: 'mail',
         },
       ],
     },
@@ -853,13 +814,12 @@ it starts in Settings > Schedule.`,
       title: 'What we learned',
       icon: 'lightbulb',
       points: [
-        'Asked cold, every tool writes the **most likely** answer for a company like yours',
-        "A **company brain**, written once, makes every tool's output yours",
-        'A coding agent is a **tool loop**: read, write, run the tests',
-        'Agree a **plan** against the ticket before any code',
-        "**Read** what it wrote. Passing tests aren't a review, and nor is an AI reviewer alone",
-        'Turn repeated work into **skills**, and run them without a person',
-        'The tools change monthly. The **context** and the **checks** are yours to keep',
+        'Every coding tool here is the **tool loop**, run in a different place',
+        'App builders get you a **hosted app**; coding agents work in **your code**',
+        'Agent files, skills and hooks **shape** an agent; plan mode checks it first',
+        'Cloud agents hand back **pull requests**: reviewing them is the job',
+        'A **company brain** behind MCP gives every tool the same context',
+        'The tools change monthly. **Recheck** before you rely on any of it',
       ],
     },
   },

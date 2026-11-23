@@ -5,12 +5,15 @@ The settings logic and the settings page of the Dormouse web dashboard.
 ## Commands
 
 - Run the tests from this folder: `python -m unittest`. They must all pass before you finish.
+- See when Warm Wake switches the heating on for a saved home, and write its settings page next to it: `python -m dormouse homes/flat-3b.json`.
 
 ## Code
 
 - `dormouse/settings.py`: every setting, its default, and the values it allows.
 - `dormouse/warm_wake.py`: when Warm Wake switches the heating on.
 - `dormouse/pages.py`: the settings page, as HTML.
+- `dormouse/__main__.py`: runs one saved home from `homes/`.
+- `homes/`: saved homes, as JSON: their settings, room temperature, next schedule period and recent heat-ups.
 - `tests/`: one test file per module, using `unittest`.
 
 ## Rules

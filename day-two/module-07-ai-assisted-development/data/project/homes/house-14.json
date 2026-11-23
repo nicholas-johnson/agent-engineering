@@ -1,0 +1,13 @@
+{
+  "name": "14 Mill Lane",
+  "room": 15.0,
+  "next_period": {"start": "2026-11-24T06:30", "target": 20.0},
+  "heat_ups": [[3.0, 95], [2.5, 80], [4.0, 120]],
+  "settings": {
+    "boost_temperature": 22.0,
+    "warm_wake": true,
+    "week_starts_on": "Sunday",
+    "away_temperature": 15.0,
+    "geofencing": true
+  }
+}

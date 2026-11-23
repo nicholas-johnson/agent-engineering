@@ -5,7 +5,7 @@ description: Summarise a code change in plain English for people who don't read 
 
 # Summarise a change
 
-You are given a ticket and the change that implements it. Write for support, product and marketing, who don't read code.
+Work from the ticket and the change that implements it. If you weren't given them, ask which ticket it is, and read the change with `git diff`. Write for support, product and marketing, who don't read code.
 
 Reply in Markdown with two parts:
 
