@@ -218,6 +218,20 @@ heat up, and starts the heating early by up to 90 minutes. ...`,
     },
   },
   {
+    type: 'standard',
+    content: {
+      title: 'What is ChromaDB',
+      icon: 'database',
+      points: [
+        'A **vector database**: stores vectors, finds the nearest, filters by facts about each',
+        'Module 5 embedded every document on every run, then compared them all in a loop',
+        'Chroma **keeps** the vectors, so each chunk is embedded once, and **searches** them for us',
+        'Open source: `pip install chromadb`. Runs **inside our script**, like SQLite, or as a server',
+        'Others do the same job: **pgvector** for Postgres, Pinecone, Qdrant, Weaviate',
+      ],
+    },
+  },
+  {
     type: 'code',
     content: {
       title: 'ChromaDB',
@@ -231,8 +245,7 @@ collection = database.get_or_create_collection(
     embedding_function=None,
 )`,
       highlights: [
-        'A **vector database**: stores vectors, finds the nearest, filters by facts about each',
-        'Runs inside our script: one folder, **33 MB** for 1,823 chunks',
+        '`PersistentClient`: one folder on disk, **33 MB** for 1,823 chunks',
         'A **collection** is like a table. Compare by **cosine**',
         "`embedding_function=None`: **our** vectors, not Chroma's own model",
       ],
