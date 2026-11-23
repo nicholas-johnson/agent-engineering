@@ -715,4 +715,21 @@ def add_sources(citations, found):
       ],
     },
   },
+  {
+    type: 'standard',
+    content: {
+      title: 'Azure AI Search',
+      icon: 'search',
+      points: [
+        "Microsoft's managed version of this module: chunks, vectors and search, run for you",
+        '**Integrated vectorization**: indexers pull documents in, chunk them and embed them',
+        '**Hybrid search**: keywords and vectors in one query, so **E-305** matches exactly',
+        'A **semantic ranker** re-reads the top 50 and puts the best first',
+        '**Agentic retrieval**: the model plans the searches, served over **MCP**',
+        '**Document-level access**: results trimmed to what the user may read',
+      ],
+      credit:
+        'Renamed Foundry IQ (Azure AI Search) in November 2026. Checked 23 November 2026.',
+    },
+  },
 ];
