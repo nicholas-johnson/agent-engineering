@@ -24,6 +24,7 @@ BATCH = 100
 TOP = 5
 QUESTIONS = [
     "Why does my Dormouse turn the heating on before the time I set?",
+    "My thermostat is showing E-305. What should I do?",
     "How much does a Dormouse thermostat cost?",
 ]
 
@@ -77,7 +78,17 @@ def split_into_chunks(document):
             id = f"{document['name']}#{slug(path[-1]) if path else 'top'}"
             while id in {c["id"] for c in chunks}:
                 id += "-2"
-            chunks.append({"id": id, "document": document["name"], "audience": document["audience"], "text": f"{heading}\n\n{content}"})
+            chunks.append(
+                {
+                    "id": id,
+                    "text": f"{heading}\n\n{content}",
+                    "document": document["name"],
+                    "audience": document["audience"],
+                    "title": document["title"],
+                    "section": " > ".join(path),
+                    "updated": document["updated"],
+                }
+            )
 
     for line in document["body"].splitlines():
         heading = re.match(r"(#{1,3}) (.+)", line)
@@ -110,10 +121,17 @@ def open_collection():
     )
 
 
+def metadata(chunk):
+    # Where the chunk comes from, kept beside it in the store, plus a checksum of its text.
+    fields = ["document", "audience", "title", "section", "updated"]
+    return {**{f: chunk[f] for f in fields}, "checksum": hashlib.sha256(chunk["text"].encode()).hexdigest()}
+
+
 def update(collection, chunks):
     stored = collection.get(include=["metadatas"])
-    stored = dict(zip(stored["ids"], (m["checksum"] for m in stored["metadatas"])))
-    current = {c["id"]: hashlib.sha256(c["text"].encode()).hexdigest() for c in chunks}
+    stored = dict(zip(stored["ids"], stored["metadatas"]))
+    current = {c["id"]: metadata(c) for c in chunks}
+    # Store a chunk again if its text or its metadata has changed.
     changed = [c for c in chunks if stored.get(c["id"]) != current[c["id"]]]
     removed = set(stored) - set(current)
     if removed:
@@ -123,13 +141,22 @@ def update(collection, chunks):
             ids=[c["id"] for c in changed],
             embeddings=embed([c["text"] for c in changed]),
             documents=[c["text"] for c in changed],
-            metadatas=[{"document": c["document"], "audience": c["audience"], "checksum": current[c["id"]]} for c in changed],
+            metadatas=[current[c["id"]] for c in changed],
         )
 
 
+def source(metadata):
+    place = " > ".join(part for part in [metadata["title"], metadata["section"]] if part)
+    return f"{place}, updated {metadata['updated']}"
+
+
 def search(collection, vector):
-    results = collection.query(query_embeddings=[vector], n_results=TOP, include=["documents"])
-    return [{"id": id, "text": text} for id, text in zip(results["ids"][0], results["documents"][0])]
+    # Ask for each chunk's metadata too: it says where the chunk comes from.
+    results = collection.query(query_embeddings=[vector], n_results=TOP, include=["documents", "metadatas"])
+    return [
+        {"id": id, "text": text, "source": source(metadata)}
+        for id, text, metadata in zip(results["ids"][0], results["documents"][0], results["metadatas"][0])
+    ]
 
 
 def answer(question, found):
@@ -154,6 +181,12 @@ def check(citations, found):
     return [{**c, "checked": words(c["quote"]) in texts.get(c["chunk"], "")} for c in citations]
 
 
+def add_sources(citations, found):
+    # The model only names a chunk. Where that chunk comes from, we look up in the store's metadata.
+    sources = {c["id"]: c["source"] for c in found}
+    return [{**c, "source": sources.get(c["chunk"], "not a chunk we found")} for c in citations]
+
+
 def plain(text):
     text = text.lower().replace("→", ">").replace("->", ">").replace("°c", " degrees")
     return re.sub(r"\s*>\s*", ">", re.sub(r"\s+", " ", text))
@@ -171,11 +204,11 @@ shown = []
 for question, vector in zip(QUESTIONS, embed(QUESTIONS)):
     found = search(collection, vector)
     reply = answer(question, found)
-    reply["citations"] = check(reply["citations"], found)
+    reply["citations"] = check(add_sources(reply["citations"], found), found)
     print(f"\nQ: {question}\nA: {reply['answer']}")
     for citation in reply["citations"]:
         mark = "quote checked" if citation["checked"] else "NOT IN THAT CHUNK"
-        print(f'   [{citation["chunk"]}] "{citation["quote"]}" ({mark})')
+        print(f'   [{citation["source"]}] "{citation["quote"]}" ({mark})')
     shown.append({"question": question, **reply})
 
 # Every question in the set: right, refused, or wrong?
@@ -187,7 +220,7 @@ for n, (q, vector) in enumerate(zip(questions, embed([q["question"] for q in que
     print(f"  Asking {n}/{len(questions)}", end="\r")
     found = search(collection, vector)
     reply = answer(q["question"], found)
-    reply["citations"] = check(reply["citations"], found)
+    reply["citations"] = check(add_sources(reply["citations"], found), found)
     quoted += len(reply["citations"])
     checked += sum(c["checked"] for c in reply["citations"])
     if q["kind"] in ("everyday", "error code"):

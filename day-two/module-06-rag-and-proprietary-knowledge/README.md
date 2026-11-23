@@ -1,6 +1,6 @@
 # Module 6 — RAG and Proprietary Knowledge
 
-> A customer asks Dormouse's support assistant: _"Why does my Dormouse turn the heating on before the time I set?"_ **Just asking** the model gets a confident answer about thermostats in general, nearly right and partly made up: **hallucination**. Putting **all 275 documents in the prompt** gets the right answer, for 191,548 tokens and 24 seconds a question. **RAG** splits the documents into 1,823 **chunks**, stores them in a **vector database**, ChromaDB, and sends the model only the five nearest the question: 906 tokens and two seconds, with the right chunks for 22 of 24 questions. But not for ours. The customer's words aren't the documentation's, Warm Wake comes sixth, and the model fills the gap with a guess. Putting the search behind an **MCP server** shares it with every application, and lets the model write its own searches, in the documentation's words: Warm Wake comes first and all 24 are found, but every question now takes two model calls. Converting every document into an **FAQ**, as many questions as a customer might ask, written once ahead of time, gives 7,987 questions but finds no more than the chunks did, 22 of 24: broad questions, written again and again, crowd out the right one. Last, the model must **quote its sources**, code checks every quote, and the model says when the documentation doesn't answer: all 57 quotes check out, and all 5 questions the documentation can't answer are turned down. But "I don't know" is only as good as the search, and a real quote can still leave out the fact that mattered. And no search in this module asks who is asking, so internal documents reach customers. That is Module 8.
+> A customer asks Dormouse's support assistant: _"Why does my Dormouse turn the heating on before the time I set?"_ **Just asking** the model gets a confident answer about thermostats in general, nearly right and partly made up: **hallucination**. Putting **all 275 documents in the prompt** gets the right answer, for 191,548 tokens and 24 seconds a question. **RAG** splits the documents into 1,823 **chunks**, stores them in a **vector database**, ChromaDB, and sends the model only the five nearest the question: 906 tokens and two seconds, with the right chunks for 22 of 24 questions. But not for ours. The customer's words aren't the documentation's, Warm Wake comes sixth, and the model fills the gap with a guess. Putting the search behind an **MCP server** shares it with every application, and lets the model write its own searches, in the documentation's words: Warm Wake comes first and all 24 are found, but every question now takes two model calls. Converting every document into an **FAQ**, as many questions as a customer might ask, written once ahead of time, gives 7,987 questions but finds no more than the chunks did, 22 of 24: broad questions, written again and again, crowd out the right one. Last, the model must **quote its sources**, code checks every quote and reads each source's title and date from the store, and the model says when the documentation doesn't answer: all 55 quotes check out, and all 5 questions the documentation can't answer are turned down. But "I don't know" is only as good as the search, and a real quote can still leave out the fact that mattered. And no search in this module asks who is asking, so internal documents reach customers. That is Module 8.
 
 ## Learning goals
 
@@ -9,7 +9,7 @@
 - Split documents into **chunks**, store them in a **vector database** with **metadata** to filter on, re-embed only what changed, find the relevant chunks, and answer from them: **retrieval-augmented generation** (**RAG**).
 - Offer the search to any AI application as an **MCP server**, and let the model write its own searches.
 - Turn documentation into the questions customers ask (an **FAQ**), search those too, and **measure** whether it helps.
-- Make a model **cite its sources**, check each quote in code, and let it say when the documentation doesn't answer.
+- Make a model **cite its sources**, check each quote in code, read where each source comes from out of the store's metadata, and let it say when the documentation doesn't answer.
 
 ---
 
@@ -50,7 +50,7 @@ uv run python demo/01_just_ask.py
 | `03_retrieve_and_answer.py` | Chunk, embed and store the documents in ChromaDB, then answer from the five nearest chunks | `03_retrieve_and_answer.json`: the chunks found, the answer, and the 24 questions' checks; `chunks.json`: every chunk |
 | `04_agent.py`               | An agent that searches through an MCP server, `04_docs_server.py`, which it starts itself  | `04_agent.json`: every question's searches, results and answer                                                        |
 | `05_faq.py`                 | Search the questions each chunk answers, as well as the chunks                             | `05_faq.json`: the chunks found, the answer, and the 24 questions' checks, three ways                                 |
-| `06_citations.py`           | Answer only from the chunks, quote them, check every quote, and say when there's no answer | `06_citations.json`: all 30 answers, their quotes and checks, and how each turned out                                 |
+| `06_citations.py`           | Answer only from the chunks, quote them, check every quote, and say when there's no answer | `06_citations.json`: all 30 answers, their quotes, sources and checks, and how each turned out                        |
 
 The first run of demo 3 embeds all 1,823 chunks, and the first run of demo 5 embeds all 7,987 questions. Both are stored in ChromaDB, in `demo/output/chroma/`, and later runs only embed what has changed. On a slow connection those first runs take several minutes each, so run demos 3 and 5 once before a session. Model output is random, so your answers will differ from the ones quoted here.
 
@@ -441,7 +441,7 @@ What if the model had to show where each sentence came from, and we checked?
 
 **Demo:** `demo/06_citations.py`
 
-Three changes to demo 3, and nothing else. The search stays as it was, the customer's words against the chunks, so we can see what the instructions and the check change on their own.
+Four changes to demo 3, and nothing else. The search still compares the customer's words with the chunks and finds the same five, so we can see what the instructions, the check and the sources change on their own.
 
 1. **Stricter instructions.** Use only the documentation, quote it word for word, and say when it doesn't answer:
 
@@ -466,47 +466,80 @@ Three changes to demo 3, and nothing else. The search stays as it was, the custo
        return [{**c, "checked": words(c["quote"]) in texts.get(c["chunk"], "")} for c in citations]
    ```
 
-The demo asks two questions, then all 30 in `data/questions.json`: the 24 the documentation answers, the 5 it doesn't, and 1 only an internal note answers.
+4. **Read the source from the store.** Each chunk's metadata now also says where it comes from: the document's title, the section, and the date the document was last updated, taken from its front matter and headings. The search asks for the metadata back with each chunk:
+
+   ```python
+   metadatas=[{"document": ..., "audience": ..., "title": ..., "section": ..., "updated": ..., "checksum": ...}]
+
+   results = collection.query(query_embeddings=[vector], n_results=TOP, include=["documents", "metadatas"])
+   ```
+
+   The model names a chunk by its id, and nothing more. Code looks up where that chunk comes from:
+
+   ```python
+   def add_sources(citations, found):
+       sources = {c["id"]: c["source"] for c in found}
+       return [{**c, "source": sources.get(c["chunk"], "not a chunk we found")} for c in citations]
+   ```
+
+   The model never writes a title or a date, so it can't get one wrong. It chooses the chunk; the store says what that chunk is. Demo 3 stored a chunk again only when its text changed. Now it is stored again when its text **or its metadata** changes, so the first run fills in the new fields for chunks an earlier demo stored, and a new `updated` date reaches the store even when the words stay the same.
+
+The demo asks three questions, the ones from demo 1, then all 30 in `data/questions.json`: the 24 the documentation answers, the 5 it doesn't, and 1 only an internal note answers.
 
 ```text
 Q: Why does my Dormouse turn the heating on before the time I set?
-A: The documentation doesn’t explain why Dormouse might turn the heating on before a scheduled time.
+A: The documentation does not explain why Dormouse might turn the heating on before a scheduled time.
+
+Q: My thermostat is showing E-305. What should I do?
+A: E-305 means the thermostat isn’t getting a response from the boiler. Check that the boiler is switched on, its pressure is between 1 and 1.5 bar, and its display for a fault. Then allow the thermostat and boiler time to respond; if E-305 remains, check the boiler’s manual for any fault shown and follow its guidance or call a registered gas engineer.
+   [Thermostat Shows E-305 > What E-305 means, updated 2026-10-21] "E-305 means the thermostat cannot get a response from the boiler." (quote checked)
+   [Resolve error E-305: Boiler not responding > What E-305 means, updated 2026-02-17] "1. Confirm that the boiler is switched on." (quote checked)
+   [Resolve error E-305: Boiler not responding > What E-305 means, updated 2026-02-17] "2. Check that its pressure is between 1 and 1.5 bar." (quote checked)
+   [Resolve error E-305: Boiler not responding > What E-305 means, updated 2026-02-17] "3. Look at the boiler's display for a fault." (quote checked)
+   [Thermostat Shows E-305 > Check whether E-305 clears, updated 2026-10-21] "After checking the boiler's power, pressure and display, allow the thermostat and boiler to respond." (quote checked)
+   [Thermostat Shows E-305 > Check the boiler's display, updated 2026-10-21] "Use the boiler's manual to look up any fault shown." (quote checked)
+   [Thermostat Shows E-305 > Check the boiler's display, updated 2026-10-21] "If the boiler reports a fault, follow the manual's guidance or call a registered gas engineer." (quote checked)
 
 Q: How much does a Dormouse thermostat cost?
-A: The documentation does not provide the Dormouse Thermostat’s price.
+A: The documentation does not say how much a Dormouse thermostat costs.
 
-Of 24 questions the documentation answers: answered right 19, answered wrong 4, said it didn't know 1
+Of 24 questions the documentation answers: answered right 20, answered wrong 3, said it didn't know 1
 Of 5 questions it doesn't: said it didn't know 5
-Quotes found in the chunk they cite: 57 of 57
+Quotes found in the chunk they cite: 55 of 55
 ```
 
-Our question first. Demo 3 searched the same way, missed Warm Wake, and guessed. Told not to, the model now says the documentation doesn't explain it. That is honest, and it is no help to the customer. The price question is better than demo 1, which sent the customer to a website and a sales team it knew nothing about. All five questions the documentation doesn't answer (the price, the founder, the next model, a discount and a phone number) got "the documentation doesn't say". For the phone number it added that support is in the app under Help > Contact support, with a checked quote. The internal question, about a loud click, got "the documentation does not explain".
+Our question first. Demo 3 searched the same way, missed Warm Wake, and guessed. Told not to, the model now says the documentation doesn't explain it. That is honest, and it is no help to the customer.
 
-Every one of the 57 quotes is in the chunk it cites. That isn't guaranteed: in an earlier run of the same demo, one quote of 60 wasn't. The chunk said _"It keeps the home at the away temperature until you turn Away mode off."_ The model had tidied it into _"Away mode keeps the home at the away temperature until you turn it off"_ and still called it a quote, and the check caught it. A check that looks for the exact words doesn't have to decide whether a change matters.
+E-305 is where the sources show. Demo 1 told the customer to switch the thermostat off at the breaker. Now the answer is the documentation's: check the boiler is on, that its pressure is between 1 and 1.5 bar, and its display. Every sentence it relies on has a checked quote, and every quote has a source: a title, a section and a date, read from the store. The sources show something the chunk ids hid. The answer draws on two different documents about E-305, one updated in February and one in October. They agree here. When two copies of a fact disagree, the date on each citation is how a reader tells which is newer. The [`stale-copies`](playground/stale-copies/) playground hunts for them.
+
+The price question is better than demo 1, which sent the customer to a website and a sales team it knew nothing about. All five questions the documentation doesn't answer (the price, the founder, the next model, a discount and a phone number) got "the documentation doesn't say". For the phone number it added that support is in the app under Help > Contact support, with a checked quote. The internal question, about a loud click, got "the documentation doesn't explain".
+
+Every one of the 55 quotes is in the chunk it cites. That isn't guaranteed: in an earlier run of the same demo, one quote of 60 wasn't. The chunk said _"It keeps the home at the away temperature until you turn Away mode off."_ The model had tidied it into _"Away mode keeps the home at the away temperature until you turn it off"_ and still called it a quote, and the check caught it. A check that looks for the exact words doesn't have to decide whether a change matters.
 
 | Outcome                          | Questions |
 | -------------------------------- | --------- |
-| Answerable: answered right       | 19 of 24  |
-| Answerable: answered wrong       | 4 of 24   |
+| Answerable: answered right       | 20 of 24  |
+| Answerable: answered wrong       | 3 of 24   |
 | Answerable: said it didn't know  | 1 of 24   |
 | Not covered: said it didn't know | 5 of 5    |
 | Internal: kept it internal       | 1 of 1    |
 
-The four counted wrong aren't made up. Two of them quote the very fact they leave out. From `demo/output/06_citations.json`:
+The three counted wrong aren't made up. One of them quotes the very fact it leaves out. From `demo/output/06_citations.json`:
 
 ```text
 Q: Can I have a separate thermostat for upstairs?
-A: Yes. You can use a separate thermostat to control upstairs as its own zone and schedule. Each thermostat controls its own zone, and separate thermostats can control downstairs and upstairs heating.
-   [thermostat-valve-and-sensor-zone-planning.md#choose-the-zones] "A home can have up to four thermostats, each controlling its own zone with its own schedule." (quote checked)
-   [wired-thermostat-and-wireless-zone-devices.md#zone-planning-and-schedules] "For example, separate thermostats can control downstairs and upstairs heating." (quote checked)
+A: Yes. You can use a separate thermostat to control the upstairs as its own zone and schedule. Each thermostat controls its own zone, with its own schedule. (thermostat-valve-and-sensor-zone-planning.md#choose-the-zones)
+   [Thermostat, Valve and Sensor Zone Planning > Choose the zones, updated 2025-11-13] "A home can have up to four thermostats, each controlling its own zone with its own schedule. For example, one zone may serve the downstairs radiators and another the upstairs radiators." (quote checked)
+   [Thermostat, Valve and Sensor Zone Planning > Choose the zones, updated 2025-11-13] "Use a separate thermostat for each zone you want to control independently." (quote checked)
 ```
 
-The quote says up to four; the answer doesn't, and the score reads the answer. Q22 is the same: its quote says "Replace both AA batteries", its answer only "the batteries". The other two answer a different question from the one asked. Q21 gets what E-217 means, but not that the thermostat needs a replacement. Q11 gets how to turn Away mode off by hand, when it's geofencing that turns it on.
+The quote says up to four; the answer doesn't, and the score reads the answer. The answer has also pasted a chunk id into its own text, a filename that means nothing to a customer. The source lines under it are what a customer should see, and code wrote those. The other two answer a different question from the one asked. Q21 gets what E-217 means, but not that the thermostat needs a replacement. Q11 gets how to turn Away mode off by hand, when it's geofencing that turns it on.
 
 ### Why this breaks
 
 - **"I don't know" is only as good as the search.** Our question was answered "the documentation doesn't explain" because the search missed Warm Wake. Sections 4 and 5 found it; this demo searches as demo 3 did.
-- **A real quote can still give a poor answer.** The check proves a quote is in the chunk it cites. It doesn't prove the answer says what the quote says, or that it answers the question. All four wrong answers passed the check.
+- **A real quote can still give a poor answer.** The check proves a quote is in the chunk it cites. It doesn't prove the answer says what the quote says, or that it answers the question. All three wrong answers passed the check.
+- **A source is only as good as its metadata.** The title and date come from each document's front matter. If someone edits a document and doesn't change its date, every citation of it shows the old one.
 - **We can only check the answers we write.** Behind the MCP server in section 4, the client writes the answer, and nothing checks its quotes.
 - **No search here asks who is asking.** Every search in this module looks at all 275 documents. In section 4, an answer to a customer cited an internal specification. Deciding who may see what, and enforcing it in code rather than in a prompt, is Module 8.
 
@@ -521,7 +554,7 @@ The quote says up to four; the answer doesn't, and the score reads the answer. Q
 | 3. Retrieve, then answer           | The 5 chunks nearest the customer's words      | The customer's words aren't the documentation's: it misses, then guesses               |
 | 4. Share it: an MCP server         | The chunks the model searches for              | Two model calls a question; nothing checks the answer, or who is asking                |
 | 5. FAQs                            | Chunks found through the questions they answer | Repeated, broad questions crowd out the right chunk; the answer isn't checked          |
-| 6. Citations                       | Quotes from the chunks, checked in code        | Refuses when the search misses; real quotes, incomplete answers; no idea who is asking |
+| 6. Citations                       | Checked quotes, with sources from the store    | Refuses when the search misses; real quotes, incomplete answers; no idea who is asking |
 
 ## Playground
 
